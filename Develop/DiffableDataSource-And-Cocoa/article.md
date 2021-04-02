@@ -112,7 +112,7 @@ class ViewModel {
 - `**-[NSTableViewDiffableDataSourceImpl _applyDifferencesFromSnapshot:completion:]**`는 Objective-C 런타임 에러입니다. 하지만 [NSTableViewDiffableDataSource](https://developer.apple.com/documentation/appkit/nstableviewdiffabledatasource)는 NSObject가 아닌 Swift Object이며, Swift 전용입니다. 다시 말해 Swift Object -> NSObject로 Bridging되는 로직이 내부적으로 존재합니다.
 - 검색해보니 Objective-C로 작동하는 [NSTableViewDiffableDataSourceReference](https://developer.apple.com/documentation/appkit/nstableviewdiffabledatasourcereference)도 존재하네요. 즉, `NSTableViewDiffableDataSource`와 `NSTableViewDiffableDataSourceReference`의 Bridging 방식은 다르다는 것을 추측할 수 있으며, `NSTableViewDiffableDataSource`의 Bridging에서 버그가 있을 것이란 가설을 세웠습니다.
 
-그럼 한 번 `NSTableViewDiffableDataSource` 대신에 `NSTableViewDiffableDataSourceReference`로 바꾸면 문제가 해결될지 볼가요? 일단 알고 가야 할 점이 있습니다.
+그럼 한 번 `NSTableViewDiffableDataSource` 대신에 `NSTableViewDiffableDataSourceReference`로 바꾸면 문제가 해결될지 볼까요? 그 전에 일단 알고 가야 할 점이 있습니다.
 
 - `NSTableViewDiffableDataSource`는 `SectionIdentifierType`, `ItemIdentifierType`에 `Hashable`, `Equatable`를 conform하는 모든 Type이 들어갈 수 있습니다.
 - 하지만 `NSTableViewDiffableDataSourceReference`는 NSObject만 가능합니다. Item 비교를 위해 `isEqual(:)`를 override해야 하며, 이걸 하지 않으면 Item이 새로 생성될 때마다 무조건 서로 다른 데이터로 취급되어서 성능면에서 안 좋고 animation도 자연스럽게 작동하지 않을겁니다. [예시](https://github.com/pookjw/YTPIPHelper/blob/main/YTPIPHelper/Entity/MainResultIem.m) - Objective-C로 쓰긴 했는데 Swift로도 똑같이 동작함
