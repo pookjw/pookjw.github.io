@@ -186,7 +186,7 @@ General Purpose Registers:
 그럼 한 번 `NSTableViewDiffableDataSource` 대신에 `NSTableViewDiffableDataSourceReference`로 바꾸면 문제가 해결될지 볼까요? 그 전에 일단 알고 가야 할 점이 있습니다.
 
 - `NSTableViewDiffableDataSource`는 `SectionIdentifierType`, `ItemIdentifierType`에 `Hashable`, `Equatable`를 conform하는 모든 Type이 들어갈 수 있습니다.
-- 하지만 `NSTableViewDiffableDataSourceReference`는 NSObject만 가능합니다. Item 비교를 위해 `isEqual(:)`를 override해야 하며, 이걸 하지 않으면 Item이 새로 생성될 때마다 무조건 서로 다른 데이터로 취급되어서 성능면에서 안 좋고 animation도 자연스럽게 작동하지 않을겁니다. [예시](https://github.com/pookjw/YTPIPHelper/blob/main/YTPIPHelper/Entity/MainResultIem.m) - Objective-C로 쓰긴 했는데 Swift로도 똑같이 동작함
+- 하지만 `NSTableViewDiffableDataSourceReference`는 NSObject만 가능합니다. Item 비교를 위해 `isEqual(_:)`를 override해야 하며, 이걸 하지 않으면 Item이 새로 생성될 때마다 무조건 서로 다른 데이터로 취급되어서 성능면에서 안 좋고 animation도 자연스럽게 작동하지 않을겁니다. [예시](https://github.com/pookjw/YTPIPHelper/blob/main/YTPIPHelper/Entity/MainResultIem.m) - Objective-C로 쓰긴 했는데 Swift로도 똑같이 동작함
 
 자 그럼 한 번 바꿔봅시다. `<Int, String>`에서 `<NSNumber, NSString>`으로 바뀐 걸 볼 수 있습니다.
 
