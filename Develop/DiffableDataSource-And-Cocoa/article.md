@@ -171,10 +171,10 @@ General Purpose Registers:
       cpsr = 0x60000000
 ```
 
-문제가 됐던 arg가 `applyDifferencesFromSnapshot `인데요, 그럼 register 값은 `x2` 일텐데 이걸 한 번 보면
+문제가 됐던 arg가 `applyDifferencesFromSnapshot`인데요, 그럼 register 값은 `x2` 일텐데 이걸 한 번 보면
 
 ```
-(lldb) (lldb) po $x2
+(lldb) po $x2
 <nil>
 ```
 
