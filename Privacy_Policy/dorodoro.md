@@ -6,7 +6,7 @@
 
 # DoroDoro Privacy Policy
 
-When you start using DoroDoro application, your information will be sent to *Ministry of the Interior and Safety* (a branch of the Government of South Korea), *Kakako* and *Apple*. DoroDoro application developer won't store or collect user's personal data.
+When you start using DoroDoro application, your information will be sent to *Ministry of the Interior and Safety* (a branch of the Government of South Korea), *Kakao* and *Apple*. DoroDoro application developer won't store or collect user's personal data.
 
 Edited : 2021.04.02
 
