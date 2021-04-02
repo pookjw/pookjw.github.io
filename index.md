@@ -12,4 +12,4 @@
 
 - GitHub : https://github.com/pookjw
 - LinkedIn : https://www.linkedin.com/in/pookjw/
-- Email: kidjinwoo@me.com
+- Email : kidjinwoo@me.com
