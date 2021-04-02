@@ -109,7 +109,7 @@ class ViewModel {
 
 잘 나오네요. -_-; 로직에는 문제가 없다는 소리인데요. 여기서 한 번 고민을 해봅시다.
 
-- `**-[NSTableViewDiffableDataSourceImpl _applyDifferencesFromSnapshot:completion:]**`는 Objective-C 런타임 에러입니다. 하지만 [NSTableViewDiffableDataSource](https://developer.apple.com/documentation/appkit/nstableviewdiffabledatasource)는 NSObject난 Swift Object, Swift 전용입니다. 다시 말해 Swift Object -> NSObject로 Bridging되는 로직이 내부적으로 존재합니다.
+- `**-[NSTableViewDiffableDataSourceImpl _applyDifferencesFromSnapshot:completion:]**`는 Objective-C 런타임 에러입니다. 하지만 [NSTableViewDiffableDataSource](https://developer.apple.com/documentation/appkit/nstableviewdiffabledatasource)는 NSObject가 아닌 Swift Object이며, Swift 전용입니다. 다시 말해 Swift Object -> NSObject로 Bridging되는 로직이 내부적으로 존재합니다.
 - 검색해보니 Objective-C로 작동하는 [NSTableViewDiffableDataSourceReference](https://developer.apple.com/documentation/appkit/nstableviewdiffabledatasourcereference)도 존재하네요. 즉, `NSTableViewDiffableDataSource`와 `NSTableViewDiffableDataSourceReference`의 Bridging 방식은 다르다는 것을 추측할 수 있으며, `NSTableViewDiffableDataSource`의 Bridging에서 버그가 있을 것이란 가설을 세웠습니다.
 
 그럼 한 번 `NSTableViewDiffableDataSource` 대신에 `NSTableViewDiffableDataSourceReference`로 바꾸면 문제가 해결될지 볼가요? 일단 알고 가야 할 점이 있습니다.
