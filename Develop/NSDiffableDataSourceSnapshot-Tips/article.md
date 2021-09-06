@@ -18,7 +18,7 @@ iOS 15.0에서 `NSDiffableDataSourceSnapshot`에  `reconfigure`라는 개념이 
 
 - `reload`가 걸리는 Item은 cell이 reuse되지 않고 재생성 됩니다. 따라서 애니메이션이 매끄럽지 못할 수 있습니다. 특히 `trailingSwipeActionsConfigurationProvider` ([문서](https://developer.apple.com/documentation/uikit/uicollectionlayoutlistconfiguration/3650428-trailingswipeactionsconfiguratio?language=objc)) 같은 것을 쓴다면 더욱 어색하게 보이겠지요.
 - 반대로 `reconfigure`는 cell을 reuse 할 수 있습니다. 
-- 하지만 주의해야 할 점은, 이전 snapshot의 Item 목록에서, reconfigure할 Item의 hash 값이 존재할 경우에만 reconfigure가 작동합니다. 이이전 snapshot의 Item 목록에서, reconfigure할 Item의 hash 값이 존재하지 않는데 reconfigure를 시도한다? 그러면 아무 일도 발생하지 않습니다.
+- 하지만 주의해야 할 점은, 이전 snapshot의 Item 목록에서, reconfigure할 Item의 hash 값이 존재할 경우에만 reconfigure가 작동합니다. 이전 snapshot의 Item 목록에서, reconfigure할 Item의 hash 값이 존재하지 않는데 reconfigure를 시도한다? 그러면 아무 일도 발생하지 않습니다.
 - 또 하나 주의해야 할 점은, 새로운 snapshot에서 Item이 삭제되고 다시 추가(append)할 경우, 이전 snapshot에 reconfigure할 Item의 hash가 존재했어도 reconfigure는 작동하지 않습니다.
 - 따라서 `reconfigure`를 발동시킬 수 있는 조건은 아래와 같습니다.
   1. 이전 snapshot의 Item 목록에서, reconfigure할 Item의 hash가 존재해야 한다.
