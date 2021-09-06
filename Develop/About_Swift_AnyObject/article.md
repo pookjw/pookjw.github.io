@@ -84,7 +84,7 @@ let value2: Unmanaged<AnyObject>? = object.perform(#selector(MyViewController.sa
 print(value2) // 런타임 에러! EXC_BAD_ACCESS
 ```
 
-## 출처
+## 참고
 
 [Swift regret: AnyObject method dispatch](https://twitter.com/UINT_MIN/status/1430652663662735362)
 
