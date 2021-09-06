@@ -1,8 +1,6 @@
-# DiffableDataSource, 그리고 Cocoa
+# NSDiffableDataSourceSnapshot, 그리고 Cocoa
 
 macOS 11.0 이후로 Cocoa에 [NSTableViewDiffableDataSource](https://developer.apple.com/documentation/appkit/nstableviewdiffabledatasource), [NSCollectionViewDiffableDataSource](https://developer.apple.com/documentation/appkit/nscollectionviewdiffabledatasource?language=objc), 그리고 [NSDiffableDataSourceSnapshot](https://developer.apple.com/documentation/uikit/nsdiffabledatasourcesnapshot)가 추가되었습니다. 마찬가지로 UIKit에도 [UITableViewDiffableDataSource](https://developer.apple.com/documentation/uikit/uitableviewdiffabledatasource)와 [UICollectionViewDiffableDataSource](https://developer.apple.com/documentation/uikit/uicollectionviewdiffabledatasource)도 추가되었죠.
-
-이들은 [RxDataSources](https://github.com/RxSwiftCommunity/RxDataSources)를 대체할 수 있으며, 더 이상 이 때문에 [RxSwift](https://github.com/ReactiveX/RxSwift)를 써야 할 이유도 사라졌다고 생각합니다. (다만 RxCocoa나 [RxAlamofire](https://github.com/RxSwiftCommunity/RxAlamofire)가 필요하시거나, RxSwift만 있는 매력적인 전용기능들을 원하신다면 여전히 RxSwift는 필요하겠죠.)
 
 raywenderlich에서 이 사용법과 [UICollectionLayoutListConfiguration](https://developer.apple.com/documentation/uikit/uicollectionlayoutlistconfiguration)까지 한꺼번에 학습할 수 있는 매우 좋은 자료가 있습니다. [iOS 14 Tutorial: UICollectionView List (www.raywenderlich.com/)](https://www.raywenderlich.com/16906182-ios-14-tutorial-uicollectionview-list)
 
@@ -236,6 +234,6 @@ class ViewModel {
 
 ![](2.png)
 
-잘 되네요.😕 일해라 애플... (이거때문에 3시간 동안 삽질...)
+잘 되네요.😕
 
 다만 `animatingDifferences`도 `NSTableViewDiffableDataSourceReference`에 버그가 있으므로, 잘 살펴보시는 걸 추천합니다.

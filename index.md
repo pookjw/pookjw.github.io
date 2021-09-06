@@ -2,7 +2,9 @@
 
 ## 개발
 
-- [DiffableDataSource, 그리고 Cocoa](Develop/DiffableDataSource-And-Cocoa/article.md)
+- [NSDiffableDataSourceSnapshot, 그리고 Cocoa](Develop/NSDiffableDataSourceSnapshot-And-Cocoa/article.md)
+
+- [NSDiffableDataSourceSnapshot의 몇가지 팁](Develop/NSDiffableDataSourceSnapshot-Tips/article.md)
 
 ## 기타
 
