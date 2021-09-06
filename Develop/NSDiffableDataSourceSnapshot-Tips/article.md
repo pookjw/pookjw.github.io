@@ -65,5 +65,5 @@ NSObject에서는 `isEqual:`과 `hash` method를 제공합니다.
 
 - 하나의 snapshot 내에서는 `isEqual:`이 쓰입니다. 어떤 아이템을 `delete`, `move` 같은 걸 할 때 `isEqual:`로 통해 snapshot이 가지고 있는 Item과 비교해서 `delete`, `move` 같은 동작을 합니다. 따라서, 두개의 Item의 reference가 달라도 `isEqual:`로 통해 Item이 둘이 같다는 결과가 나오면, snapshot에서는 똑같다고 치부합니다.
 - 새로운 snapshot을 반영하기 위해, 이전 snapshot과 diff 연산하는 과정에서는 `hash` 비교가 쓰입니다.
-- `isEqual:`로 통해 두개의  Item이 똑같다고 하는데 `hash` 값이 다르다면 Exception이 일어납니다.
+- `isEqual:`로 통해 두개의  Item이 똑같은데 `hash` 값이 다르다면 Exception이 일어납니다.
 
