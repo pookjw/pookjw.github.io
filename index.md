@@ -6,7 +6,7 @@
 
 - [NSDiffableDataSourceSnapshot의 몇가지 팁](Develop/NSDiffableDataSourceSnapshot-Tips/article.md)
 
-- [Swift의 AnyObject에 대해](About_Swift_AnyObject/article.md)
+- [Swift의 AnyObject에 대해](Develop/About_Swift_AnyObject/article.md)
 
 ## 기타
 
