@@ -3,3 +3,5 @@
 - [DoroDoro](dorodoro.md)
 
 - [ClienTV](clientv.md)
+
+- [StoneNamu](stonenamu.md)
