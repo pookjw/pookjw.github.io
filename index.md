@@ -3,10 +3,9 @@
 ## 개발
 
 - [NSDiffableDataSourceSnapshot, 그리고 Cocoa](Develop/NSDiffableDataSourceSnapshot-And-Cocoa/article.md)
-
 - [NSDiffableDataSourceSnapshot의 몇가지 팁](Develop/NSDiffableDataSourceSnapshot-Tips/article.md)
-
 - [Swift의 AnyObject에 대해](Develop/About_Swift_AnyObject/article.md)
+- [Swift로 정의된 NSObject 객체의 이름에 대해](Develop/Swift_Demangle/article.md)
 
 ## 기타
 
@@ -16,4 +15,5 @@
 
 - GitHub : https://github.com/pookjw
 - LinkedIn : https://www.linkedin.com/in/pookjw/
+- Stack Overflow : https://stackoverflow.com/users/17473716/jinwoo-kim
 - Email : kidjinwoo@me.com
