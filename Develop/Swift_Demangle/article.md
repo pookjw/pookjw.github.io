@@ -118,6 +118,9 @@ private class SampleObject: NSObject {
 그러면 Hopper에서 2개의 `SampleObject`가 어떻게 정의되었는지 살펴봅시다.
 
 ```assembly
+                             ; 
+                             ; @metaclass __TtC9SampleAppP33_457EECDA3EE0E77D6D590CB76766B48312SampleObject  {
+                             ; }
                      _OBJC_METACLASS_$__TtC9SampleAppP33_457EECDA3EE0E77D6D590CB76766B48312SampleObject:
 0000000100011c18         struct __objc_class {                                  ; DATA XREF=_OBJC_CLASS_$__TtC9SampleAppP33_457EECDA3EE0E77D6D590CB76766B48312SampleObject
                              _OBJC_METACLASS_$_NSObject,          // metaclass
