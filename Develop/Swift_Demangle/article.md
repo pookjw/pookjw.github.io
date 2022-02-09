@@ -113,7 +113,7 @@ private class SampleObject: NSObject {
 }
 ```
 
-이렇게 되면 `SampleObject`가 2개 정의되어 있게 됩니다. 빌드에도 문제가 없습니다. Objectice-C는 namespace를 지원하지 않아, symbol이 겹치면 안 되기 때문에 위와 같은 코드는 빌드에 에러가 나지만, Swift는 namespace를 지원하기 때문에 빌드에 문제가 없습니다.
+이렇게 되면 `SampleObject`가 2개 정의되어 있게 됩니다. 빌드에도 문제가 없습니다. Objective-C는 namespace를 지원하지 않아, symbol이 겹치면 안 되기 때문에 위와 같은 코드는 빌드에 에러가 나지만, Swift는 namespace를 지원하기 때문에 빌드에 문제가 없습니다.
 
 그러면 Hopper에서 2개의 `SampleObject`가 어떻게 정의되었는지 살펴봅시다.
 
