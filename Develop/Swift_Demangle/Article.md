@@ -34,7 +34,7 @@ class ViewController: UIViewController {
 
 `ViewController.viewDidLoad()`에서 아래와 같은 실험 코드를 넣어보고 돌려봅시다.
 
-```swi
+```swift
 class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,7 +55,7 @@ nil Optional(SampleApp.ViewController)
 
 또 다른 실험을 해봅시다. `ViewController`를 정의한 부분에서 `@objc(ViewController)` 키워드를 사용해 보겠습니다.
 
-```swi
+```swift
 @objc(ViewController)
 class ViewController: UIViewController {
     override func viewDidLoad() {
