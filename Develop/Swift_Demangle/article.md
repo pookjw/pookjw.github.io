@@ -198,7 +198,7 @@ static char *copySwiftDemangledName(const char *string, bool isProtocol = false)
 예를 들어, `SampleApp`의 `ViewController` 객체는
 
 1. 객체이니까 `_TtC`
-2. module 이름은 `SampleApp` - 7글자
+2. module 이름은 `SampleApp` - 9글자
 3. 객체 이름인 `ViewController` - 14글자
 4. 결론 : `_TtC9SampleApp14ViewController`
 
