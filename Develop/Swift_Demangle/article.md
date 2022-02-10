@@ -148,7 +148,7 @@ private class SampleObject: NSObject {
 
 ### 2번
 
-2번의 대한 답은 애플이 공개한 [dyld](https://github.com/apple-oss-distributions/dyld) 소스코드의 [OptimizerObjC.cpp](https://github.com/apple-oss-distributions/dyld/blob/9a9e3e4cfa7de205d61f4114c9b564e4bab7ef7f/cache-builder/OptimizerObjC.cpp#L75) 찾을 수 있습니다. 이 파일에는 아래와 같은 코드가 있습니다.
+2번의 대한 답은 애플이 공개한 [dyld](https://github.com/apple-oss-distributions/dyld) 소스코드의 [OptimizerObjC.cpp](https://github.com/apple-oss-distributions/dyld/blob/9a9e3e4cfa7de205d61f4114c9b564e4bab7ef7f/cache-builder/OptimizerObjC.cpp#L75)에서 찾을 수 있습니다. 이 파일에는 아래와 같은 코드가 있습니다.
 
 ```cpp
 static char *copySwiftDemangledName(const char *string, bool isProtocol = false)
