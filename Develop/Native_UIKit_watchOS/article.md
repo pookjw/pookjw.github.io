@@ -48,6 +48,7 @@ WatchKit에는 [WKCrownSequencer](https://developer.apple.com/documentation/watc
 @end
 
 @implementation InterfaceController
+
 - (void)willActivate {
     [super willActivate];
     
