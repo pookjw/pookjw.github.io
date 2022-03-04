@@ -4,7 +4,7 @@ watchOS를 개발하기 위해서는 일반적으로 [WatchKit](https://develope
 
 하지만 [Native UIKit apps on Apple Watch](https://www.highcaffeinecontent.com/blog/20150912-Native-UIKit-apps-on-Apple-Watch)라는 watchOS에서 UIKit을 돌리는 방법이 있더군요. `injected_main`을 통해 `WKExtension`에서 내부적으로 작동하는 `main` 함수를 injection하는 방법인데요. 이렇게 하면 watchOS에서 iOS 어플을 개발하듯이 UIKit을 돌릴 수 있지만... 기존 WatchKit/ClockKit과 동시에 쓸 수 없는 문제가 발생합니다. 특히 Digital Crown의 rotation 이벤트를 받아 올 수 있는 `WKCrownSequencer`를 못 쓰게 되는게 불편하다고 느꼈어요.
 
-이걸 해결하기 위해 `injected_main`은 쓰지 않고, WatchKit이랑 UIKit을 같이 쓰는 방법을 발견해서 적으려고 합니다.
+이걸 해결하기 위해 `injected_main`은 쓰지 않고, WatchKit이랑 UIKit을 같이 쓰는 방법을 적으려고 합니다.
 
 ## WatchOS + UIKit
 
