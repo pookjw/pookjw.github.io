@@ -51,7 +51,9 @@ watchOS에는 `PepperUICore`라고 하는 Private Framework가 존재하고, 그
 
 이제 실행해보면...
 
-<iframe width='500' height='294' src="https://www.youtube.com/embed/PMwlyvA2kkA?&theme=dark&autohide=2"frameborder="0"></iframe><div style='font-size: 0.8em'><a href='http://codegena.com/generator/Youtube-Embed-Code-Generator.html'>Created by Codegena.</a></div>
+![](2.webp)
+
+[고화질 (YouTube)](https://youtu.be/PMwlyvA2kkA)
 
 너무 잘 된다😭 이거 성공시키려고 7시간 동안 삽질 ㅠㅠ `PUICCrownInputSequencer`도 자동으로 잘 붙어서 Digital Crown을 통한 스크롤도 잘 되는 걸 볼 수 있어요...
 
