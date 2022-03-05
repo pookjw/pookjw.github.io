@@ -46,11 +46,6 @@ watchOS에는 `PepperUICore`라고 하는 Private Framework가 존재하고, 그
     [vc release];
 }
 
-- (void)configureCrownSequencer {
-    self.crownSequencer.delegate = self;
-    [self.crownSequencer focus];
-}
-
 @end
 ```
 
