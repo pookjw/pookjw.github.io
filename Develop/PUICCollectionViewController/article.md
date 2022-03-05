@@ -62,3 +62,9 @@ watchOS에는 `PepperUICore`라고 하는 Private Framework가 존재하고, 그
 ## 팁
 
 `PUICCollectionView`는 `UICollectionView`에는 없는 전용 기능들이 존재하고, `UIScrollView(PUICAdditions)`라는 Category도 존재해요. `lldb`로 보시면 iOS에는 볼 수 없는 재밌는 것들이 여러가지 있어서 관심 있으시면 보시는 것도 좋아요.
+
+## 여담
+
+App Store에 올렸더니 Reject 당하네요... ㅎㅎ
+
+![](3.png)
