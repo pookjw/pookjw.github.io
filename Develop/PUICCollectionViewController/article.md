@@ -57,6 +57,8 @@ watchOS에는 `PepperUICore`라고 하는 Private Framework가 존재하고, 그
 
 너무 잘 된다😭 이거 성공시키려고 7시간 동안 삽질 ㅠㅠ `PUICCrownInputSequencer`도 자동으로 잘 붙어서 Digital Crown을 통한 스크롤도 잘 되는 걸 볼 수 있어요...
 
+참고로 제 [StoneNamu 프로젝트](https://github.com/pookjw/StoneNamu/tree/develop)에서 해당 부분의 코드를 볼 수 있어요.
+
 ## 팁
 
 `PUICCollectionView`는 `UICollectionView`에는 없는 전용 기능들이 존재하고, `UIScrollView(PUICAdditions)`라는 Category도 존재해요. `lldb`로 보시면 iOS에는 볼 수 없는 재밌는 것들이 여러가지 있어서 관심 있으시면 보시는 것도 좋아요.
