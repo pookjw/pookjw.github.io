@@ -55,7 +55,7 @@ watchOS에는 `PepperUICore`라고 하는 Private Framework가 존재하고, 그
 
 [고화질 (YouTube)](https://youtu.be/PMwlyvA2kkA)
 
-너무 잘 된다😭 이거 성공시키려고 7시간 동안 삽질 ㅠㅠ `PUICCrownInputSequencer`도 자동으로 잘 붙어서 Digital Crown을 통한 스크롤도 잘 되는 걸 볼 수 있어요...
+너무 잘 된다😭 PepperUICore에 대해 아는게 없고 검색해도 안 나오다보니 이거 성공시키려고 7시간 동안 삽질 ㅠㅠ `PUICCrownInputSequencer`도 자동으로 잘 붙어서 Digital Crown을 통한 스크롤도 잘 되는 걸 볼 수 있어요...
 
 참고로 제 [StoneNamu 프로젝트](https://github.com/pookjw/StoneNamu/tree/develop)에서 해당 부분의 코드를 볼 수 있어요.
 
