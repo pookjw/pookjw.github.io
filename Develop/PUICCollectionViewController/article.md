@@ -65,6 +65,6 @@ watchOS에는 `PepperUICore`라고 하는 Private Framework가 존재하고, 그
 
 ## 여담
 
-App Store에 올렸더니 Reject 당하네요... ㅎㅎ
+App Store에 올렸더니 Reject 당하네요... ㅎㅎ [Objective-C Runtime](https://developer.apple.com/documentation/objectivec/objective-c_runtime)로 꼼수부리면 피할 수 있을 것 같긴 하네요.
 
 ![](3.png)
