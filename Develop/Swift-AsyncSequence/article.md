@@ -1,6 +1,6 @@
 # Swift AsyncSequence
 
-[AsyncSequence]의 기초에 대해 적어보려고 합니다.
+AsyncSequence의 기초에 대해 적어보려고 합니다.
 
 [Modern Concurrency in Swift (raywenderlich.com)](https://www.raywenderlich.com/books/modern-concurrency-in-swift) 내용의 일부 + 사족? 입니다.
 
