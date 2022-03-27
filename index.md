@@ -8,7 +8,7 @@
 - [watchOS에서 UIKit 사용](Develop/Native_UIKit_watchOS/article.md)
 - [NSDiffableDataSourceSnapshot, 그리고 Cocoa](Develop/NSDiffableDataSourceSnapshot-And-Cocoa/article.md)
 - [NSDiffableDataSourceSnapshot의 몇가지 팁](Develop/NSDiffableDataSourceSnapshot-Tips/article.md)
-- [Swift AsyncSequence](Swift-AsyncSequence/article.md)
+- [Swift AsyncSequence](Develop/Swift-AsyncSequence/article.md)
 
 ## 기타
 
