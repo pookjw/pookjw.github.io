@@ -18,7 +18,7 @@ let images: [UIImage] = await withTaskGroup(of: Data.self, returning: [UIImage].
 }
 ```
 
-하지만 실행시켜야 할 task가 너무 많으면 이를 분산처리하고 싶을 때가 있습니다. [NSOperationQueue](https://developer.apple.com/documentation/foundation/nsoperationqueue)에서는 [maxConcurrentOperationCount](https://developer.apple.com/documentation/foundation/nsoperationqueue/1414982-maxconcurrentoperationcount)를 통해 통제할 수 있지만, Concurrency는 (아마도) 이런게 없는 것 같아요.
+하지만 실행시켜야 할 task가 너무 많으면 그 많은 것들을 동시에 실행시키면 부하가 있으므로, 동시간에 최대로 돌아갈 수 있는 Task 개수를 제한하고 싶을 때가 있습니다. [NSOperationQueue](https://developer.apple.com/documentation/foundation/nsoperationqueue)에서는 [maxConcurrentOperationCount](https://developer.apple.com/documentation/foundation/nsoperationqueue/1414982-maxconcurrentoperationcount)를 통해 통제할 수 있지만, Concurrency는 (아마도) 이런게 없는 것 같아요.
 
 그래서 같은 기능을 수행할 수 있도록 `MaxTaskGroup`이라는 것을 만들어 봤는데요.
 
