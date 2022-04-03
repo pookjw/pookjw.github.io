@@ -36,7 +36,7 @@ class MaxTaskGroup<Success> {
     
     var value: AsyncStream<Success> {
         get {
-            AsyncStream<Success> { [unowned self] continuation in
+            AsyncStream<Success> { continuation in
                 Task {
                     await withTaskGroup(of: Success.self) { group in
                         let batchSize: Int = self.maxTaskCount
