@@ -9,6 +9,7 @@
 - [NSDiffableDataSourceSnapshot, 그리고 Cocoa](Develop/NSDiffableDataSourceSnapshot-And-Cocoa/article.md)
 - [NSDiffableDataSourceSnapshot의 몇가지 팁](Develop/NSDiffableDataSourceSnapshot-Tips/article.md)
 - [Swift AsyncSequence](Develop/Swift-AsyncSequence/article.md)
+- [Swift TaskGroup + Batch Size](Develop/Swift_TaskGroup_Batch_Size/article.md)
 
 ## 기타
 
