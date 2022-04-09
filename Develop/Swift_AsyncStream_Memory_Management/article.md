@@ -57,7 +57,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 }
 ``` 
 
-... 하지만 `guard let self = self else { return }`에서 self를 strong 참조를 하게 되고, Task는 영원히 끝나지 않기 때문에 순환참조가 해결되지 않습니다. `[unonwned self]`를 쓰면 해결되겠지만, Race Condition이 발생하지 않을거란 보장이 없습니다. 즉, 저희는 `AsyncThrowingStream` (또는 `AsyncStream`) 내에서는 self의 Reference Count를 늘리면 안 됩니다. 그러면 아래와 같이 고쳐볼게요.
+... 하지만 `guard let self = self else { return }`에서 self를 strong 참조를 하게 되고, Task는 영원히 끝나지 않기 때문에 순환참조가 해결되지 않습니다. `[unowned self]`를 쓰면 해결되겠지만, Race Condition이 발생하지 않을거란 보장이 없습니다. 즉, 저희는 `AsyncThrowingStream` (또는 `AsyncStream`) 내에서는 self의 Reference Count를 늘리면 안 됩니다. 그러면 아래와 같이 고쳐볼게요.
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
