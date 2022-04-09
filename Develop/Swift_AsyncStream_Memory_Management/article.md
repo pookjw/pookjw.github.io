@@ -73,7 +73,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 }
 ``` 
 
-이렇게 하니 순환참조 문제는 해결됩니다! 하지만 `Task`가 영원히 끝나지 않는 또 다른 문제가 발생합니다.😭😭😭😭😭😭😭😭😭😭😭😭
+이렇게 하니 순환참조 문제는 해결됩니다! 하지만 `dataCacheRepo.didChangeDataCache`이 끝나지 않는다면 `Task`가 영원히 끝나지 않는 또 다른 문제가 발생합니다.😭😭😭😭😭😭😭😭😭😭😭😭
 
 그럴 때는 [`AsyncStream.Continuation.onTermination`](https://developer.apple.com/documentation/swift/asyncstream/continuation/3856653-ontermination)을 활용하면 됩니다. 아래처럼요.
 
