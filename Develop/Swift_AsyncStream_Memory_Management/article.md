@@ -40,7 +40,7 @@ let task: Task = .init {
 
 `DataCacheUseCaseImpl.didChangeDataCache`에서 `dataCacheUseCase (self)`를 strong 참조하고 있기 때문에, 순환참조가 발생해서 `task`가 cancel이 되어도 `dataCacheUseCase`는 deinit되지 않는 문제가 발생합니다.
 
-'그러면 `[weak self]`를 쓰면 되는거 아니야?'라고 생각하실 수 있습니다. 하지만 `for`문 특성상 `guard let self = self else { return }`은 무조건 써야 하므로, `DataCacheUseCaseImpl`의 코드는 아래와 같이 바뀌겠네요.
+'그러면 `[self]` 대신에 `[weak self]`를 쓰면 되는거 아니야?'라고 생각하실 수 있습니다. 하지만 `for`문 특성상 `guard let self = self else { return }`은 무조건 써야 하므로, `DataCacheUseCaseImpl`의 코드는 아래와 같이 바뀌겠네요.
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
