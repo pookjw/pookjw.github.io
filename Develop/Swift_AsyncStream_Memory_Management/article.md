@@ -1,6 +1,6 @@
 # Swift AsyncStream + 메모리 관리
 
-[AsyncStream](https://developer.apple.com/documentation/swift/asyncstream)을 쓰면서 메모리 관리를 하는 방법을 소개하고자 합니다.
+[AsyncStream](https://developer.apple.com/documentation/swift/asyncstream)을 쓰면서 메모리 관리를 하는 팁을 소개하려고 합니다.
 
 예시를 들어서 설명하겠습니다. `DataCacheRepo`와 `DataCacheUseCase`, `DataCacheUseCaseImpl`이 아래와 같이 있다고 가정해 봅시다.
 
