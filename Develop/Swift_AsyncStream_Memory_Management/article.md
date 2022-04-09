@@ -28,7 +28,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 }
 ```
 
-`DataCacheRepo.didChangeDataCache`를 통해 이벤트를 날리고, 그걸 `DataCacheUseCaseImpl.didChangeDataCache`에 Binding하는 구조입니다. 이 `DataCacheUseCaseImpl.didChangeDataCache`를 아래처럼 옵저빙을 시작한다면
+`DataCacheRepo.didChangeDataCache`에 날라오는 이벤트를 `DataCacheUseCaseImpl.didChangeDataCache`에 Binding하는 구조입니다. 이 `DataCacheUseCaseImpl.didChangeDataCache`를 아래처럼 옵저빙을 시작한다면
 
 ```swift
 let task: Task = .init {
