@@ -126,6 +126,14 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 
 이렇게 되면 `DataCacheUseCaseImpl`이 deinit되는 시점에 스트림을 끝낼 수 있고, strong으로 붙잡히고 있던 `dataCacheRepo`도 풀려나게 됩니다.
 
+즉, 요약하면 저희는 아래를 보장할 수 있게 됩니다.
+
+- `dataCacheRepo.didChangeDataCache`의 스트림이 끝나면 strong으로 붙잡고 있던게 모두 풀립니다.
+
+- 또한 `DataCacheUseCaseImpl`가 deinit이 되면 스트림을 끝낼 수 있고, strong으로 붙잡고 있던게 모두 풀립니다.
+
+- `DataCacheUseCaseImpl.didChangeDataCache` 스트림을 cancel할 경우에도 strong으로 붙잡고 있던게 모두 풀립니다.
+
 ### 같이 읽으면 좋은 자료
 
 [Memory management when using async/await in Swift](https://www.swiftbysundell.com/articles/memory-management-when-using-async-await/)
