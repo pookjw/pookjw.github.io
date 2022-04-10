@@ -136,7 +136,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 
 이렇게 되면 `DataCacheUseCaseImpl`이 deinit되는 시점에 스트림을 끝낼 수 있고, strong으로 붙잡히고 있던 `dataCacheRepo`도 풀려나게 됩니다.
 
-근데 `didChangeDataCache` 스트림이 끝나도 `didChangeDataCacheContinuations`에 저장된 `continuation`이 지워지지 않는 문제가 발생하므로, [withTaskCancellationHandler(handler:operation:)](https://developer.apple.com/documentation/swift/3814990-withtaskcancellationhandler)를 써줍시다.
+근데 `didChangeDataCache` 스트림이 끝나도 `didChangeDataCacheContinuations`에 저장된 `continuation`이 지워지지 않는 문제가 발생하므로, [`withTaskCancellationHandler(handler:operation:)`](https://developer.apple.com/documentation/swift/3814990-withtaskcancellationhandler)를 써줍시다.
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
