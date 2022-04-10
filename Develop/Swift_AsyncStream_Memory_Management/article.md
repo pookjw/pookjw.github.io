@@ -125,6 +125,9 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
         }
     }
     
+    private let dataCacheRepo: DataCacheRepo
+    private lazy var didChangeDataCacheContinuations: [AsyncThrowingStream<Void, Error>.Continuation] = []
+    
     deinit {
         didChangeDataCacheContinuations.forEach { $0.finish() }
     }
@@ -163,6 +166,9 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
             }
         }
     }
+    
+    private let dataCacheRepo: DataCacheRepo
+    private lazy var didChangeDataCacheContinuations: [AsyncThrowingStream<Void, Error>.Continuation] = []
     
     deinit {
         didChangeDataCacheContinuations.forEach { $0.finish() }
