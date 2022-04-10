@@ -19,7 +19,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
     public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
         .init { [self] continuation in
             Task {
-                for try await value in await self.dataCacheRepo.didChangeDataCache {
+                for try await value in self.dataCacheRepo.didChangeDataCache {
                     continuation.yield(value)
                 }
             }
@@ -50,7 +50,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
         .init { [weak self] continuation in
             Task { [weak self] in
                 guard let self = self else { return }
-                for try await value in await self.dataCacheRepo.didChangeDataCache {
+                for try await value in self.dataCacheRepo.didChangeDataCache {
                     continuation.yield(value)
                 }
             }
@@ -68,7 +68,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
     public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
         .init { [dataCacheRepo] continuation in
             Task { [dataCacheRepo] in
-                for try await value in await dataCacheRepo.didChangeDataCache {
+                for try await value in dataCacheRepo.didChangeDataCache {
                     continuation.yield(value)
                 }
             }
@@ -88,7 +88,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
     public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
         .init { [dataCacheRepo] continuation in
             let task: Task = .init { [dataCacheRepo] in
-                for try await value in await dataCacheRepo.didChangeDataCache {
+                for try await value in dataCacheRepo.didChangeDataCache {
                     continuation.yield(value)
                 }
             }
@@ -114,7 +114,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
             let task: Task = .init { [dataCacheRepo] in
                 self?.didChangeDataCacheContinuations.append(continuation)
                 
-                for try await value in await dataCacheRepo.didChangeDataCache {
+                for try await value in dataCacheRepo.didChangeDataCache {
                     continuation.yield(value)
                 }
             }
