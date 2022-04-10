@@ -111,7 +111,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
     public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
         .init { [dataCacheRepo, weak self] continuation in
-            let task: Task = .init { [dataCacheRepo] in
+            let task: Task = .init { [dataCacheRepo, weak self] in
                 self?.didChangeDataCacheContinuations.append(continuation)
                 
                 for try await value in dataCacheRepo.didChangeDataCache {
@@ -142,7 +142,7 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
     public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
         .init { [dataCacheRepo, weak self] continuation in
-            let task: Task = .init { [dataCacheRepo] in
+            let task: Task = .init { [dataCacheRepo, weak self] in
                 self?.didChangeDataCacheContinuations.append(continuation)
                 
                 try await withTaskCancellationHandler(
