@@ -6,20 +6,22 @@
 
 ```swift
 protocol DataCacheRepo {
-    var didChangeDataCache: AsyncThrowingStream<Void, Swift.Error> { get async }
+    var didChangeDataCache: AsyncThrowingStream<Void, Swift.Error> { get }
 }
 ```
 
 ```swift
 public protocol DataCacheUseCase {
-    var didChangeDataCache: AsyncThrowingStream<Void, Swift.Error> { get async }
+    var didChangeDataCache: AsyncThrowingStream<Void, Swift.Error> { get }
 }
 
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
-    public lazy var didChangeDataCache: AsyncThrowingStream<Void, Error> = .init { [self] continuation in
-        Task {
-            for try await value in await self.dataCacheRepo.didChangeDataCache {
-                continuation.yield(value)
+    public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
+        .init { [self] continuation in
+            Task {
+                for try await value in await self.dataCacheRepo.didChangeDataCache {
+                    continuation.yield(value)
+                }
             }
         }
     }
@@ -44,11 +46,13 @@ let task: Task = .init {
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
-    public lazy var didChangeDataCache: AsyncThrowingStream<Void, Error> = .init { [weak self] continuation in
-        Task { [weak self] in
-            guard let self = self else { return }
-            for try await value in await self.dataCacheRepo.didChangeDataCache {
-                continuation.yield(value)
+    public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
+        .init { [weak self] continuation in
+            Task { [weak self] in
+                guard let self = self else { return }
+                for try await value in await self.dataCacheRepo.didChangeDataCache {
+                    continuation.yield(value)
+                }
             }
         }
     }
@@ -61,10 +65,12 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
-    public lazy var didChangeDataCache: AsyncThrowingStream<Void, Error> = .init { [dataCacheRepo] continuation in
-        Task { [dataCacheRepo] in
-            for try await value in await dataCacheRepo.didChangeDataCache {
-                continuation.yield(value)
+    public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
+        .init { [dataCacheRepo] continuation in
+            Task { [dataCacheRepo] in
+                for try await value in await dataCacheRepo.didChangeDataCache {
+                    continuation.yield(value)
+                }
             }
         }
     }
@@ -79,15 +85,17 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
-    public lazy var didChangeDataCache: AsyncThrowingStream<Void, Error> = .init { [dataCacheRepo] continuation in
-        let task: Task = .init { [dataCacheRepo] in
-            for try await value in await dataCacheRepo.didChangeDataCache {
-                continuation.yield(value)
+    public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
+        .init { [dataCacheRepo] continuation in
+            let task: Task = .init { [dataCacheRepo] in
+                for try await value in await dataCacheRepo.didChangeDataCache {
+                    continuation.yield(value)
+                }
             }
-        }
-        
-        continuation.onTermination = { termination in
-            task.cancel()
+            
+            continuation.onTermination = { termination in
+                task.cancel()
+            }
         }
     }
 
@@ -101,30 +109,66 @@ public final class DataCacheUseCaseImpl: DataCacheUseCase {
 
 ```swift
 public final class DataCacheUseCaseImpl: DataCacheUseCase {
-    public lazy var didChangeDataCache: AsyncThrowingStream<Void, Error> = .init { [dataCacheRepo, weak self] continuation in
-        self?.didChangeDataCacheContinuation = continuation
-        
-        let task: Task = .init { [dataCacheRepo] in
-            for try await value in await dataCacheRepo.didChangeDataCache {
-                continuation.yield(value)
+    public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
+        .init { [dataCacheRepo, weak self] continuation in
+            let task: Task = .init { [dataCacheRepo] in
+                self?.didChangeDataCacheContinuations.append(continuation)
+                
+                for try await value in await dataCacheRepo.didChangeDataCache {
+                    continuation.yield(value)
+                }
+            }
+            
+            continuation.onTermination = { termination in
+                task.cancel()
             }
         }
-        
-        continuation.onTermination = { termination in
-            task.cancel()
-        }
     }
-
-    private let dataCacheRepo: DataCacheRepo
-    private var didChangeDataCacheContinuation: AsyncThrowingStream<Void, Error>.Continuation?
     
     deinit {
-        didChangeDataCacheContinuation?.finish()
+        didChangeDataCacheContinuations.forEach { $0.finish() }
     }
 }
 ```
 
 이렇게 되면 `DataCacheUseCaseImpl`이 deinit되는 시점에 스트림을 끝낼 수 있고, strong으로 붙잡히고 있던 `dataCacheRepo`도 풀려나게 됩니다.
+
+근데 `didChangeDataCache` 스트림이 끝나도 `didChangeDataCacheContinuations`에 저장된 `continuation`이 지워지지 않는 문제가 발생하므로, [withTaskCancellationHandler(handler:operation:)](https://developer.apple.com/documentation/swift/3814990-withtaskcancellationhandler)를 써줍시다.
+
+```swift
+public final class DataCacheUseCaseImpl: DataCacheUseCase {
+    public nonisolated var didChangeDataCache: AsyncThrowingStream<Void, Error> {
+        .init { [dataCacheRepo, weak self] continuation in
+            let task: Task = .init { [dataCacheRepo] in
+                self?.didChangeDataCacheContinuations.append(continuation)
+                
+                try await withTaskCancellationHandler(
+                    handler: { [weak self] in
+                        self?.didChangeDataCacheContinuations.removeAll { i in
+                            let first: UnsafePointer<AsyncThrowingStream<Void, Error>.Continuation> = withUnsafePointer(to: i, { UnsafePointer($0) })
+                            let second: UnsafePointer<AsyncThrowingStream<Void, Error>.Continuation> = withUnsafePointer(to: continuation, { UnsafePointer($0) })
+                            return first == second
+                        }
+                    },
+                    operation: {
+                        for try await _ in dataCacheRepo.didChangeDataCache {
+                            continuation.yield(())
+                        }
+                    }
+                )
+            }
+            
+            continuation.onTermination = { termination in
+                task.cancel()
+            }
+        }
+    }
+    
+    deinit {
+        didChangeDataCacheContinuations.forEach { $0.finish() }
+    }
+}
+```
 
 즉, 요약하면 저희는 아래를 보장할 수 있게 됩니다.
 
