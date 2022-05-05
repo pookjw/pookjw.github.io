@@ -4,9 +4,7 @@
 
 - [Chapter 2](#chapter-2)
 
-<a name="chapter-1">
-# Chapeter 1: Getting Started
-</a>
+# <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
 (lldb) file /Applications/Xcode.app/Contents/MacOS/Xcode
@@ -208,9 +206,7 @@ unsafeBitCast(0x0000000111ccf200, to: NSView.self).string
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^~~~~~
 ```
 
-<a name="chapter-2">
-# Chapter 2: Help & Apropos
-</a>
+# <a name="chapter-2">Chapter 2: Help & Apropos</a>
 
 `help` 명령어를 치면 무진장 많은 명령어들의 도움말들을 볼 수 있다.
 
