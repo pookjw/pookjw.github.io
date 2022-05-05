@@ -1,8 +1,10 @@
 [Advanced Apple Debugging & Reverse Engineering (raywenderlich.com)](https://www.raywenderlich.com/books/advanced-apple-debugging-reverse-engineering)의 내용을 정리한 글이다.
 
-- [Chapter 1](#chapter-1)
+- [Chapter 1: Getting Started](#chapter-1)
 
-- [Chapter 2](#chapter-2)
+- [Chapter 2: Help & Apropos](#chapter-2)
+
+- [Chapter 3: Attaching with LLDB](#chapter-3)
 
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
@@ -545,3 +547,157 @@ The following settings variables may relate to 'swift':
 The following commands may relate to 'reference count':
   refcount -- Inspect the reference count data for a Swift object
 ```
+
+# <a name="chapter-3">Chapter 3: Attaching with LLDB</a>
+
+아래처럼 lldb에서 이미 실행된 프로세스에 attach 할 수 있다. (참고로 `pgrep -x Xcode` 명령어로 PID를 받아 올 수 있다.)
+
+```
+% lldb -n Xcode
+(lldb) process attach --name "Xcode"
+
+...
+
+% lldb -p 3386
+(lldb) process attach --pid 3386
+```
+
+만약 다음 번에 실행될 프로세스에 attach하고 싶은 경우, `-w` (`--waitFor`)를 쓰면 된다. 이럴 경우 파일 경로로 통해서도 설정할 수 있는데 이때는 `-w`가 필요 없다.
+
+```
+% lldb -n Finder -w
+(lldb) process attach --name "Finder" --waitfor
+
+...
+
+% lldb -f /System/Library/CoreServices/Finder.app/Contents/MacOS/Finder
+(lldb) target create "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder"
+Current executable set to '/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder' (arm64e).
+```
+
+`-f`을 통해 파일 경로로 지정했을 경우, `process launch` 명령어로 바로 실행시킬 수 있다.
+
+```
+(lldb) process launch
+Process 3473 launched: '/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder' (arm64e)
+```
+
+아래 명령어로 설정된 target을 지울 수 있다.
+
+```
+(lldb) target delete
+```
+
+이제 `/bin/ls`를 통해 실행 중에 옵션을 넣는 방법에 대해 알자면, 일단 `/bin/ls`로 설정한 후
+
+```
+% lldb -f /bin/ls
+(lldb) target create "/bin/ls"
+Current executable set to '/bin/ls' (arm64e).
+```
+
+위에서 설명했듯이 `process launch`를 실행하면 해당 프로그램을 실행할 수 있다.
+
+```
+(lldb) process launch
+Process 3502 launched: '/bin/ls' (arm64e)
+Applications	Documents	Movies		Postman		git
+Brewfile	Downloads	Music		Public		lldb_commands
+Desktop		Library		Pictures	Sites		theos
+Process 3502 exited with status = 0 (0x00000000) 
+```
+
+`-w` 옵션을 쓰면 `cd`를 한 다음에 프로그램을 실행하게 된다. 예를 들어 아래와 같이 명령어를 입력하면
+
+```
+(lldb) process launch -w /Applications
+Process 3512 launched: '/bin/ls' (arm64e)
+
+# /Applications의 내용...
+```
+
+아래와 같은 내용이라 할 수 있다.
+
+```
+% cd /Applications
+% ls
+```
+
+`--` 옵션을 쓰면 프로그램 실행의 arguments를 지정할 수 있다.
+
+```
+(lldb) process launch -w /Applications
+Process 3512 launched: '/bin/ls' (arm64e)
+
+# /Applications의 내용...
+```
+
+이는 `% ls /Applications`와 같은거라 할 수 있다. 하지만 `--`는 아래이 `~` 문구가 같은 경우는 에러가 난다.
+
+```
+(lldb) process launch -- ~/Desktop
+Process 3557 launched: '/bin/ls' (arm64e)
+ls: ~/Desktop: No such file or directory
+Process 3557 exited with status = 1 (0x00000001) 
+```
+
+이럴 경우 `-X true`를 써주면 된다.
+
+```
+(lldb) process launch -X true -- ~/Desktop
+Process 3574 launched: '/bin/ls' (arm64e)
+
+# ~/Desktop의 내용...
+```
+
+이는 `run` 명령어로도 할 수 있다.
+
+```
+(lldb) run ~/Desktop
+Process 3583 launched: '/bin/ls' (arm64e)
+
+# ~/Desktop의 내용...
+```
+
+만약에 현재 설정된 environment variable들을 보고 싶으면, `env` 명령어를 쓰면 된다.
+
+```
+(lldb) env
+target.env-vars (dictionary of strings) =
+```
+
+책에서는 이런 식으로 environment variable을 설정할 수 있다는데... 내가 해보니 안 됨. shell이 달라서 그런듯...
+
+```
+(lldb) process launch -v LSCOLORS=Af -v CLICOLOR=1  -- /Applications/
+```
+
+이거는 터미널에서 아래 명령어와 같은거라 함.
+
+```
+$ LSCOLORS=Af CLICOLOR=1 ls /Applications/
+```
+
+만약에 출력 결과물을 파일로 저장하고 싶으면, `-o`를 쓰면 된다. 터미널에서 `>` 기호라고 생각하면 될듯하다.
+
+```
+(lldb) process launch -o /tmp/ls_output.txt -- /Applications
+```
+
+이러면 아래 터미널 명령어로 잘 저장되었는지 볼 수 있다.
+
+```
+% cat /tmp/ls_output.txt
+```
+
+`-i`을 쓰면 터미널의 `<` 기호같은 것을 쓸 수 있다.
+
+```
+(lldb) target create /usr/bin/wc
+
+(lldb) process launch -i /tmp/ls_output.txt
+
+(lldb) run
+```
+
+마지막 명령어의 경우 `wc`에 아무런 input이 없어서 멈출텐데, 해당 프로세스를 강제종로 시키고 싶으면 `Ctrl` + `D`를 누르면 된다.
