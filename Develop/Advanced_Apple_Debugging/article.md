@@ -6,6 +6,10 @@
 
 - [Chapter 3: Attaching with LLDB](#chapter-3)
 
+- [Chapter 4: Stopping in Code](#chapter-4)
+
+- [Chapter 5: Expression](#chapter-5)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -701,3 +705,346 @@ $ LSCOLORS=Af CLICOLOR=1 ls /Applications/
 ```
 
 마지막 명령어의 경우 `wc`에 아무런 input이 없어서 멈출텐데, 해당 프로세스를 강제종로 시키고 싶으면 `Ctrl` + `D`를 누르면 된다.
+
+# <a name="chapter-4">Chapter 4: Stopping in Code</a>
+
+Symbol 검색하기
+
+```
+(lldb) image lookup -n "-[UIViewController viewDidLoad]"
+1 match found in /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore:
+        Address: UIKitCore[0x00000000004bd8d0] (UIKitCore.__TEXT.__text + 4957852)
+        Summary: UIKitCore`-[UIViewController viewDidLoad]
+```
+
+정규식으로 Symbol 검색하기
+
+```
+(lldb) image lookup -rn test
+1 match found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-byjsnxuqpxeyyddvxghkubpurqlj/Build/Products/Debug-iphonesimulator/Signals.app/Signals:
+        Address: Signals[0x0000000100005e78] (Signals.__TEXT.__text + 15360)
+        Summary: Signals`Signals.DetailViewController.test() throws -> () at DetailViewController.swift:52
+```
+
+Swift Symbol 검색하기
+
+```
+(lldb) image lookup -rn Signals.SwiftTestClass.name.setter
+1 match found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-byjsnxuqpxeyyddvxghkubpurqlj/Build/Products/Debug-iphonesimulator/Signals.app/Signals:
+        Address: Signals[0x000000010000b5fc] (Signals.__TEXT.__text + 37764)
+        Summary: Signals`Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String> at SwiftTestClass.swift:32
+
+(lldb) image lookup -rn Signals.SwiftTestClass.name.(getter|setter)
+2 matches found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-byjsnxuqpxeyyddvxghkubpurqlj/Build/Products/Debug-iphonesimulator/Signals.app/Signals:
+        Address: Signals[0x000000010000b58c] (Signals.__TEXT.__text + 37652)
+        Summary: Signals`Signals.SwiftTestClass.name.getter : Swift.Optional<Swift.String> at SwiftTestClass.swift:32        Address: Signals[0x000000010000b5fc] (Signals.__TEXT.__text + 37764)
+        Summary: Signals`Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String> at SwiftTestClass.swift:32
+```
+
+Swift Symbol로 breakpoint 걸기 (위에서 얻은 정확한 Symbol 이름을 넣어주면 된다)
+
+```
+(lldb) b Signals`Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String>
+Breakpoint 3: where = Signals`Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String> at SwiftTestClass.swift:32, address = 0x00000001027d75fc
+```
+
+단축어로 breakpoint를 걸 수 있다.
+
+```
+(lldb) b -[UIViewController viewDidLoad]
+Breakpoint 4: where = UIKitCore`-[UIViewController viewDidLoad], address = 0x000000018462b8d0
+
+(lldb) b Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String>
+Breakpoint 5: where = Signals`Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String> at SwiftTestClass.swift:32, address = 0x00000001027d75fc
+```
+
+정규식을 통해서도 걸 수 있다.
+
+```
+(lldb) rb SwiftTestClass.name.setter
+Breakpoint 6: where = Signals`Signals.SwiftTestClass.name.setter : Swift.Optional<Swift.String> at SwiftTestClass.swift:32, address = 0x00000001027d75fc
+
+(lldb) rb name\.setter
+Breakpoint 7: 8 locations.
+
+(lldb) rb '\-\[UIViewController\ '
+Breakpoint 8: 796 locations.
+
+# Category들만
+(lldb) rb '\-\[UIViewController(\(\w+\))?\ '
+Breakpoint 9: 796 locations.
+
+# DetailViewController.swift 안에 있는 모드 코드에
+(lldb) rb . -f DetailViewController.swift
+Breakpoint 10: 65 locations.
+
+# 모든 Symbol에 breakpoint 걸기...
+(lldb) rb .
+
+# 특정 Module에 있는 모든 Symbol에 breakpoint 걸기...
+(lldb) rb . -s Commons
+(lldb) rb . -s UIKitCore
+```
+
+만약에 breakpoint가 몇번 이상 걸리면 자동으로 delete되게 처리하려면 `-o` (one-shot)을 쓰면 된다.
+
+```
+(lldb) rb . -s UIKitCore -o 1
+```
+
+breakpoint 명령어들 예제를 적자면
+
+```
+# Commons moudle 안의 Swift 언어로 된 모든 Symbol들에 breakpoint를 건다.
+(lldb) breakpoint set -L swift -r . -s Commons
+
+# 모든 소스코드 파일 (-A)에서 "if let"이 포함되어 있으면 breakpoint를 건다.
+(lldb) breakpoint set -A -p "if let"
+
+# 특정 파일만 하고 싶으면
+(lldb) breakpoint set -p "if let" -f MasterViewController.swift -f DetailViewController.swift
+
+# Signals model 안에 있는 모든 소스코드에서 "if let"이 포함되어 있는 곳에 breakpoint를 건다.
+(lldb) breakpoint set -p "if let" -s Signals -A
+
+# `-[UIViewController viewDidLoad]`가 걸리면 명령어를 실행하고 pause하지 않는다.
+(lldb) breakpoint set -n "-[UIViewController viewDidLoad]` -C "po $arg1" -G1
+```
+
+여담으로 디버깅 결과물들을 파일로 쓸 수 있다.
+
+```
+(lldb) breakpoint write -f /tmp/br.json
+(lldb) platform shell cat /tmp/br.json
+
+# re-import
+(lldb) breakpoint read -f /tmp/br.json
+```
+
+현재 설정된 breakpoint 목록보기
+
+```
+# 전체 breakpoint
+(lldb) breakpoint list
+
+# 첫번째꺼만
+(lldb) breakpoint list 1
+
+# 간략하게 (briefly)
+(lldb) breakpoint list 1 -b
+
+# 첫번째꺼의 첫번째 symbol만 (근데 난 안 됨...)
+(lldb) breakpoint list 1 1
+(lldb) breakpoint list 1-1
+
+# 특정 breakpoint만 지우기
+(lldb) breakpoint delete 1
+(lldb) breakpoint delete 1.1
+```
+
+# <a name="chapter-5">Chapter 5: Expression</a>
+
+`NSObject.description`을 override 해보면
+
+```swift
+override var description: String {
+  return "Yay! debugging " + super.description
+}
+```
+
+`print("\(self)")`로 찍어보면 위에서 정의한 `description`이 나오는 것을 확인할 수 있다.
+
+```
+Yay! debugging <Signals.MasterViewController: 0x7f8a0ac06b70>
+```
+
+마찬가지로 lldb에서 `po self`를 하면 똑같이 나온다.
+
+```
+(lldb) po self
+Yay! debugging <Signals.MasterViewController: 0x7f8a0ac06b70>
+```
+
+이제 `NSObject.debugDescription`을 override 해보면
+
+```swift
+override var debugDescription: String {
+  return "debugDescription: " + super.debugDescription
+}
+```
+
+`print(_:)`에서는 여전히 `description`이 나오지만, `po self`에서는 `debugDescription`이 나오는 것을 확인할 수 있다.
+
+```
+(lldb) po self
+debugDescription: Yay! debugging <Signals.MasterViewController: 0x7fb71fd04080>
+```
+
+이제 `p self`를 해보면 raw를 볼 수 있다.
+
+```
+(lldb) p self
+(Signals.MasterViewController) $R0 = 0x0000000149615e70 {
+  UIKit.UITableViewController = {
+    baseUIViewController@0 = {
+      baseUIResponder@0 = {
+        baseNSObject@0 = {
+          isa = Signals.MasterViewController
+        }
+      }
+      _overrideTransitioningDelegate = 0x0000000000000000
+      _view = some {
+        some = 0x000000014a02ee00 {
+          baseUIScrollView@0 = {
+            baseUIView@0 = {
+
+# 생략...
+```
+
+또한 `po`나 `p`가 불릴 경우, 출력의 메모리 주소는 `$R0`, `$R1`, `$R2`... 이런 식으로 register에 저장되며, `continue`가 되면 다 날라간다.
+
+```
+(lldb) p self
+(Signals.MasterViewController) $R0 = 0x00000001286053c0 {
+# 생략
+
+(lldb) p self
+(Signals.MasterViewController) $R1 = 0x00000001286053c0 {
+# 생략
+
+(lldb) p self
+(Signals.MasterViewController) $R2 = 0x00000001286053c0 {
+# 생략
+
+(lldb) po self
+debugDescription: Yay! debugging <Signals.MasterViewController: 0x1286053c0>
+
+(lldb) p self
+(Signals.MasterViewController) $R4 = 0x00000001286053c0 {
+# 생략
+
+(lldb) po $R5
+debugDescription: Yay! debugging <Signals.MasterViewController: 0x1286053c0>
+
+(lldb) po $R6
+debugDescription: Yay! debugging <Signals.MasterViewController: 0x1286053c0>
+```
+
+또한 `type` 명령어로 통해 `p`에서 나오는 결과를 커스텀 할 수 있다.
+
+```
+(lldb) type summary add Signals.MasterViewController --summary-string "Wahho!"
+(lldb) p self
+(Signals.MasterViewController) $R8 = 0x00000001286053c0 Wahho!
+
+# 초기화
+(lldb) type summary clear
+```
+
+`po`에 대해 좀 더 알아보자면, `po`는 코드 실행도 가능하다. 다만 현재 context 언어 (Swift, Objective-C)에 맞게 써야 한다.
+
+
+- Swift Context
+
+```
+(lldb) po [UIApplication sharedApplication]
+error: expression failed to parse:
+error: <EXPR>:8:16: error: expected ',' separator
+[UIApplication sharedApplication]
+               ^
+              ,
+
+(lldb) po UIApplication.shared
+<UIApplication: 0x1485042c0>
+```
+
+- Objective-C Context
+
+```
+(lldb) po [UIApplication sharedApplication]
+<UIApplication: 0x1485042c0>
+
+(lldb) po UIApplication.shared
+error: expression failed to parse:
+error: No module map file in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-cwkqbgfljqhkztfcsvolnunfygne/Build/Products/Debug-iphonesimulator/Commons.framework
+
+error: <user expression 2>:1:15: property 'shared' not found on object of type 'UIApplication'
+UIApplication.shared
+```
+
+Context에 상관 없이 특정 언어를 지정해서 실행할 수도 있다.
+
+```
+(lldb) expression -l objc -O -- [UIApplication sharedApplication]
+<UIApplication: 0x1485042c0>
+
+(lldb) expression -l swift -O -- UIApplication.shared
+<UIApplication: 0x1485042c0>
+```
+
+`expression`의 `-O`는 아래와 같다.
+
+```
+-O ( --object-description )
+            Display using a language-specific description API, if possible.
+```
+
+변수를 선언할 수도 있다. 물론 ARC는 안 된다.
+
+```
+# 이렇게 하면 안 된다.
+(lldb) po id test = [NSObject new]
+(lldb) po test
+error: use of undeclared identifier 'test
+
+# 이렇게 해야 한다.
+(lldb) po id $test = [NSObject new]
+(lldb) po $test
+<NSObject: 0x600000718100>
+
+(lldb) po [$test release]
+0x0000000104af8000
+
+# Swift에서...
+(lldb) po id $test = [NSObject new]
+(lldb) expression -l swift -O -- $test
+<NSObject: 0x600000f580c0>
+
+# 이런건 아직 안 되는듯? Bridging이 생각하는 것 처럼 되진 않는다 함
+(lldb) expression -l swift -O -- $test.description
+error: expression failed to parse:
+error: <EXPR>:3:1: error: cannot find '$test' in scope
+$test.description
+^~~~~
+```
+
+`expression`의 `-i` 플래그에 대해서도 알아보자. `expression`을 통해 명령어가 실행됐을 때, 그 명령어를 현재 breakpoint에도 걸리게 할지를 정할 수 있다.
+
+```
+-i <boolean> ( --ignore-breakpoints <boolean> )
+            Ignore breakpoint hits while running expressions
+```
+
+```
+# `-[UIViewController viewDidLoad]`에 breakpoint를 설정한다.
+(lldb) b -[UIViewController viewDidLoad]
+Breakpoint 3: where = UIKitCore`-[UIViewController viewDidLoad], address = 0x000000018462b8d0
+
+# `-i` 플래그를 안 쓰면 위에서 정의한 breakpoint가 기본적으로 무시된다.
+(lldb) expression -l swift -O -- self.viewDidLoad()
+Yay! debugging <Signals.MasterViewController: 0x135510060>
+0 elements
+
+# 하지만 `-i 0`으로 설정하면 breakpoint 때문에 에러가 난다.
+(lldb) expression -l swift -O -i 0 -- self.viewDidLoad()
+error: Execution was interrupted, reason: breakpoint 3.1.
+The process has been left at the point where it was interrupted, use "thread return -x" to return to the state before expression evaluation.
+```
+
+마지막으로 `expression`은 format을 지정해서 출력할 수 있다. 예를 들어, `-G`의 경우 GDB format이다. 이건 지엽적이라 그냥 책을 보고 공부하자.
+
+```
+(lldb) expression -G x -- 10
+(int) $0 = 0x0000000a
+```
+
