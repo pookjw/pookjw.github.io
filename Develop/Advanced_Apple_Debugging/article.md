@@ -10,6 +10,10 @@
 
 - [Chapter 5: Expression](#chapter-5)
 
+- [Chapter 6: Thread, Frame & Stepping Around](#chapter-6)
+
+- [Chapter 7: Image](#chapter-7)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -227,237 +231,8 @@ Debugger commands:
   expression        -- Evaluate an expression on the current thread.  Displays any returned value
                        with LLDB's default formatting.
   frame             -- Commands for selecting and examing the current thread's stack frames.
-  gdb-remote        -- Connect to a process via remote GDB server.  If no host is specifed,
-                       localhost is assumed.
-  gui               -- Switch into the curses based GUI mode.
-  help              -- Show a list of all debugger commands, or give details about a specific
-                       command.
-  ivars             -- Dumps all ivars for an instance of a particular class which inherits from
-                       NSObject (iOS, NSObject subclass only)
-  kdp-remote        -- Connect to a process via remote KDP server.  If no UDP port is specified,
-                       port 41139 is assumed.
-  la                -- List a directory from the process's perspective. Useful when working on an
-                       actual device.
-  language          -- Commands specific to a source language.
-  log               -- Commands controlling LLDB internal logging.
-  ls                -- List a directory from the process's perspective. Useful when working on an
-                       actual device.
-  memory            -- Commands for operating on memory in the current target process.
-  methods           -- Dumps all methods implemented by the NSObject subclass (iOS, NSObject
-                       subclass only)
-  msg_header_b      -- Dump the mach_msg_header_t in raw bytes
-  msg_header_w      -- Dump the mach_msg_header_t in raw bytes
-  platform          -- Commands to manage and create platforms.
-  plugin            -- Commands for managing LLDB plugins.
-  process           -- Commands for interacting with processes on the current platform.
-  quit              -- Quit the LLDB debugger.
-  register          -- Commands to access registers for the current thread and stack frame.
-  reproducer        -- Commands for manipulating reproducers. Reproducers make it possible to
-                       capture full debug sessions with all its dependencies. The resulting
-                       reproducer is used to replay the debug session while debugging the
-                       debugger.
-                       Because reproducers need the whole the debug session from beginning to end,
-                       you need to launch the debugger in capture or replay mode, commonly though
-                       the command line driver.
-                       Reproducers are unrelated record-replay debugging, as you cannot interact
-                       with the debugger during replay.
-  rlook             -- Regex search
-  script            -- Invoke the script interpreter with provided code and display any results. 
-                       Start the interactive interpreter if no code is supplied.
-  session           -- Commands controlling LLDB session.
-  settings          -- Commands for managing LLDB settings.
-  source            -- Commands for examining source code described by debug information for the
-                       current target process.
-  statistics        -- Print statistics about a debugging session
-  swift-healthcheck -- Show the LLDB debugger health check diagnostics.
-  target            -- Commands for operating on debugger targets.
-  thread            -- Commands for operating on one or more threads in the current process.
-  trace             -- Commands for loading and using processor trace information.
-  tv                -- Toggle view. Hides/Shows a view depending on it's current state. You don't
-                       need to resume LLDB to see changes
-  type              -- Commands for operating on the type system.
-  version           -- Show the LLDB debugger version.
-  watchpoint        -- Commands for operating on watchpoints.
-Current command abbreviations (type 'help command alias' for more info):
-  add-dsym             -- Add a debug symbol file to one of the target's current modules by
-                          specifying a path to a debug symbols file or by using the options to
-                          specify a module.
-  args                 -- Dump the contents of one or more register values from the current frame. 
-                          If no register is specified, dumps them all.
-  attach               -- Attach to process by ID or name.
-  avoid_step_libraries -- Set the value of the specified debugger setting.
-  b                    -- Set a breakpoint using one of several shorthand formats.
-  bpo                  -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  bt                   -- Show the current thread's call stack.  Any numeric argument displays at
-                          most that many frames.  The argument 'all' displays all threads.
-  c                    -- Continue execution of all threads in the current process.
-  call                 -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  continue             -- Continue execution of all threads in the current process.
-  cp                   -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  cpo                  -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  detach               -- Detach from the current target process.
-  di                   -- Disassemble specified instructions in the current target.  Defaults to
-                          the current function for the current thread and stack frame.
-  dis                  -- Disassemble specified instructions in the current target.  Defaults to
-                          the current function for the current thread and stack frame.
-  display              -- Evaluate an expression at every stop (see 'help target stop-hook'.)
-  down                 -- Select a newer stack frame.  Defaults to moving one frame, a numeric
-                          argument can specify an arbitrary number.
-  dump_app_contents    -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  enable_logging       -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  env                  -- Shorthand for viewing and setting environment variables.
-  exit                 -- Quit the LLDB debugger.
-  f                    -- Select the current stack frame by index from within the current thread
-                          (see 'thread backtrace'.)
-  ff                   -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  file                 -- Create a target using the argument as the main executable.
-  finish               -- Finish executing the current stack frame and stop after returning. 
-                          Defaults to current thread unless specified.
-  gg                   -- Interrupt the current target process.
-  history              -- Dump the history of commands in this session.
-                          Commands in the history list can be run again using "!<INDEX>".  
-                          "!-<OFFSET>" will re-run the command that is <OFFSET> commands from the
-                          end of the list (counting the current command).
-  iheap                -- Import a scripting module in LLDB.
-  image                -- Commands for accessing information for one or more target modules.
-  j                    -- Set the program counter to a new address.
-  jump                 -- Set the program counter to a new address.
-  kill                 -- Terminate the current target process.
-  l                    -- List relevant source code using one of several shorthand formats.
-  list                 -- List relevant source code using one of several shorthand formats.
-  lnetwork             -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  n                    -- Source level single step, stepping over calls.  Defaults to current
-                          thread unless specified.
-  next                 -- Source level single step, stepping over calls.  Defaults to current
-                          thread unless specified.
-  nexti                -- Instruction level single step, stepping over calls.  Defaults to current
-                          thread unless specified.
-  ni                   -- Instruction level single step, stepping over calls.  Defaults to current
-                          thread unless specified.
-  p                    -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  parray               -- parray <COUNT> <EXPRESSION> -- lldb will evaluate EXPRESSION to get a
-                          typed-pointer-to-an-array in memory, and will display COUNT elements of
-                          that type from the array.
-  pexecutable          -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  plibrary             -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  plocalmodulelist     -- Invoke the script interpreter with provided code and display any results.
-                          Start the interactive interpreter if no code is supplied.
-  po                   -- Evaluate an expression on the current thread.  Displays any returned
-                          value with formatting controlled by the type's author.
-  poarray              -- poarray <COUNT> <EXPRESSION> -- lldb will evaluate EXPRESSION to get the
-                          address of an array of COUNT objects in memory, and will call po on them.
-  print                -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  q                    -- Quit the LLDB debugger.
-  qqq                  -- Connect to a remote debug service.
-  r                    -- Launch the executable in the debugger.
-  rbreak               -- Sets a breakpoint or set of breakpoints in the executable.
-  re                   -- Commands to access registers for the current thread and stack frame.
-  reload_lldbinit      -- Reload ~/.lldbinit
-  repl                 -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  run                  -- Launch the executable in the debugger.
-  s                    -- Source level single step, stepping into calls.  Defaults to current
-                          thread unless specified.
-  shell                -- Run a shell command on the host.
-  si                   -- Instruction level single step, stepping into calls.  Defaults to current
-                          thread unless specified.
-  sif                  -- Step through the current block, stopping if you step directly into a
-                          function whose name matches the TargetFunctionName.
-  sp                   -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  spo                  -- Evaluate an expression on the current thread.  Displays any returned
-                          value with LLDB's default formatting.
-  step                 -- Source level single step, stepping into calls.  Defaults to current
-                          thread unless specified.
-  stepi                -- Instruction level single step, stepping into calls.  Defaults to current
-                          thread unless specified.
-  t                    -- Change the currently selected thread.
-  tbreak               -- Set a one-shot breakpoint using one of several shorthand formats.
-  undisplay            -- Stop displaying expression at every stop (specified by stop-hook index.)
-  up                   -- Select an older stack frame.  Defaults to moving one frame, a numeric
-                          argument can specify an arbitrary number.
-  v                    -- Show variables for the current stack frame. Defaults to all arguments and
-                          local variables in scope. Names of argument, local, file static and file
-                          global variables can be specified. Children of aggregate variables can be
-                          specified such as 'var->child.x'.  The -> and [] operators in 'frame
-                          variable' do not invoke operator overloads if they exist, but directly
-                          access the specified element.  If you want to trigger operator overloads
-                          use the expression command to print the variable instead.
-                          It is worth noting that except for overloaded operators, when printing
-                          local variables 'expr local_var' and 'frame var local_var' produce the
-                          same results.  However, 'frame variable' is more efficient, since it uses
-                          debug information and memory reads directly, rather than parsing and
-                          evaluating an expression, which may even involve JITing and running code
-                          in the target program.
-  var                  -- Show variables for the current stack frame. Defaults to all arguments and
-                          local variables in scope. Names of argument, local, file static and file
-                          global variables can be specified. Children of aggregate variables can be
-                          specified such as 'var->child.x'.  The -> and [] operators in 'frame
-                          variable' do not invoke operator overloads if they exist, but directly
-                          access the specified element.  If you want to trigger operator overloads
-                          use the expression command to print the variable instead.
-                          It is worth noting that except for overloaded operators, when printing
-                          local variables 'expr local_var' and 'frame var local_var' produce the
-                          same results.  However, 'frame variable' is more efficient, since it uses
-                          debug information and memory reads directly, rather than parsing and
-                          evaluating an expression, which may even involve JITing and running code
-                          in the target program.
-  vo                   -- Show variables for the current stack frame. Defaults to all arguments and
-                          local variables in scope. Names of argument, local, file static and file
-                          global variables can be specified. Children of aggregate variables can be
-                          specified such as 'var->child.x'.  The -> and [] operators in 'frame
-                          variable' do not invoke operator overloads if they exist, but directly
-                          access the specified element.  If you want to trigger operator overloads
-                          use the expression command to print the variable instead.
-                          It is worth noting that except for overloaded operators, when printing
-                          local variables 'expr local_var' and 'frame var local_var' produce the
-                          same results.  However, 'frame variable' is more efficient, since it uses
-                          debug information and memory reads directly, rather than parsing and
-                          evaluating an expression, which may even involve JITing and running code
-                          in the target program.
-  x                    -- Read from the memory of the current target process.
-Current user-defined commands:
-  __generate_script -- generates new LLDB script
-  biof              -- For more information run 'help biof'
-  copyz             -- For more information run 'help copyz'
-  dclass            -- Dumps info about objc/swift classes
-  dd                -- Alternative to LLDB's disassemble cmd
-  ddp               -- For more information run 'help ddp'
-  dumpenv           -- Short documentation here
-  iap               -- iAP helper methods
-  iblog             -- For more information run 'help iblog'
-  include           -- imports a self-contained C header
-  info              -- Get info about an address in memory
-  jtool             -- wrapper for @Morpheus______'s jtool
-  keychain          -- iOS keychain methods
-  lbr               -- For more information run 'help lbr'
-  lookup            -- lookup functions or variables
-  lsof              -- lists open file descriptors in your program
-  msl               -- get stack trace of address, needs MallocStackLogging
-  overlaydbg        -- Display UIDebuggingInformationOverlay on iOS
-  pframework        -- For more information run 'help pframework'
-  pmodule           -- Generates DTrace script to profile module
-  sbt               -- Resymbolicate stripped ObjC backtrace
-  sclass            -- Swizzle class helper
-  search            -- Searches heap for instances
-  section           -- Mach-O segment/section helper
-  snoopie           -- Profile stripped ObjC methods using DTrace
-  sys               -- For more information run 'help sys'
-  tobjectivec       -- Generates DTrace profiling scripts
-  xref              -- Find references to (non heap) code/data
-  yoink             -- Copies contents of remote contents to local computer
+# 생략...
+
 For more information on any command, type 'help <command-name>'.
 ```
 
@@ -478,33 +253,7 @@ The following subcommands are supported:
                  all.
       disable -- Disable the specified breakpoint(s) without deleting them.  If none are specified,
                  disable all breakpoints.
-      enable  -- Enable the specified disabled breakpoint(s). If no breakpoints are specified,
-                 enable all of them.
-      list    -- List some or all breakpoints at configurable levels of detail.
-      modify  -- Modify the options on a breakpoint or set of breakpoints in the executable.  If no
-                 breakpoint is specified, acts on the last created breakpoint.  With the exception
-                 of -e, -d and -i, passing an empty argument clears the modification.
-      name    -- Commands to manage name tags for breakpoints
-      read    -- Read and set the breakpoints previously saved to a file with "breakpoint write".  
-      set     -- Sets a breakpoint or set of breakpoints in the executable.
-      write   -- Write the breakpoints listed to a file that can be read in with "breakpoint read".
-                 If given no arguments, writes all breakpoints.
-
-For more help on any particular subcommand, type 'help <command> <subcommand>'.
-(lldb) help breakpoint name
-Commands to manage name tags for breakpoints
-
-Syntax: breakpoint name <subcommand> [<command-options>]
-
-The following subcommands are supported:
-
-      add       -- Add a name to the breakpoints provided.
-      configure -- Configure the options for the breakpoint name provided.  If you provide a
-                   breakpoint id, the options will be copied from the breakpoint, otherwise only
-                   the options specified will be set on the name.
-      delete    -- Delete a name from the breakpoints provided.
-      list      -- List either the names for a breakpoint or info about a given name.  With no
-                   arguments, lists all names
+# 생략...
 
 For more help on any particular subcommand, type 'help <command> <subcommand>'.
 ```
@@ -519,29 +268,7 @@ The following commands may relate to 'swift':
   refcount          -- Inspect the reference count data for a Swift object
   swift-healthcheck -- Show the LLDB debugger health check diagnostics.
   dclass            -- Dumps info about objc/swift classes
-
-The following settings variables may relate to 'swift':
-  target.swift-extra-clang-flags -- Additional -Xcc flags to be passed to the Swift ClangImporter.
-  target.swift-framework-search-paths -- List of directories to be searched when locating
-                                         frameworks for Swift.
-  target.swift-module-search-paths -- List of directories to be searched when locating modules for
-                                      Swift.
-  target.use-all-compiler-flags -- Try to use compiler flags for all modules when setting up the
-                                   Swift expression parser, not just the main executable.
-  target.experimental.swift-create-module-contexts-in-parallel -- Create the per-module Swift AST
-                                                                  contexts in parallel.
-  target.process.toolchain-mismatch-warnings -- If true, warn when stopped in code that was
-                                                compiled by a Swift compiler different from the one
-                                                embedded in LLDB.
-  symbols.swift-module-loading-mode -- The module loading mode to use when loading modules for
-                                       Swift.
-  symbols.swift-validate-typesystem -- Validate all Swift typesystem queries. Used for testing an
-                                       asserts-enabled LLDB only.
-  symbols.use-swift-clangimporter -- Reconstruct Clang module dependencies from headers when
-                                     debugging Swift code
-  symbols.use-swift-dwarfimporter -- Reconstruct Clang module dependencies from DWARF when
-                                     debugging Swift code
-  symbols.use-swift-typeref-typesystem -- Prefer Swift Remote Mirrors over Remote AST
+# 생략...
 ```
 
 만약에 reference count을 알아내는 명령어가 기억 안 난다! 싶으면 아래처럼 하면 `refcount`을 쓰면 된다는 것을 알 수 있다.
@@ -833,9 +560,8 @@ breakpoint 명령어들 예제를 적자면
 # 간략하게 (briefly)
 (lldb) breakpoint list 1 -b
 
-# 첫번째꺼의 첫번째 symbol만 (근데 난 안 됨...)
-(lldb) breakpoint list 1 1
-(lldb) breakpoint list 1-1
+# 첫번째꺼의 첫번째 symbol만
+(lldb) breakpoint list 1.1
 
 # 특정 breakpoint만 지우기
 (lldb) breakpoint delete 1
@@ -1046,5 +772,224 @@ The process has been left at the point where it was interrupted, use "thread ret
 ```
 (lldb) expression -G x -- 10
 (int) $0 = 0x0000000a
+```
+
+# <a name="chapter-6">Chapter 6: Thread, Frame & Stepping Around</a>
+
+[Stack과 Heap](https://sklubmk.github.io/2021/11/01/0a6d4d441931/)
+
+lldb로 backtrace를 볼 수 있다.
+
+```
+(lldb) b Signals.MasterViewController.viewWillAppear(Swift.Bool) -> ()
+Breakpoint 2: where = Signals`Signals.MasterViewController.viewWillAppear(Swift.Bool) -> () at MasterViewController.swift:53, address = 0x0000000104c0ad44
+(lldb) c
+Process 19367 resuming
+
+# breakpoint가 걸리면
+
+# backtrace 보기
+(lldb) thread backtrace
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 2.1
+  * frame #0: 0x0000000104c0ad44 Signals`MasterViewController.viewWillAppear(animated=false, self=0x0000000000000000) at MasterViewController.swift:53
+    frame #1: 0x0000000104c0b27c Signals`@objc MasterViewController.viewWillAppear(_:) at <compiler-generated>:0
+    frame #2: 0x0000000184631720 UIKitCore`-[UIViewController _setViewAppearState:isAnimating:] + 604
+
+# 현재 frame 정보
+(lldb) frame info
+frame #0: 0x0000000104c0ad44 Signals`MasterViewController.viewWillAppear(animated=false, self=0x0000000000000000) at MasterViewController.swift:53
+
+# Thread 목록 보기
+(lldb) thread list
+Process 19367 stopped
+* thread #1: tid = 0x72601, 0x0000000104c0ad44 Signals`MasterViewController.viewWillAppear(animated=false, self=0x0000000000000000) at MasterViewController.swift:53, queue = 'com.apple.main-thread', stop reason = breakpoint 2.1
+  thread #2: tid = 0x726ad, 0x00000001cba33ce4 libsystem_kernel.dylib`__workq_kernreturn + 8
+  thread #3: tid = 0x726ae, 0x00000001cba888fc libsystem_pthread.dylib`start_wqthread
+
+# Thread 변경
+(lldb) thread select 7
+(lldb) thread backtrace
+* thread #7, queue = 'com.apple.UIKit.KeyboardManagement'
+  * frame #0: 0x00000001cba33dd4 libsystem_kernel.dylib`__ulock_wait + 8
+    frame #1: 0x0000000104ff25fc libdispatch.dylib`_dlock_wait + 52
+    frame #2: 0x0000000104ff23ac libdispatch.dylib`_dispatch_thread_event_wait_slow + 52
+
+# frame 변경
+(lldb) frame select 10
+frame #10: 0x00000001809258d8 Foundation`__88-[NSXPCConnection _sendInvocation:orArguments:count:methodSignature:selector:withProxy:]_block_invoke_3 + 208
+Foundation`__88-[NSXPCConnection _sendInvocation:orArguments:count:methodSignature:selector:withProxy:]_block_invoke_3:
+->  0x1809258d8 <+208>: b      0x180925c38               ; <+1072>
+    0x1809258dc <+212>: adrp   x8, 385088
+    0x1809258e0 <+216>: ldr    x8, [x8, #0xf50]
+    0x1809258e4 <+220>: cmp    x21, x8
+    0x1809258e8 <+224>: b.eq   0x1809259dc               ; <+468>
+    0x1809258ec <+228>: adrp   x8, 385088
+    0x1809258f0 <+232>: ldr    x8, [x8, #0xf58]
+    0x1809258f4 <+236>: cmp    x21, x8
+(lldb) frame info
+frame #10: 0x00000001809258d8 Foundation`__88-[NSXPCConnection _sendInvocation:orArguments:count:methodSignature:selector:withProxy:]_block_invoke_3 + 208
+```
+
+step은 아래처럼 할 수 있다.
+
+```
+# 둘이 같은듯? 코드를 step 할 수 있음
+(lldb) next
+(lldb) step -a 1
+
+# 얘는 Assembly를 step
+(lldb) step
+(lldb) step -a 0
+
+# Assembly step을 끝냄 (코드 step으로 돌아가는거임)
+(lldb) finish
+```
+
+현재 frame에 존재하는 변수들 알아볼 수 있다. Xcode에서 뜨는거랑 같은 원리.
+
+```
+(lldb) frame variable
+(Bool) animated = false
+(Signals.MasterViewController) self = 0x0000000137d27740 {
+  UIKit.UITableViewController = {
+    baseUIViewController@0 = {
+      baseUIResponder@0 = {
+        baseNSObject@0 = {
+          isa = Signals.MasterViewController
+        }
+      }
+# 생략...
+
+# Flat하게 보기
+(lldb) frame variable -F
+animated._value = 0
+self = 0x0000000137d27740
+self =
+self.isa = Signals.MasterViewController
+self._overrideTransitioningDelegate = 0x0000000000000000
+self._view = some
+# 생략...
+
+# 특정 이름만 보기
+(lldb) frame variable -F animated
+animated._value = 0
+
+(lldb) frame variable -F self
+self = 0x0000000137d27740
+self =
+self.isa = Signals.MasterViewController
+self._overrideTransitioningDelegate = 0x0000000000000000
+self._view = some
+self._view.some = 0x0000000140851400
+self._view.some.isa = UITableView
+# 생략...
+```
+
+# <a name="chapter-7">Chapter 7: Image</a>
+
+현재 load된 Image 목록을 아래처럼 알아낼 수 있다.
+
+```
+(lldb) image list
+[  0] 73AB11C0-1DF9-3381-87D6-C9CF673C054C 0x0000000104c08000 /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-akjtdbeivvcitldylztlxnerzrbj/Build/Products/Debug-iphonesimulator/Signals.app/Signals 
+[  1] F82A5CF7-0669-37E6-949A-963C97AA692C 0x0000000104f38000 /usr/lib/dyld 
+[  2] 6E6188A1-7B04-3AE8-BE81-CB35B05B8358 0x0000000104e50000 /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/lib/dyld_sim 
+# 생략...
+
+(lldb) image list Foundation
+[  0] C5E56BF5-55BE-3ABB-947C-CDC542A7B3B5 0x00000001806fd000 /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/Foundation.framework/Foundation 
+```
+
+모든 symbol을 dump 뜰 수도 있다.
+
+```
+(lldb) image dump symtab UIKitCore -s address
+Symtab, file = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore, num_symbols = 167998 (sorted by address):
+               Debug symbol
+               |Synthetic symbol
+               ||Externally Visible
+               |||
+Index   UserID DSX Type            File Address/Value Load Address       Size               Flags      Name
+------- ------ --- --------------- ------------------ ------------------ ------------------ ---------- ----------------------------------
+[    0]      0     Code            0x0000000000003234 0x0000000184171234 0x0000000000000168 0x000e0000 -[UIColorWell _commonInit]
+[    1]      1     Code            0x000000000000339c 0x000000018417139c 0x0000000000000058 0x000e0000 -[UIColorWell initWithFrame:]
+
+# 생략...
+```
+
+symbol을 검색할 수도 있다.
+
+```
+(lldb) image lookup -n "-[UIViewController viewDidLoad]"
+1 match found in /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore:
+        Address: UIKitCore[0x00000000004bd8d0] (UIKitCore.__TEXT.__text + 4957852)
+        Summary: UIKitCore`-[UIViewController viewDidLoad]
+
+(lldb) image lookup -rn '\[UIViewController\ '
+843 matches found in /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore:
+        Address: UIKitCore[0x00000000004b16c8] (UIKitCore.__TEXT.__text + 4908180)
+        Summary: UIKitCore`-[UIViewController _presentationControllerClassName]        Address: UIKitCore[0x00000000004b16e8] (UIKitCore.__TEXT.__text + 4908212)
+        Summary: UIKitCore`-[UIViewController navigationInsetAdjustment]        Address: UIKitCore[0x00000000004b1734] (UIKitCore.__TEXT.__text + 4908288)
+# 생략...
+```
+
+Type의 정보를 알아낼 수도 있다.
+
+```
+# C 구조체
+(lldb) image lookup -t sigaction
+Best match found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-akjtdbeivvcitldylztlxnerzrbj/Build/Products/Debug-iphonesimulator/Signals.app/Signals:
+id = {0x000057ee}, name = "sigaction", byte-size = 16, decl = signal.h:286, compiler_type = "struct sigaction {
+    __sigaction_u __sigaction_u;
+    sigset_t sa_mask;
+    int sa_flags;
+}"
+
+(lldb) image lookup -t NSObject
+Best match found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-akjtdbeivvcitldylztlxnerzrbj/Build/Products/Debug-iphonesimulator/Signals.app/Signals:
+id = {0x000002b8}, name = "NSObject", byte-size = 8, decl = NSObject.h:53, compiler_type = "@interface NSObject{
+    Class isa;
+}
+@end"
+```
+
+또한 `NSObject(IvarDescription)` Category에는 재밌는 것들이 있는데,
+
+```
+(lldb) image lookup -rn NSObject\(IvarDescription\)
+7 matches found in /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore:
+        Address: UIKitCore[0x0000000001002368] (UIKitCore.__TEXT.__text + 16773428)
+        Summary: UIKitCore`-[NSObject(IvarDescription) __ivarDescriptionForClass:]        Address: UIKitCore[0x000000000100251c] (UIKitCore.__TEXT.__text + 16773864)
+        Summary: UIKitCore`-[NSObject(IvarDescription) _ivarDescription]        Address: UIKitCore[0x000000000100262c] (UIKitCore.__TEXT.__text + 16774136)
+        Summary: UIKitCore`-[NSObject(IvarDescription) __propertyDescriptionForClass:]        Address: UIKitCore[0x0000000001002ab0] (UIKitCore.__TEXT.__text + 16775292)
+        Summary: UIKitCore`-[NSObject(IvarDescription) _propertyDescription]        Address: UIKitCore[0x0000000001002ba8] (UIKitCore.__TEXT.__text + 16775540)
+        Summary: UIKitCore`-[NSObject(IvarDescription) __methodDescriptionForClass:]        Address: UIKitCore[0x0000000001003088] (UIKitCore.__TEXT.__text + 16776788)
+        Summary: UIKitCore`-[NSObject(IvarDescription) _methodDescription]        Address: UIKitCore[0x0000000001003180] (UIKitCore.__TEXT.__text + 16777036)
+        Summary: UIKitCore`-[NSObject(IvarDescription) _shortMethodDescription]
+```
+
+요약하면 `_ivarDescription`으로 ivar들을 볼 수 있다. 예를 들어 `UIApplication` 같은 경우
+
+```
+(lldb) po [[UIApplication sharedApplication] _ivarDescription]
+<UIApplication: 0x15e504610>:
+in UIApplication:
+	_delegate (<UIApplicationDelegate>*): <Signals.AppDelegate: 0x600002d610a0>
+	_remoteControlEventObservers (long): 0
+	_topLevelNibObjects (NSArray*): nil
+	_networkResourcesCurrentlyLoadingCount (long): 0
+	_hideNetworkActivityIndicatorTimer (NSTimer*): nil
+	_editAlertController (UIAlertController*): nil
+	_statusBar (UIStatusBar*): nil
+	_statusBarRequestedStyle (long): 0
+	_statusBarWindow (UIStatusBarWindow*): nil
+# 생략
+```
+
+이런 재밌는 정보들이 나온다. `UIStatusBar`는 iOS 13 이후로 `UIScene`의 등장에 따라 사라진 것 같다.
+
+```
+(lldb) po [UIApplication sharedApplication]->_statusBar
+ nil
 ```
 
