@@ -14,6 +14,12 @@
 
 - [Chapter 7: Image](#chapter-7)
 
+- [Chapter 8: Watchpoints](#chapter-8)
+
+- [Chapter 9: Persisting and Customizing Commands](#chapter-9)
+
+- [Chapter 10: Regex Commands](#chapter-10)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -50,9 +56,9 @@ AppKit`-[NSView hitTest:]:
 Target 0: (Xcode) stopped.
 ```
 
-현재 멈춘 곳의 정보를 알기 위해서는 `po $rdi`라고 입력하면 된다던데... 이건 `x86_64` 기준 register이다. (`rdi`, `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`, ..., `r15`)
+현재 멈춘 곳의 정보를 알기 위해서는 `po $rdi`라고 입력하면 된다던데... 이건 `x86_64` 기준 register이다. (`rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`, ..., `r15`)
 
-Apple Silicon 맥을 쓰는 유저라면 `arm64`이므로 register는 `x1`, `x2`, `x3`, ..., `x30`이 된다.
+Apple Silicon 맥을 쓰는 유저라면 `arm64`이므로 register는 `x0`, `x1`, `x2`, `x3`, ..., `x30`이 된다.
 
 ```
 (lldb) po $rd1
@@ -993,3 +999,280 @@ in UIApplication:
  nil
 ```
 
+# <a name="chapter-8">Chapter 8: Watchpoints</a>
+
+breakpoint의 경우 Stack 영역만 관찰이 가능하고 Heap 영역의 변화는 감지할 수 없다. 예를 들어 특정 포인터의 값을 변경하는 것을 관찰하고 싶다면, setter/getter가 존재하지 않을 경우 (ivar에 직접 접근하는 경우) 관찰이 불가능하다. 이런 경우 watchpoint를 써야 한다.
+
+아래처럼 `shouldEnableSignalHandling`라는 property가 있다고 하자. ivar는 `_shouldEnableSignalHandling`로 된다.
+
+```objc
+@interface UnixSignalHandler : NSObject
+@property (nonatomic) BOOL shouldEnableSignalHandling;
+@end
+```
+
+`UnixSignalHandler`의 메모리가 할당될 경우, 시작 포인터 주소로부터 offset을 더하면 `_shouldEnableSignalHandling`의 포인터 주소가 나온다. 이 offset을 구하기 위해 dump를 해준다. (가끔 명령어 실행해도 안 뜰 때가 있는듯? 로드가 덜 되어서 그런가)
+
+```
+(lldb) language objc class-table dump UnixSignalHandler -v
+isa = 0x1006145d8 name = UnixSignalHandler instance size = 56 num ivars = 4 superclass = NSObject
+  ivar name = source type = id size = 8 offset = 24
+  ivar name = _shouldEnableSignalHandling type = bool size = 1 offset = 32
+```
+
+`_shouldEnableSignalHandling`의 경우 사이즈가 1 byte, **offset은 32**인 것을 알 수 있다. 만약 `UnixSignalHandler`의 포인터 값이 `0x6000017b9ac0`일 경우,
+
+```
+(lldb) po 0x6000017b9ac0
+<UnixSignalHandler: 0x6000017b9ac0>
+
+(lldb) p/x 0x6000017b9ac0 + 32
+(long) $1 = 0x00006000017b9ae0
+
+(lldb) watchpoint set expression -s 1 -w write -- 0x00006000017b9ae0
+Watchpoint created: Watchpoint 1: addr = 0x6000017b9ae0 size = 1 state = enabled type = w
+    new value: 0
+```
+
+이런 식으로 `_shouldEnableSignalHandling`에 watchpoint를 정의할 수 있다. `-s`는 size를 정의할 수 있으며 위에서 사이즈는 1인 것을 알 수 있었다. 실제로 아래 코드에서 자동으로 pause가 걸리는 것을 확인할 수 있다.
+
+```objc
+- (void)setShouldEnableSignalHandling:(BOOL)shouldEnableSignalHandling {
+  self->_shouldEnableSignalHandling = shouldEnableSignalHandling;
+  // 생략
+}
+```
+
+정확히 어떤 부분이 watchpoint에 걸렸는지 보고 싶을 경우, disassemble을 해보면
+
+```
+(lldb) disassemble -m
+
+# 생략
+
+** 146 	  self->_shouldEnableSignalHandling = shouldEnableSignalHandling;
+   147 	  sigset_t signals;
+
+    0x10060a9b0 <+32>:  ldrb   w8, [sp, #0xf]
+    0x10060a9b4 <+36>:  ldur   x9, [x29, #-0x8]
+    0x10060a9b8 <+40>:  and    w8, w8, w10
+    0x10060a9bc <+44>:  strb   w8, [x9, #0x20]
+->  0x10060a9c0 <+48>:  mov    w8, #-0x1
+
+# 생략
+```
+
+이런 식으로 끈다. `strb`을 보면 `x9`랑 `0x20`을 더한 값을 `w8`에 할당하고, `w8`에 `-0x1`을 할당하는 것을 확인할 수 있다. 이를 검증하기 위해 `x9`랑 `0x20`의 값을 보면
+
+```
+(lldb) po $x9
+<UnixSignalHandler: 0x6000017b9ac0>
+
+(lldb) p/d 0x20
+(int) $6 = 32
+```
+
+이렇게 예상이 맞는걸 볼 수 있다.
+
+아래 명령어로 현재 설정된 watchpoint들을 볼 수 있다.
+
+```
+(lldb) watchpoint list
+Number of supported hardware watchpoints: 4
+Current watchpoints:
+Watchpoint 2: addr = 0x6000017b9ae0 size = 1 state = enabled type = w
+    new value: 0
+
+# 짧게 (brief)
+(lldb) watchpoint list -b
+Number of supported hardware watchpoints: 4
+Current watchpoints:
+Watchpoint 2: addr = 0x6000017b9ae0 size = 1 state = enabled type = w
+```
+
+수정할 수도 있다.
+
+```
+# condition을 설정
+(lldb) watchpoint modify 2 -c '*(BOOL*)0x6000017b9ae0 == 0'
+1 watchpoints modified.
+
+# 명령어 추가 - backtrace (bt) 보기
+(lldb) watchpoint command add 2
+Enter your debugger command(s).  Type 'DONE' to end.
+> bt 5
+> continue
+> DONE
+
+# condition을 비롯한 모든 arguments 제거
+(lldb) watchpoint modify 2
+1 watchpoints modified.
+
+# 명령어만 제거
+(lldb) watchpoint command delete 2
+```
+
+또한 아래 명령어로 watchpoint를 모두 지울 수 있다.
+
+```
+# 모두 삭제
+(lldb) watchpoint delete
+About to delete all watchpoints, do you want to do that?: [Y/n] y
+All watchpoints removed. (1 watchpoints)
+```
+
+참고로 Xcode에서 GUI로 watchpoint 설정을 편하게 할 수 있긴 하다.
+
+![](1.png)
+
+# <a name="chapter-9">Chapter 9: Persisting and Customizing Commands</a>
+
+`~/lldbinit` 파일을 통해 `lldb`가 실행될 떄 명령어를 실행시키도록 할 수 있는데, 이를 통해 커스텀 명령어 설정이 가능하다. 예를 들어 아래 명령어를 등록하면
+
+```
+command alias Yay_Autolayout expression -l objc -O -- [[[[[UIApplication sharedApplication] keyWindow] rootViewController] view] recursiveDescription]
+```
+
+`Yay_Autolayout` 명령어를 실행하면 `recursiveDescription`를 볼 수 있다.
+
+```
+(lldb) Yay_Autolayout
+<_UISplitViewControllerPanelImplView: 0x13fe065d0; frame = (0 0; 428 926); autoresize = W+H; gestureRecognizers = <NSArray: 0x600003178090>; layer = <CALayer: 0x600003fa6f40>>
+   | <_UIPanelControllerContentView: 0x13fe0bf10; frame = (0 0; 428 926); autoresize = W+H; layer = <CALayer: 0x600003fa6d00>>
+# 생략
+```
+
+`help`를 보면
+
+```
+(lldb) help Yay_Autolayout
+Evaluate an expression on the current thread.  Displays any returned value with
+LLDB's default formatting.  Expects 'raw' input (see 'help raw-input'.)
+
+Syntax: Yay_Autolayout <cmd-options> -- <expr>
+
+Command Options Usage:
+  Yay_Autolayout [-AFLORTgp] [-f <format>] [-G <gdb-format>] [-a <boolean>] [-j <boolean>] [-X <source-language>] [-v[<description-verbosity>]] [-i <boolean>] [-l <source-language>] [-t <unsigned-integer>] [-u <boolean>] [-d <none>] [-S <boolean>] [-D <count>] [-P <count>] [-Y[<count>]] [-V <boolean>] [-Z <count>] -- <expr>
+
+# 생략
+```
+
+이렇게 기본적으로 설정된 도움말 문구들이 보이는데... `-H`를 통해 문구를 지정할 수 있다.
+
+```
+command alias -H "Yay_Autolayout will get the root view and recursively dump all the subviews and their frames" -h "Recursively dump views" -- Yay_Autolayout expression -l objc -O -- [[[[[UIApplication sharedApplication] keyWindow] rootViewController] view] recursiveDescription]
+```
+
+이러면 기본 문구 + 커스텀 문구를 볼 수 있다.
+
+```
+(lldb) help Yay_Autolayout
+Evaluate an expression on the current thread.  Displays any returned value with
+LLDB's default formatting.  Expects 'raw' input (see 'help raw-input'.)
+
+Syntax: Yay_Autolayout <cmd-options> -- <expr>
+
+Command Options Usage:
+  Yay_Autolayout [-AFLORTgp] [-f <format>] [-G <gdb-format>] [-a <boolean>] [-j <boolean>] [-X <source-language>] [-v[<description-verbosity>]] [-i <boolean>] [-l <source-language>] [-t <unsigned-integer>] [-u <boolean>] [-d <none>] [-S <boolean>] [-D <count>] [-P <count>] [-Y[<count>]] [-V <boolean>] [-Z <count>] -- <expr>
+
+# 생략
+
+Yay_Autolayout will get the root view and recursively dump all the subviews and
+their frames
+
+# 생략
+```
+
+argument를 받을 수 있는 커스텀 명령어를 만들 경우, 아래처럼 할 수 있다.
+
+```
+command alias _cpo expression -l objc -O --
+```
+
+이를 실험해보기 위해 `viewDidLoad`에서 breakpoint를 설정하고 아래처럼 해보면 된다.
+
+```
+(lldb) po self
+<Signals.MasterViewController: 0x125e0f320>
+
+(lldb) _cpo 0x125e0f320
+<Signals.MasterViewController: 0x125e0f320>
+```
+
+# <a name="chapter-10">Chapter 10: Regex Commands</a>
+
+Chapter 9에서 `alias`를 통해 커스텀 명령어를 하는 법을 익혔지만 한계점이 있어서 정규식을 써야 할 때가 있다. 아래와 같은 구조다.
+
+```
+s/<regex>/<subst>/
+```
+
+만약에 모든 조건을 다 받아 들일 수 있는 명령어를 만들고 싶을 경우, `(.+)`로 쓰면 된다.
+
+```
+(lldb) command regex rlook 's/(.+)/image lookup -rn %1/'
+```
+
+그러면 위에서 생성한 `rlook` 명령어를 아래처럼 쓸 수 있다.
+
+```
+(lldb) rlook viewDidLoad
+6 matches found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Signals-gjiobvqhhrhmpabmuvxjbklzgovn/Build/Products/Debug-iphonesimulator/Signals.app/Signals:
+        Address: Signals[0x0000000100002558] (Signals.__TEXT.__text + 736)
+        Summary: Signals`Signals.MasterViewController.viewDidLoad() -> () at MasterViewController.swift:37        Address: Signals[0x0000000100002d08] (Signals.__TEXT.__text + 2704)
+
+# 생략
+```
+
+좀 더 응용하면 아래처럼도 할 수 있다.
+
+```
+(lldb) command regex -- tv 's/(.+)/expression -l objc -O -- @import QuartzCore; [%1 setHidden:!(BOOL)[%1 isHidden]]; (void)[CATransaction flush];/'
+(lldb) tv [[[UIApp keyWindow] rootViewController] view]
+```
+
+특정 조건일 경우에만 발동시키고 싶으면 `<regex>` 부분을 고치면 된다. 아래는 1) 0~9까지의 숫자가 들어 오거나, 2) $로 시작하거나 3) @로 시작하거나 4) [로 시작할 때의 조건이다.
+
+```
+(lldb) command regex getcls 's/(([0-9]|\$|\@|\[).*)/cpo [%1 class]/'
+(lldb) getcls @""
+__NSCFConstantString
+
+(lldb) getcls @[]
+__NSArray0
+
+(lldb) getcls @[@""]
+__NSSingleObjectArrayI
+
+(lldb) getcls @[@"", @3]
+__NSArrayI
+
+(lldb) getcls [UIDevice currentDevice]
+UIDevice
+```
+
+하지만 `getcls self`를 치면 위 조건에 부합하지 않아서 에러가 뜬다.
+
+```
+(lldb) getcls self
+error: getcls
+```
+
+이럴 경우 조건에 따라 명령어를 다르게 실행시키는 것이 가능하다.
+
+```
+(lldb) command regex getcls 's/(([0-9]|\$|\@|\[).*)/cpo [%1 class]/' 's/(.+)/expression -l swift -O -- type(of: %1)/'
+
+(lldb) getcls self
+Signals.MasterViewController
+
+(lldb) getcls self .title
+Swift.Optional<Swift.String>
+```
+
+여러가지 argument를 받을 수 있게 할 수도 있다.
+
+```
+(lldb) command regex swiftpersel 's/(.+)\s+(\w+)/expression -l swift -O -- %1.perform(NSSelectorFromString("%2"))/'
+(lldb) swiftpersel UIApplication.shared statusBar
+```
