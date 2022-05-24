@@ -20,6 +20,10 @@
 
 - [Chapter 10: Regex Commands](#chapter-10)
 
+- [Chapter 11: Assembly Register Calling Convention](#chapter-11)
+
+- [Chapter 12: Assembly & Memory](#chapter-12)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -1127,7 +1131,7 @@ All watchpoints removed. (1 watchpoints)
 
 # <a name="chapter-9">Chapter 9: Persisting and Customizing Commands</a>
 
-`~/lldbinit` 파일을 통해 `lldb`가 실행될 떄 명령어를 실행시키도록 할 수 있는데, 이를 통해 커스텀 명령어 설정이 가능하다. 예를 들어 아래 명령어를 등록하면
+`~/.lldbinit` 파일을 통해 `lldb`가 실행될 떄 명령어를 실행시키도록 할 수 있는데, 이를 통해 커스텀 명령어 설정이 가능하다. 예를 들어 아래 명령어를 등록하면
 
 ```
 command alias Yay_Autolayout expression -l objc -O -- [[[[[UIApplication sharedApplication] keyWindow] rootViewController] view] recursiveDescription]
@@ -1276,3 +1280,480 @@ Swift.Optional<Swift.String>
 (lldb) command regex swiftpersel 's/(.+)\s+(\w+)/expression -l swift -O -- %1.perform(NSSelectorFromString("%2"))/'
 (lldb) swiftpersel UIApplication.shared statusBar
 ```
+
+# <a name="chapter-11">Chapter 11: Assembly Register Calling Convention</a>
+
+```asm
+pushq   %rbx
+subq    $0x228, %rsp
+movq    %rdi, %rbx
+```
+
+이런 식으로 x86_64 Assembly 코드가 있을 경우 `pushq`, `mov` 같은 것들은 **opcode**라고 부르며, `rbx`, `rsp` 같은 것은 **registers**라고 부른다. `%`나 `$` 기호가 있을 경우 AT&T 포맷이며 없을 경우 Intel 포맷이라 한다. 이는 Rosetta 환경에서 확
+인이 가능하다.
+
+```
+(lldb) disassemble -m -F att
+
+** 55  	  override func viewDidLoad() {
+
+Registers`ViewController.viewDidLoad():
+    0x104a964c0 <+0>:   pushq  %rbp
+    0x104a964c1 <+1>:   movq   %rsp, %rbp
+    0x104a964c4 <+4>:   pushq  %r13
+    0x104a964c6 <+6>:   subq   $0x88, %rsp
+
+
+(lldb) disassemble -m -F intel
+
+** 55  	  override func viewDidLoad() {
+
+Registers`ViewController.viewDidLoad():
+    0x104a964c0 <+0>:   push   rbp
+    0x104a964c1 <+1>:   mov    rbp, rsp
+    0x104a964c4 <+4>:   push   r13
+    0x104a964c6 <+6>:   sub    rsp, 0x88
+```
+
+이제 registers에 대해 알아보자면, 아래 Objective-C 코드의 경우
+
+```objc
+@implementation ViewController
+
+- (void)logWithName:(NSString *)name old:(int)old location:(NSString *)location {
+    NSLog(@"Hello world, I am %@. I'm %d, and I live in %@.", name, old, location);
+}
+
+@end
+```
+
+```objc
+NSString *name = @"Zoltan";
+[self logWithName:name old:30 location:@"my father's basement"];
+```
+
+arm64 registers는 아래처럼 된다.
+
+```
+(lldb) register read
+General Purpose Registers:
+        x0 = 0x0000600003bb8c00
+        x1 = 0x0000000102153360  "logWithName:old:location:"
+        x2 = 0x0000000102154040  @"Zoltan"
+        x3 = 0x000000000000001e
+        x4 = 0x0000000102154060  @"my father's basement"
+# 생략
+
+(lldb) po $x0
+<ViewController: 0x600003bb8c00>
+
+(lldb) p/d $x3
+(unsigned long) $1 = 30
+```
+
+Objective-C에서 registers에 대해 알아 보자면, 아래와 같은 호출이 있다고 하면
+
+```objc
+[NSApplication sharedApplication];
+
+NSString *helloWorldString = [@"Can't Sleep; " stringByAppendingString:@"Clowns will eat me"];
+```
+
+컴파일러는 아래처럼 처리한다.
+
+```
+id NSApplicationClass = [NSApplication class];
+((void (*)(id, SEL))objc_msgSend)(NSApplicationClass, @selector(sharedApplication));
+
+NSString *helloWorldString2;
+helloWorldString2 = ((NSString * (*)(NSString *, SEL, NSString *))objc_msgSend)(@"Can't sleep; ", @selector(stringByAppendingString:), @"Clowns will eat me");
+```
+
+  [`objc_msgSend()`](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)를 써보고 싶으면 `#import <objc/message.h>`를 하면 된다. 또한 type casting을 해줘야 하는 이유는 [여기](https://www.mikeash.com/pyblog/objc_msgsends-new-prototype.html)에 설명되어 있다.
+
+이제 parameters들이 registers에 어떻게 작동하는지 보면
+
+```swift
+func executeLotsOfArguments(one: Int, two: Int, three: Int, four: Int, five: Int, six: Int, seven: Int, eight: Int, nine: Int, ten: Int, eleven: Int) -> Int {
+  print("arguments are: \(one), \(two), \(three), \(four), \(five), \(six), \(seven), \(eight), \(nine), \(ten), \(eleven)")
+  return 100
+}
+
+_ = executeLotsOfArguments(one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11)
+```
+
+x86_64의 경우 `RDI`, `RSI`, `RDX`, `RCX`, `R8`, `R9` 순서인 것을 볼 수 있다. 6개가 넘어가는 나머지 parameter는 다음 Stack으로 넘어 간다고 한다.
+
+```
+(lldb) register read -f d
+General Purpose Registers:
+       rax = 4301950400  MyApp2`MyApp2.ViewController.executeLotsOfArguments(one: Swift.Int, two: Swift.Int, three: Swift.Int, four: Swift.Int, five: Swift.Int, six: Swift.Int, seven: Swift.Int, eight: Swift.Int, nine: Swift.Int, ten: Swift.Int, eleven: Swift.Int) -> Swift.Int at ViewController.swift:27
+       rbx = 105553143088512
+       rcx = 4
+       rdx = 3
+       rdi = 1
+       rsi = 2
+       rbp = 12968306944
+       rsp = 12968306728
+        r8 = 5
+        r9 = 6
+       r10 = 2043
+       r11 = 101
+       r12 = 140703316248320  libobjc.A.dylib`objc_msgSend
+       r13 = 105553143088512
+       r14 = 104
+       r15 = 140703316248320  libobjc.A.dylib`objc_msgSend
+       rip = 4301950400  MyApp2`MyApp2.ViewController.executeLotsOfArguments(one: Swift.Int, two: Swift.Int, three: Swift.Int, four: Swift.Int, five: Swift.Int, six: Swift.Int, seven: Swift.Int, eight: Swift.Int, nine: Swift.Int, ten: Swift.Int, eleven: Swift.Int) -> Swift.Int at ViewController.swift:27
+    rflags = 514
+        cs = 43
+        fs = 0
+        gs = 0
+```
+
+arm64의 경우 `x0`, `x1`, `x2`, `x3`, `x4`, `x5`, `x6`, `x7`, `x9`이며, 총 9개 까지만 하나의 Stack에 받을 수 있다. 특이한 점은 마지막 `x9`은 마지막 parameter라는 것이다.
+
+```
+2022-05-21 20:46:00.258362+0900 MyApp2[3130:93721] Hello world, I am Zoltan. I'm 30, and I lve in my fathers' basement.
+(lldb) register read -f d
+General Purpose Registers:
+        x0 = 1
+        x1 = 2
+        x2 = 3
+        x3 = 4
+        x4 = 5
+        x5 = 6
+        x6 = 7
+        x7 = 8
+        x8 = 4334657492  MyApp2`MyApp2.ViewController.executeLotsOfArguments(one: Swift.Int, two: Swift.Int, three: Swift.Int, four: Swift.Int, five: Swift.Int, six: Swift.Int, seven: Swift.Int, eight: Swift.Int, nine: Swift.Int, ten: Swift.Int, eleven: Swift.Int) -> Swift.Int at ViewController.swift:27
+        x9 = 11
+       x10 = 6132230160
+       x11 = 2045
+       x12 = 36
+       x13 = 3171026983
+       x14 = 3173126144
+       x15 = 66
+       x16 = 6729930300  libswiftCore.dylib`swift_bridgeObjectRelease
+       x17 = 1025507328
+       x18 = 0
+       x19 = 105553177138944
+       x20 = 105553177138944
+       x21 = 7744348115  
+       x22 = 105553156183536
+       x23 = 105553166615104
+       x24 = 7986454528  (void *)0x00000001dc0780b8: NSNumber
+       x25 = 7999535768  @"contentViewController"
+       x26 = 7744345436  
+       x27 = 7744347429  
+       x28 = 7744351469  
+        fp = 6132230368
+        lr = 4334655412  MyApp2`MyApp2.ViewController.viewDidLoad() -> () + 584 at ViewController.swift:18:13
+        sp = 6132230160
+        pc = 4334657492  MyApp2`MyApp2.ViewController.executeLotsOfArguments(one: Swift.Int, two: Swift.Int, three: Swift.Int, four: Swift.Int, five: Swift.Int, six: Swift.Int, seven: Swift.Int, eight: Swift.Int, nine: Swift.Int, ten: Swift.Int, eleven: Swift.Int) -> Swift.Int at ViewController.swift:27
+      cpsr = 1610616832
+```
+
+만약에 `func executeLotsOfArguments(one:two:three:four:five:six:seven:eight:nine:ten:eleven:)`의 return 값을 알고 싶을 경우, `func`에서 breakpoint를 걸고
+
+```
+(lldb) finish
+arguments are: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+
+# arm64
+(lldb) register read
+General Purpose Registers:
+        x0 = 0x0000000000000064
+# 생략
+(lldb) register read x0 -fd
+      x0 = 100
+
+# x86_64
+(lldb) register read
+General Purpose Registers:
+       rax = 0x0000000000000064
+# 생략
+(lldb) register read rax -fd
+     rax = 100
+```
+
+이렇게 `x0` 또는 `rax`에 return 값이 있는 것을 알 수 있다.
+
+이렇게 배운 register로 SpringBoard에 장난을 치자면, 우선 아래 명령어로 Simulator의 UUID를 가져온다.
+
+```
+% xcrun simctl list
+-- iOS 15.5 --
+    iPhone 13 Pro Max (98093B34-CB15-492E-8553-0BBCCEB8BF6C) (Shutdown)
+
+% open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app --args -CurrentDeviceUDID 98093B34-CB15-492E-8553-0BBCCEB8BF6C
+
+% lldb -n SpringBoard
+(lldb) process attach --name "SpringBoard"
+```
+
+이러면 원하는 Simulator를 실행할 수 있고, SpringBoard에 attach 할 수 있다. 그리고 아래 string을 할당해주고 주소를 가져온다. autoreleasepool은 존재하지 않을 것이기에, 메모리는 계속 살아 있을 것이다.
+
+```
+(lldb) p/x @"Yay! Debugging!"
+(__NSCFString *) $0 = 0x00006000010a57a0 @"Yay! Debugging!"
+```
+
+그리고 모든 `UILabel`의 글자를 방금 만든 string 값으로 대체해준다. arm64는 `x2`, x86_64는 `rdx`가 되어야 한다.
+
+```
+(lldb) breakpoint set -n "-[UILabel setText:]" -C "po $x2 = 0x00006000010a57a0" -G1
+Breakpoint 1 where = UIKitCore`-[UILabel setText:], address = 0x000000018523a010
+```
+
+그러면 아래처럼 잘 작동하는 것을 확인할 수 있다.
+
+![](2.png)
+
+# <a name="chapter-12">Chapter 12: Assembly & Memory</a>
+
+AT&T Assembly의 경우 대략적으로 아래 형태인데
+
+```asm
+movq  $ox78,  %rax
+```
+
+이는 각각 **opcode**, **source**, **destination**이라 할 수 있다. `0x78`이라는 hex 값을 `RAX` register에 옮긴다는 것이다.
+
+또한 `~/.lldbinit` 파일에 아래와 같은 setting들을 추가할 수 있다. prologue/epilogue에 대한 설명은 [여기](https://allblackk.tistory.com/89)에서 잘 되어 있는듯...
+
+```
+settings set target.x86-disassembly-flavor intel
+settings set target.skip-prologue false
+```
+
+이렇게 Intel로 설정한다면, 아래처럼 더 깔끔하게 보인다.
+
+```asm
+mov rax,  0x78
+```
+
+아래를 등록하면 `cpx` 명령어도 만들 수 있다. Objective-C context에서 명령을 실행하고 hex값을 받아 올 수 있다. (참고로 마지막에 띄어쓰기 있다.)
+
+```
+command alias -H "Print value in ObjC context in hexadecimal" -h "Print in hex" -- cpx expression -f x -l objc -- 
+```
+
+이제 `rip`, `pc` register에 대해 알아보자면, `NSApplicationDelegate`에 아래처럼 짜고 `aBadMethod()`에서 breakpoint를 걸어준다.
+
+```swift
+@NSApplicationMain
+class AppDelegate: NSObject, NSApplicationDelegate {
+  func applicationWillBecomeActive(_ notification: Notification) {
+    print("\(#function)")
+    self.aBadMethod()
+  }
+  
+  func aBadMethod() {
+    print("\(#function)")
+  }
+  
+  func aGoodMethod() {
+    print("\(#function)")
+  }
+}
+```
+
+breapoint가 걸렸을 때 register들을 보면
+
+```
+# x86_64 (Rosetta)
+(lldb) register read
+General Purpose Registers:
+       rax = 0x00000001040c5610  Registers`Registers.AppDelegate.aBadMethod() -> () at AppDelegate.swift:38
+       rbx = 0x000000030c38e4f8
+       rcx = 0x00007ffffffffff8
+       rdx = 0x00000000c6a1809d
+       rdi = 0x00000000000000d4
+       rsi = 0x0000600001762700
+       rbp = 0x000000030c38e420
+       rsp = 0x000000030c38e338
+        r8 = 0x0000000000002700
+        r9 = 0x0000000000000040
+       r10 = 0x00000000000007fb
+       r11 = 0x00000000000000ff
+       r12 = 0x0000000000001400
+       r13 = 0x00006000000109e0
+       r14 = 0x0000000000000000
+       r15 = 0x0000000000000000
+       rip = 0x00000001040c5610  Registers`Registers.AppDelegate.aBadMethod() -> () at AppDelegate.swift:38
+    rflags = 0x0000000000000206
+        cs = 0x000000000000002b
+        fs = 0x0000000000000000
+        gs = 0x0000000000000000
+
+# arm64
+(lldb) register read
+General Purpose Registers:
+        x0 = 0x000000012c5070e0
+        x1 = 0x00000001cc52b43
+        x2 = 0x000000012c5070e0
+        x3 = 0x0000600000dd0d80
+        x4 = 0x0000000000000018
+        x5 = 0x00000001cc52b43e
+        x6 = 0x0000000000006690
+        x7 = 0x0000000000000002
+        x8 = 0x0300000104cc9209 (0x0000000104cc9209) (void *)0x380000000104cc95
+        x9 = 0x0100000000000000
+       x10 = 0x0000000000000000
+       x11 = 0x000000000000000f
+       x12 = 0x000000000000000e
+       x13 = 0x00006000031cc0d0
+       x14 = 0x0000000000000000
+       x15 = 0x0000000104cc9208  (void *)0x0000000104cc9538: _TtC6MyApp413SceneDelegate
+       x16 = 0x000000010503bf30  libobjc.A.dylib`objc_retain
+       x17 = 0x0000000104cc1a8c  MyApp4`@objc MyApp4.SceneDelegate.sceneWillEnterForeground(__C.UIScene) -> () at <compiler-generated>
+       x18 = 0x0000000000000000
+       x19 = 0x0000600000dd1148
+       x20 = 0x0000600000dd0d80
+       x21 = 0x00000001cc52b43e
+       x22 = 0x000000012c5070e0
+       x23 = 0x0000600000dd0d80
+       x24 = 0x000000012c5070e0
+       x25 = 0x00000001cc52c044
+       x26 = 0x00006000031e8100
+       x27 = 0x0000000000000001
+       x28 = 0x000000012c5070e0
+        fp = 0x000000016b13bc30
+        lr = 0x0000000104cc1ac0  MyApp4`@objc MyApp4.SceneDelegate.sceneWillEnterForeground(__C.UIScene) -> () + 52 at <compiler-generated>
+        sp = 0x000000016b13bc10
+        pc = 0x0000000104cc1a5c  MyApp4`MyApp4.SceneDelegate.sceneWillEnterForeground(__C.UIScene) -> () at SceneDelegate.swift:14
+      cpsr = 0x00001000
+```
+
+현재 method의 register는 `rip` 또는 `pc`에 할당된 것을 볼 수 있다.
+
+```
+# x86_64 (Rosetta)
+(lldb) cpx $rip
+(unsigned long) $0 = 0x00000001040c5610
+
+# arm64
+(lldb) cpx $pc
+(unsigned long) $0 = 0x0000000104cc1a5c
+```
+
+여기서 나는 lldb 상에서 `aBadMethod()` 대신에 `aGoodMethod()`가 불리도록 설정하고 싶어서, lldb로 `aGoodMethod`의 주소를 알아내기 위해 아래처럼 하면
+
+```
+(lldb) image lookup -vrn ^Registers.*aGoodMethod
+1 match found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Registers-adpzdnequcnjmhaupcjnjugkrbto/Build/Products/Debug/Registers.app/Contents/MacOS/Registers:
+        Address: Registers[0x0000000100008810] (Registers.__TEXT.__text + 20512)
+        Summary: Registers`Registers.AppDelegate.aGoodMethod() -> () at AppDelegate.swift:42
+         Module: file = "/Users/pookjw/Library/Developer/Xcode/DerivedData/Registers-adpzdnequcnjmhaupcjnjugkrbto/Build/Products/Debug/Registers.app/Contents/MacOS/Registers", arch = "x86_64"
+    CompileUnit: id = {0x00000000}, file = "/Users/pookjw/Downloads/dbg-materials-editions-3.0/12. Assembly & Memory/projects/starter/Registers/Registers/AppDelegate.swift", language = "swift"
+       Function: id = {0x4000000fd}, name = "Registers.AppDelegate.aGoodMethod() -> ()", mangled = "$s9Registers11AppDelegateC11aGoodMethodyyF", range = [0x00000001040c5810-0x00000001040c5a09)
+       FuncType: id = {0x4000000fd}, byte-size = 8, decl = AppDelegate.swift:42, compiler_type = "() -> ()
+"
+         Blocks: id = {0x4000000fd}, range = [0x1040c5810-0x1040c5a09)
+      LineEntry: [0x00000001040c5810-0x00000001040c582c): /Users/pookjw/Downloads/dbg-materials-editions-3.0/12. Assembly & Memory/projects/starter/Registers/Registers/AppDelegate.swift:42
+         Symbol: id = {0x00000362}, range = [0x00000001040c5810-0x00000001040c5a10), name="Registers.AppDelegate.aGoodMethod() -> ()", mangled="$s9Registers11AppDelegateC11aGoodMethodyyF"
+       Variable: id = {0x40000011a}, name = "self", type = "Registers.AppDelegate", location = DW_OP_fbreg -16, decl = AppDelegate.swift:42
+```
+
+`0x00000001040c5810`인 것을 알 수 있다. 이걸 현재 `rip` 또는 `pc`에 써주면 된다.
+
+```
+# x86_64 (Rosetta)
+(lldb) register write rip 0x00000001040c5810
+
+# arm64
+(lldb) register write pc 0x00000001040c5810
+```
+
+여기서 중요한 점은 lldb에서 `continue` 명령어를 치면 안 되고, Xcode에서 직접 버튼으로 continue를 해야 한다. 버그인듯? 암튼 그러면 `aBadMethod()`가 안 불리고 `aGoodMethod()`가 불리는 것을 확인할 수 있다.
+
+x86에서의 8비트~64비트 registers는 아래와 같다.
+
+![](3.png)
+
+그러면 아래처럼 64비트로 정의된 hex 값을 낮은 비트에서 아래처럼 볼 수 있다. 여기서 `dl`, `dh`는 `dx`를 쪼갰을 때 low와 high를 뜻한다고 한다.
+
+```
+(lldb) register write rdx 0x123456789ABCDEF
+(lldb) p/x $rdx
+(unsigned long) $0 = 0x0123456789abcdef
+(lldb) p/x $edx
+(unsigned int) $1 = 0x89abcdef
+(lldb) p/x $dx
+(unsigned short) $2 = 0xcdef
+(lldb) p/x $dl
+(unsigned char) $3 = 0xef
+(lldb) p/x $dh
+(unsigned char) $4 = 0xcd
+```
+
+이제 메모리에 대해 알아보자면, method에서 breakpoint를 찍을 경우
+
+```
+(lldb) cpx $rip
+(unsigned long) $0 = 0x000000010454f610
+```
+
+이렇게 현재 `rip`의 주소를 가져오는게 있다. 그리고 아래 명령어를 통해 memory에 로드된 assembly 코드를 볼 수 있다. `-fi`는 instruction 포맷으로 보겠다는 것이고, `-c1`은 1개만 보겠다는건데 이건 나중에 자세히 설명하겠다.
+
+```
+(lldb) memory read -fi -c1 0x000000010454f610
+->  0x10454f610: 55  push   rbp
+```
+
+이는 `disassemble` 명령어로도 볼 수 있다. `-b`가 붙으면 opcode (예시는 opcode가 `55`이다)도 같이 볼 수 있다.
+
+```
+(lldb) disassemble -b
+Registers`AppDelegate.aBadMethod():
+->  0x10454f610 <+0>:   55                       push   rbp
+```
+
+만약에 opcode만 알고 있을 경우 assembly를 알고 싶으면 아래처럼 하면 된다.
+
+```
+(lldb) expression -f i -l objc -- 0x55
+(int) $5 = 55  push   rbp
+
+# 이미 Objective-C context일 경우
+(lldb) p/i 0x55
+(int) $6 = 55  push   rbp
+```
+
+이제 다른 장난을 쳐보자면, `-c4`로 보면 더 많은 assembly 코드를 볼 수 있는데
+
+```
+(lldb) memory read -fi -c4 $rip
+->  0x7ff819137f6e: 4c 89 ef           mov    rdi, r13
+    0x7ff819137f71: 48 8b 75 d0        mov    rsi, qword ptr [rbp - 0x30]
+    0x7ff819137f75: ff 15 95 52 4d 3d  call   qword ptr [rip + 0x3d4d5295] ; (void *)0x00007ff8165a4700: objc_msgSend
+    0x7ff819137f7b: e9 6e ff ff ff     jmp    0x7ff819137eee            ; <+495>
+```
+
+`0x7ff819137f71`를 보면 `48 8b 75 d0`라는 opcode를 가지고 있다. 이 opcode로 assembly를 보려고 하면
+
+```
+# 예시처럼 아예 안 뜨거나 엉뚱한 코드가 뜬다.
+(lldb) p/i 0x488b75d0
+(int) $8 =
+
+(lldb) p/i 0xd0758b48
+(unsigned int) $9 = 48 8b 75 d0  mov    rsi, qword ptr [rbp - 0x30]
+```
+
+위처럼 배열 순서를 바꿔줘야 원하는 값이 나오는 것을 알 수 있다. 이것을 endianness라고 부른다. 이걸 `memory` 명령어에서 간단하게 해결하고 싶을 경우
+
+- `48 8b 75 d0` : 사이즈는 4이다. 즉 `-s4`를 써야 한다.
+
+- 우리는 `0x7ff819137f71`만 알고 싶은 것이므로 `-c1`만 쓴다.
+
+- `-fx`를 통해 endianness이 해결된 주소를 가져온다.
+
+```
+(lldb) memory read -s4 -c1 -fx 0x7ff819137f71
+0x7ff819137f71: 0xd0758b48
+
+(lldb) p/i 0xd0758b48
+(unsigned int) $10 = 48 8b 75 d0  mov    rsi, qword ptr [rbp - 0x30]
+```
+
+이렇게 해결된 것을 볼 수 있다.
