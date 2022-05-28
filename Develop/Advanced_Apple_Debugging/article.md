@@ -24,6 +24,8 @@
 
 - [Chapter 12: Assembly & Memory](#chapter-12)
 
+- [Chapter 13: Assembly & the Stack](#chapter-13)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -1757,3 +1759,434 @@ Registers`AppDelegate.aBadMethod():
 ```
 
 이렇게 해결된 것을 볼 수 있다.
+
+# <a name="chapter-13">Chapter 13: Assembly & the Stack</a>
+
+![](4.png)
+
+Stack은 사진처럼 높은 주소에서 낮은 주소로 내려가는 방식이며, 이 사이즈는 커널에서 유한한 값으로 크기를 정해준다. 만약 이 크기를 넘길 경우 stack overflow가 일어나게 된다.
+
+## x86_64
+
+### `RSP`와 `RBP`
+
+![](5.png)
+
+- `RSP` : Stack Pointer Register이다. 말 그대로 특정 스레드의 Stack의 주소를 나타낸다. 사진처럼 frame이 늘어날 수록 낮은 주소가 할당된다.
+
+- `RBP` : local variables나 function parameters 안에 있는 값에 접근할 때 쓰인다. Xcode에서 Variables 값을 받아 올 때 이 `RBP`에서 offset을 통해 값을 가져오는 방식이다.
+
+`RSP`와 `RBP` 값의 설정은 function prologue에서 일어난다. Xcode나 lldb 상에서 현재 frame을 바꿀 경우, `RSP`와 `RBP`의 값이 바뀌는 것을 볼 수 있다.
+
+### `push` opcode
+
+`push`는 `RSP`의 pointer 값을 낮춘다. 64비트 architecture의 경우 보통 8 bytes 만큼의 pointer 값을 낮춘다고 한다. 다시 말하자면 `RSP`는 pointer이며, `push`는 `RSP` pointer에 새로운 값을 할당해 주기도 한다. 예를 들어 `push  0x5`일 경우 pseudocode는 아래처럼 된다.
+
+```
+RSP = RSP - 0x8
+*RSP = 0x5
+```
+
+### `pop` opcode
+
+`pop`은 `push`의 반대 역할을 한다. `RSP`의 값을 가져오고 pointer 값을 올려준다. 예를 들어 `pop  rdx`일 경우 pseudocode는 아래처럼 된다.
+
+```
+RDX = *RSP // 0x5
+RSP = RSP + 0x8
+```
+
+### `call` opcode
+
+`call`은 함수 호출을 해준다. `push`를 통해 함수 호출이 끝날 경우 어디로 가야 할지 알려주는 구조다. 만약에 `0x7fffb34df410`이라는 함수가 있을 경우,
+
+```asm
+0x7fffb34de913 <+227>: call   0x7fffb34df410            
+0x7fffb34de918 <+232>: mov    edx, eax
+```
+
+여기서 `call`이 불리면 아래처럼 된다.
+
+```asm
+mov   rip, 0x7fffb34de918 // RIP = 0x7fffb34de918 -> 함수 호출이 끝날 경우 돌아 올 경로 지정
+
+// 함수 시작
+
+// Prologue
+push  rip                 // RSP = RSP - 0x8; *RSP = RIP  -> RIP의 값을 백업
+mov   rip, rsp            // RIP = RSP
+
+// 함수 내용
+/* */
+
+// Epilogue
+pop   rsp                 // RDI = *RSP; RSP = RSP + 0x8 -> 백업한 RIP 값을 되돌림
+ret                       // RDI (0x7fffb34de918)으로 이동함
+```
+
+잘 이해가 안 간다면 [이 사이트](https://godbolt.org)에서 아래처럼 코드 작성하고 **x86_64 gcc 12.1**로 설정하고 아래 코드를 입력하면
+
+```c
+int hello() { return 3; }
+
+int walk(int i) { return i + hello(); };
+```
+
+이렇게 Assembly 코드가 나온다. 여기서는 `rbp`가 `rip`과 같은 역할을 하는듯? 이걸 보면 이해가 될지도.
+
+```asm
+hello:
+        push    rbp
+        mov     rbp, rsp
+        mov     eax, 3
+        pop     rbp
+        ret
+walk:
+        push    rbp
+        mov     rbp, rsp
+        sub     rsp, 8
+        mov     DWORD PTR [rbp-4], edi
+        mov     eax, 0
+        call    hello
+        mov     edx, DWORD PTR [rbp-4]
+        add     eax, edx
+        leave
+        ret
+```
+
+`hello`를 보면 알다시피, `pop`과 `push`는 서로 상응해야 한다. 그렇지 않을 경우 `ret`이 불릴 때 엉뚱한 곳으로 가버릴 것이다.
+
+### `RBP`와 `RSP` 실습
+
+이제 위에서 배운 이론이 정말 뜻대로 작동하는지 보자. `RSP`, `RDP`, `RDI`, `RDX`의 값을 쉽게 보기 위해 아래와 같은 alias를 만들어준다.
+
+```
+(lldb) command alias dumpreg register read rsp rbp rdi rdx
+```
+
+아래처럼 생긴 코드가 있다고 가정하자.
+
+```c
+#ifndef StackWalkthrough_h
+#define StackWalkthrough_h
+
+void StackWalkthrough(int x);
+
+#endif /* StackWalkthrough_h */
+```
+
+```asm
+.globl _StackWalkthrough
+
+
+_StackWalkthrough:
+      push  %rbp
+      movq  %rsp, %rbp
+      movq  $0x0, %rdx
+      movq  %rdi, %rdx
+      push  %rdx
+      movq  $0x0, %rdx
+      pop   %rdx
+      pop   %rbp
+      ret
+```
+
+첫번째 줄부터 breakpoint를 걸어보고 `StackWalkthrough(5)`로 실행해보면
+
+```asm
+push   rbp        <- paused
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0
+pop    rdx
+pop    rbp
+ret 
+```
+
+`dumpreg`, `x/gx $rsp`, `p/x $rsp` 치면 아래처럼 된다. 참고로 `p/x`는 그 자체의 값만을 출력하는데, 만약에 pointer일 경우 `x/gx`로 통해 pointer의 값을 알려준다. C에서 `void *p`가 있을 경우 `p`를 그대로 출력할지, 아니면 `*p`를 출력할지의 차이라고 생각하면 된다. `x/gx`는 `memory read`의 alias라고 한다.
+
+```
+(lldb) dumpreg
+     rsp = 0x0000000304aa9368
+     rbp = 0x0000000304aa9390
+     rdi = 0x0000000000000005
+     rdx = 0x000000000000001c
+
+(lldb) x/gx $rsp
+0x304aa9368: 0x000000010046fefc
+
+(lldb) p/x $rsp
+(unsigned long) $1 = 0x0000000304aa9368
+```
+
+`si` (step-inst)를 실행하면 다음 instruction으로 이동하게 되는데
+
+```asm
+push   rbp
+mov    rbp, rsp <- paused
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0
+pop    rdx
+pop    rbp
+ret 
+```
+
+```
+(lldb) dumpreg
+     rsp = 0x0000000304aa9360
+     rbp = 0x0000000304aa9390
+     rdi = 0x0000000000000005
+     rdx = 0x000000000000001c
+
+(lldb) x/gx $rsp
+0x304aa9360: 0x0000000304aa9390
+```
+
+이렇게 `push rbp`가 잘 된 것을 볼 수 있다. 또 `si`를 해보면
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0 <- paused
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0
+pop    rdx
+pop    rbp
+ret 
+```
+
+```
+(lldb) p/x $rbp
+(unsigned long) $10 = 0x0000000304aa9360
+
+(lldb) p (BOOL)($rbp == $rsp)
+(BOOL) $11 = YES
+```
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi <- paused
+push   rdx
+mov    rdx, 0x0
+pop    rdx
+pop    rbp
+ret 
+```
+
+```
+(lldb) p/x $rdx
+(unsigned long) $12 = 0x0000000000000000
+```
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx      <- paused
+mov    rdx, 0x0
+pop    rdx
+pop    rbp
+ret 
+```
+
+```
+(lldb) p/x $rdx
+(unsigned long) $13 = 0x0000000000000005 // parameter에 5가 들어 왔으므로 rdi는 5이며, 이를 rdx에 할당해준 것.
+```
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0 <- paused
+pop    rdx
+pop    rbp
+ret 
+```
+
+```
+(lldb) p/x $rsp
+(unsigned long) $15 = 0x0000000304aa9358
+
+(lldb) x/gx $rsp
+0x304aa9358: 0x0000000000000005
+```
+
+여기서는 `rsp`가 0x2 만큼 감소한 것을 알 수 있고, `rsp`의 값이 `rdx`의 주소값이 된 것을 알 수 있다.
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0
+pop    rdx      <- paused
+pop    rbp
+ret 
+```
+
+```
+(lldb) dumpreg
+     rsp = 0x0000000304aa9358
+     rbp = 0x0000000304aa9360
+     rdi = 0x0000000000000005
+     rdx = 0x0000000000000000
+```
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0
+pop    rdx
+pop    rbp      <- paused
+ret
+```
+
+```
+(lldb) dumpreg
+     rsp = 0x0000000304aa9360
+     rbp = 0x0000000304aa9360
+     rdi = 0x0000000000000005
+     rdx = 0x0000000000000005
+```
+
+```asm
+push   rbp
+mov    rbp, rsp
+mov    rdx, 0x0
+mov    rdx, rdi
+push   rdx
+mov    rdx, 0x0
+pop    rdx
+pop    rbp
+ret             <- paused
+```
+
+```
+(lldb) dumpreg
+     rsp = 0x0000000304aa9368
+     rbp = 0x0000000304aa9390
+     rdi = 0x0000000000000005
+     rdx = 0x0000000000000005
+```
+
+이런 식으로 `pop`과 `push`가 상응했기 때문에 `rsp`, `rbp`가 처음 주소와 똑같은 값을 지닌 것을 알 수 있다. 또한 `rdx`에 return할 값이 있으므로, 계속 진행되는 코드에서 `rdx`를 받아서 처리할 것이다.
+
+### 여러 개의 Parameter가 들어 올 경우
+
+아래처럼 여러 개의 Parameter가 들어 오는 함수가 있다고 가정하자.
+
+```objc
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    [self executeLotsOfArgumentsWithOne:1 two:2 three:3 four:4 five:5 six:6 seven:7 eight:8 nine:9 ten:10];
+}
+
+- (NSString *)executeLotsOfArgumentsWithOne:(NSUInteger)one two:(NSUInteger)two three:(NSUInteger)three four:(NSUInteger)four five:(NSUInteger)five six:(NSUInteger)six seven:(NSUInteger)seven eight:(NSUInteger)eight nine:(NSUInteger)nine ten:(NSUInteger)ten {
+    return @"Mom, what happened to the cat?";
+}
+
+@end
+```
+
+그리고 `- (NSString *)`에 breakpoint를 걸면 아래처럼 보인다. 내가 주석넣은 부분들이 각 parameter의 위치를 말한다. 보면 6개까지는 `rbp`의 아래쪽에 할당되는데, 7개로 넘어가면 `rbp`의 위쪽(바깥쪽)에 할당된다. 아마 컴파일러가 frame의 크기를 더 크게 잡아주고, 윗부분에 공간을 만들어서 그 부분에 초과되는 parameter를 담는 것이라 추측된다.
+
+```asm
+MyApp3`-[ViewController executeLotsOfArgumentsWithOne:two:three:four:five:six:seven:eight:nine:ten:]:
+->  0x104f38170 <+0>:  push   rbp
+    0x104f38171 <+1>:  mov    rbp, rsp
+    0x104f38174 <+4>:  mov    rax, qword ptr [rbp + 0x38]   // ten
+    0x104f38178 <+8>:  mov    rax, qword ptr [rbp + 0x30]   // nine
+    0x104f3817c <+12>: mov    rax, qword ptr [rbp + 0x28]   // eight
+    0x104f38180 <+16>: mov    rax, qword ptr [rbp + 0x20]   // seven
+    0x104f38184 <+20>: mov    rax, qword ptr [rbp + 0x18]   // six
+    0x104f38188 <+24>: mov    rax, qword ptr [rbp + 0x10]   // five
+    0x104f3818c <+28>: mov    qword ptr [rbp - 0x8], rdi    // self
+    0x104f38190 <+32>: mov    qword ptr [rbp - 0x10], rsi   // Selector
+    0x104f38194 <+36>: mov    qword ptr [rbp - 0x18], rdx   // one
+    0x104f38198 <+40>: mov    qword ptr [rbp - 0x20], rcx   // two
+    0x104f3819c <+44>: mov    qword ptr [rbp - 0x28], r8    // three
+    0x104f381a0 <+48>: mov    qword ptr [rbp - 0x30], r9    // four
+    0x104f381a4 <+52>: lea    rdi, [rip + 0xe65]        ; @"Mom, what happened to the cat?"
+    0x104f381ab <+59>: pop    rbp
+    0x104f381ac <+60>: jmp    0x104f382dc               ; symbol stub for: objc_retainAutoreleaseReturnValue
+```
+
+### Debugging Info
+
+그러면 난 각 parameter의 위치를 어떻게 알았을까?를 설명하자면, 일단 Xcode를 보면 아직 `push rbp`에 코드가 멈춰 있어서 값 할당이 되지 않아 Xcode에서는 아래처럼 쓰레기값들이 보인다.
+
+![](6.png)
+
+모든 symbol을 dump 해보자. 참고로 `symfile`은 'Dump the debug symbol file for one or more target modules.'이라고 한다. 그리고 `"one"` 이렇게 검색하면 아래처럼 우리가 원하는 정보가 나오는데,
+
+```
+(lldb) image dump symfile MyApp3
+
+0x2cdd125e8:     Variable{0x1000000c3}, name = "self", type = {000000010000018a} 0x000060001C02DEB8 (ViewController *const), scope = parameter, location = DW_OP_fbreg -8, artificial
+0x2cdd10dd8:     Variable{0x1000000cf}, name = "_cmd", type = {0000000100000194} 0x000060000078B538 (SEL), scope = parameter, location = DW_OP_fbreg -16, artificial
+0x2cdd0fee8:     Variable{0x1000000db}, name = "one", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg -24
+0x2cdd50d58:     Variable{0x1000000e9}, name = "two", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg -32
+0x2bdb31078:     Variable{0x1000000f7}, name = "three", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg -40
+0x2cdd13c78:     Variable{0x100000105}, name = "four", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg -48
+0x2cdd13d98:     Variable{0x100000113}, name = "five", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg +16
+0x2cdd13eb8:     Variable{0x100000121}, name = "six", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg +24
+0x2cdd13fd8:     Variable{0x10000012f}, name = "seven", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg +32
+0x2cdd140f8:     Variable{0x10000013d}, name = "eight", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg +40
+0x2cdd14218:     Variable{0x10000014b}, name = "nine", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg +48
+0x2cdd14338:     Variable{0x100000159}, name = "ten", type = {00000001000001bd} 0x000060002001F178 (NSUInteger), scope = parameter, decl = ViewController.m:18, location = DW_OP_fbreg +56
+```
+
+`DW_OP_fbreg -48` 이것을 보면 `rbp`에서의 offset을 말하는 것이다. 이런 식으로 내가 알아냈던 것이다. 이제 `lea`까지 이동해보면
+```
+MyApp3`-[ViewController executeLotsOfArgumentsWithOne:two:three:four:five:six:seven:eight:nine:ten:]:
+    0x1046c6170 <+0>:  push   rbp
+    0x1046c6171 <+1>:  mov    rbp, rsp
+    0x1046c6174 <+4>:  mov    rax, qword ptr [rbp + 0x38]
+    0x1046c6178 <+8>:  mov    rax, qword ptr [rbp + 0x30]
+    0x1046c617c <+12>: mov    rax, qword ptr [rbp + 0x28]
+    0x1046c6180 <+16>: mov    rax, qword ptr [rbp + 0x20]
+    0x1046c6184 <+20>: mov    rax, qword ptr [rbp + 0x18]
+    0x1046c6188 <+24>: mov    rax, qword ptr [rbp + 0x10]
+    0x1046c618c <+28>: mov    qword ptr [rbp - 0x8], rdi
+    0x1046c6190 <+32>: mov    qword ptr [rbp - 0x10], rsi
+    0x1046c6194 <+36>: mov    qword ptr [rbp - 0x18], rdx
+    0x1046c6198 <+40>: mov    qword ptr [rbp - 0x20], rcx
+    0x1046c619c <+44>: mov    qword ptr [rbp - 0x28], r8
+    0x1046c61a0 <+48>: mov    qword ptr [rbp - 0x30], r9
+->  0x1046c61a4 <+52>: lea    rdi, [rip + 0xe65]        ; @"Mom, what happened to the cat?"
+    0x1046c61ab <+59>: pop    rbp
+    0x1046c61ac <+60>: jmp    0x1046c62dc               ; symbol stub for: objc_retainAutoreleaseReturnValue
+```
+
+Xcode에서 값이 정상적으로 나오는 것을 확인할 수 있고, 아래처럼 lldb 상에서도 값을 확인할 수 있다.
+
+```
+(lldb) x/gx '$rbp - 0x18'
+0x30cf4c8e8: 0x0000000000000001
+
+(lldb) p/x $rbp - 0x18
+(unsigned long) $3 = 0x000000030cf4c8e8
+
+(lldb) p/d $rbp - 0x18 # 사실 이건 필요 없다. 메모리 주소값을 10진수로 변환시킨 것 뿐이니까.
+(unsigned long) $4 = 13102270696
+```
+
+참고로 `qword ptr`은 Assembly에서 pointer의 값이라고 한다. `mov    qword ptr [rbp - 0x8], rdi`의 경우 `rbp - 0x8`의 값을 `rdi`에 할당해준 셈이다.
