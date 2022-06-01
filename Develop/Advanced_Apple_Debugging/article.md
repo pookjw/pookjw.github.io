@@ -26,6 +26,8 @@
 
 - [Chapter 13: Assembly & the Stack](#chapter-13)
 
+- [Chapter 14: Hello, Ptrace](#chapter-14)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -2190,3 +2192,343 @@ Xcode에서 값이 정상적으로 나오는 것을 확인할 수 있고, 아래
 ```
 
 참고로 `qword ptr`은 Assembly에서 pointer의 값이라고 한다. `mov    qword ptr [rbp - 0x8], rdi`의 경우 `rbp - 0x8`의 값을 `rdi`에 할당해준 셈이다.
+
+# <a name="chapter-14">Chapter 14: Hello, Ptrace</a>
+
+**System call**은 커널에서 제공하는 low-level 서비스다. 아래 명령어로 그 목록을 볼 수 있다. `-l`은 list이며, `-n` argument를 지정할 수 있다고 한다.
+
+```
+# 총 개수
+% sudo dtrace -ln 'syscall:::entry' | wc -l
+    533
+
+% sudo dtrace -ln 'syscall:::entry'
+   ID   PROVIDER            MODULE                          FUNCTION NAME
+  164    syscall                                             syscall entry
+  166    syscall                                                exit entry
+  168    syscall                                                fork entry
+  170    syscall                                                read entry
+# 생략...
+```
+
+`-l`이 없으면 조건문이 해당될 때마다 명령을 실행한다. `syscall`, `ptrace`, `entry` 조건일 경우 `printf`가 실행된다.
+
+```
+% sudo dtrace -n 'syscall::ptrace:entry { printf("%s(%d, %d, %d, %d) from %s\n", probefunc, arg0, arg1, arg2, arg3, execname); }'
+dtrace: description 'syscall::ptrace:entry ' matched 1 probe
+CPU     ID                    FUNCTION:NAME
+  0    216                     ptrace:entry ptrace(8, 1489, 0, 0) from debugserver
+
+  0    216                     ptrace:entry ptrace(13, 1489, 6147, 0) from debugserver
+```
+
+깔끔하게 보고 싶을 경우 (명령에 대한 출력만 보고 싶을 경우) `-q`를 쓰면 된다.
+
+```
+% sudo dtrace -qn 'syscall::ptrace:entry { printf("%s(%d, %d, %d, %d) from %s\n", probefunc, arg0, arg1, arg2, arg3, execname); }'
+ptrace(14, 1460, 0, 0) from debugserver
+ptrace(13, 1460, 6403, 0) from debugserver
+```
+
+만약에 **Finder**에 attach를 시도할 경우 위처럼 로그가 찍히는데
+
+```
+% lldb -n Finder
+(lldb) process attach --name "Finder"
+Process 664 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+    frame #0: 0x00000001a6ea2890 libsystem_kernel.dylib` mach_msg_trap  + 8
+libsystem_kernel.dylib`mach_msg_trap:
+->  0x1a6ea2890 <+8>: ret    
+libsystem_kernel.dylib'mach_msg_overwrite_trap:    0x1a6ea2894 <+0>: mov    x16, #-0x20
+    0x1a6ea2898 <+4>: svc    #0x80
+    0x1a6ea289c <+8>: ret    
+libsystem_kernel.dylib'semaphore_signal_trap:    0x1a6ea28a0 <+0>: mov    x16, #-0x21
+    0x1a6ea28a4 <+4>: svc    #0x80
+    0x1a6ea28a8 <+8>: ret    
+libsystem_kernel.dylib'semaphore_signal_all_trap:    0x1a6ea28ac <+0>: mov    x16, #-0x22
+Target 0: (Finder) stopped.
+Executable module set to "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder".
+Architecture set to: arm64e-apple-macosx-.
+(lldb)
+```
+
+이때 `debugserver`라는 프로세스가 생성되고 `ptrace`를 호출해서 Finder에 attach한다. 그러면 이 `debugserver`는 어떻게 생성된 프로세스일까?를 알아보면
+
+```
+% pgrep debugserver
+1624
+
+# PPID는 parent process id인듯?
+% ps -fp `pgrep -x debugserver`
+  UID   PID  PPID   C STIME   TTY           TIME CMD
+  501  1624  1620   0 10:19PM ttys007    0:00.12 /Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/debugserver --fd=5 --native-regs --setsid
+  
+# 이런 식으로 PPID 알 수도 있고
+% ps -o ppid=$(pgrep -x debugserver)
+ 1620
+  
+# PPID가 뭔지 보려면
+% ps -a 1620
+  PID TTY           TIME CMD
+ 1620 ttys007    0:04.90 /Applications/Xcode.app/Contents/Developer/usr/bin/lldb -n Finder
+```
+
+Finder에서 `ptrace`를 호출해서 `debugserver`가 실행되고 `lldb`와 통신하는 구조다.
+
+이제 Xcode에서 아래와 같은 스크립트를 생성하고 실행하면
+
+```swift
+while true {
+    sleep(2)
+    print("helloptrace")
+}
+```
+
+아까 `dtrace` 명령어에서 아래와 같이 나온다.
+
+```
+ptrace(14, 2028, 0, 0) from debugserver
+ptrace(13, 2028, 6147, 0) from debugserver
+```
+
+이 `ptrace`가 뭔지 알기 위해 Xcode에서 ⌘ + Shift + O를 누르고 `/usr/include/sys/ptrace.h`로 이동하면 아래와 같이 나온다.
+
+```c
+enum {
+    ePtAttachDeprecated __deprecated_enum_msg("PT_ATTACH is deprecated. See PT_ATTACHEXC") = 10
+};
+
+#define PT_TRACE_ME     0       /* child declares it's being traced */
+#define PT_READ_I       1       /* read word in child's I space */
+#define PT_READ_D       2       /* read word in child's D space */
+#define PT_READ_U       3       /* read word in child's user structure */
+#define PT_WRITE_I      4       /* write word in child's I space */
+#define PT_WRITE_D      5       /* write word in child's D space */
+#define PT_WRITE_U      6       /* write word in child's user structure */
+#define PT_CONTINUE     7       /* continue the child */
+#define PT_KILL         8       /* kill the child process */
+#define PT_STEP         9       /* single step the child */
+#define PT_ATTACH       ePtAttachDeprecated     /* trace some running process */
+#define PT_DETACH       11      /* stop tracing a process */
+#define PT_SIGEXC       12      /* signals as exceptions for current_proc */
+#define PT_THUPDATE     13      /* signal for thread# */
+#define PT_ATTACHEXC    14      /* attach to running process with signal exception */
+
+#define PT_FORCEQUOTA   30      /* Enforce quota for root */
+#define PT_DENY_ATTACH  31
+
+#define PT_FIRSTMACH    32      /* for machine-specific requests */
+
+__BEGIN_DECLS
+
+
+int     ptrace(int _request, pid_t _pid, caddr_t _addr, int _data);
+
+
+__END_DECLS
+```
+
+`man ptrace`로 보면 더 자세한 설명을 볼 수 있다. 다만 애플은 이 부분을 자세히 공개하지 않는 편이라 몇개만 나와 있다.
+
+```
+     PT_TRACE_ME   This request is one of two used by the traced process; it declares that
+                   the process expects to be traced by its parent.  All the other
+                   arguments are ignored.  (If the parent process does not expect to trace
+                   the child, it will probably be rather confused by the results; once the
+                   traced process stops, it cannot be made to continue except via
+                   ptrace().) When a process has used this request and calls execve(2) or
+                   any of the routines built on it (such as execv(3)), it will stop before
+                   executing the first instruction of the new image.  Also, any setuid or
+                   setgid bits on the executable being executed will be ignored.
+
+     PT_DENY_ATTACH
+                   This request is the other operation used by the traced process; it
+                   allows a process that is not currently being traced to deny future
+                   traces by its parent.  All other arguments are ignored.  If the process
+                   is currently being traced, it will exit with the exit status of
+                   ENOTSUP; otherwise, it sets a flag that denies future traces.  An
+                   attempt by the parent to trace a process which has set this flag will
+                   result in a segmentation violation in the parent.
+
+     PT_CONTINUE   The traced process continues execution.  addr is an address specifying
+                   the place where execution is to be resumed (a new value for the program
+                   counter), or (caddr_t)1 to indicate that execution is to pick up where
+                   it left off.  data provides a signal number to be delivered to the
+                   traced process as it resumes execution, or 0 if no signal is to be
+                   sent.
+
+     PT_STEP       The traced process continues execution for a single step.  The
+                   parameters are identical to those passed to PT_CONTINUE.
+
+     PT_KILL       The traced process terminates, as if PT_CONTINUE had been used with
+                   SIGKILL given as the signal to be delivered.
+
+     PT_ATTACH     This call has been replaced with PT_ATTACHEXC.
+
+     PT_ATTACHEXC  This request allows a process to gain control of an otherwise unrelated
+                   process and begin tracing it.  It does not need any cooperation from
+                   the to-be-traced process.  In this case, pid specifies the process ID
+                   of the to-be-traced process, and the other two arguments are ignored.
+                   This request requires that the target process must have the same real
+                   UID as the tracing process, and that it must not be executing a setuid
+                   or setgid executable.  (If the tracing process is running as root,
+                   these restrictions do not apply.)  The tracing process will see the
+                   newly-traced process stop and may then control it as if it had been
+                   traced all along. Note that this call differs from the prior call (
+                   PT_ATTACH) in that signals from the child are delivered to the parent
+                   as Mach exceptions (see EXC_SOFT_SIGNAL).
+
+     PT_DETACH     This request is like PT_CONTINUE, except that it does not allow
+                   specifying an alternate place to continue execution, and after it
+                   succeeds, the traced process is no longer traced and continues
+                   execution normally.
+```
+
+첫번째로 `ptrace(14, 2028, 0, 0)`를 보면, `_request`는 14번, 즉 `PT_ATTACHEXC`이 불린 것을 확인할 수 있다. 또한 설명에 의하면 `PT_ATTACHEXC`는 나머지 두 개의 argument는 무시된다고 한다. (the other two arguments are ignored)
+
+두번째로 `ptrace(13, 2028, 6147, 0)`는 13번, `PT_THUPDATE`인데 `signal for thread#`라고만 나와 있고 자세한 정보는 안 나와 있다.
+
+## attach 거부하기
+
+이 방법은 Revserse Enginering을 막기 위해 쓰인다. lldb로 attach를 시도해서 프로그램의 내부 구조를 알아내는 것을 방지하기 위함이다.
+
+### `ptrace`
+
+`ptrace`에는 `PT_DENY_ATTACH`라는 request가 존재한다. 다른 argument는 필요하지 않으며 만약 tracing되고 있을 경우 `exit(ENOTSUP)`이 불린다고 한다.
+
+```objc
+#import <sys/ptrace.h>
+```
+
+```swift
+ptrace(PT_DENY_ATTACH, 0, nil, 0)
+```
+
+이렇게 코드를 삽입하고 Xcode에서 Run을 하면 lldb로 자동으로 attach가 되면서 실행되는데, 위 코드때문에 `ENOTSUP` (45) 값이 반환되면서 강제종료된다.
+
+```
+Program ended with exit code: 45
+```
+
+여기서 생각을 해보면 어딘가에서 `ptrace`가 불려야지만 tracing을 막을 수 있다. 즉, `ptrace`가 불리기 전에 `ptrace`에 breakpoint를 찍고 함수 실행을 무력화시키면 tracing 방어 코드를 무력화시킬 수 있다.
+
+이를 하기 위해 `-w` 옵션을 쓰자.
+
+```
+% sudo lldb -n "helloptrace" -w com.apple.dt.IDEWatchSupportCore
+(lldb) process attach --name "helloptrace" --waitfor
+```
+
+그리고 프로그램을 실행하면 lldb에서 아래처럼 뜬다.
+
+```
+Process 2216 stopped
+* thread #1, stop reason = signal SIGSTOP
+    frame #0: 0x0000000100018560 dyld` _dyld_start 
+dyld`_dyld_start:
+->  0x100018560 <+0>:  mov    x0, sp
+    0x100018564 <+4>:  and    sp, x0, #0xfffffffffffffff0
+    0x100018568 <+8>:  mov    x29, #0x0
+    0x10001856c <+12>: mov    x30, #0x0
+    0x100018570 <+16>: b      0x100018e84               ; start
+dyld'mach_init:    0x100018574 <+0>: pacibsp 
+    0x100018578 <+4>:  stp    x20, x19, [sp, #-0x20]!
+    0x10001857c <+8>:  stp    x29, x30, [sp, #0x10]
+Target 0: (helloptrace) stopped.
+Executable module set to "/Users/pookjw/Library/Developer/Xcode/DerivedData/helloptrace-feiyuwxjcaporybbozwhdvquecxd/Build/Products/Debug/helloptrace".
+Architecture set to: arm64e-apple-macosx-.
+(lldb)
+```
+
+여기서 `ptrace`에 대해 조사해보면
+
+```
+(lldb) image lookup -n ptrace
+1 match found in /usr/lib/system/libsystem_kernel.dylib:
+        Address: libsystem_kernel.dylib[0x00000001802f70b0] (libsystem_kernel.dylib.__TEXT.__text + 35792)
+        Summary: libsystem_kernel.dylib`__ptrace
+```
+
+`__ptrace`에 breakpoint를 걸면 된다는 것을 알 수 있다.
+
+```
+(lldb) breakpoint set -n '__ptrace'
+Breakpoint 2: where = libsystem_kernel.dylib`__ptrace, address = 0x00000001a6eab0b0
+```
+
+아니면 regex로 해도 되고... 경고가 뜨는데 왜인지 잘 됨...
+
+```
+(lldb) rb ptrace -s libsystem_kernel.dylib
+Breakpoint 1: no locations (pending).
+WARNING:  Unable to resolve breakpoint to any actual locations.
+```
+
+그리고 `continue`를 하면 `ptrace` 호출이 일어날 때 pause가 걸리는데, 이때 아래처럼 처리하면 `ptrace` 함수가 호출될 때 아무것도 안하게 처리하면서 tracing 방어 코드를 무력화 할 수 있다.
+
+```
+(lldb) thread return 0
+```
+
+### `sysctl`
+
+과거 macOS의 iTunes 앱에서 `sysctl`를 통해 tracing을 막았다고 한다. 아래가 예시 코드다.
+
+```swift
+import Darwin
+
+let mib: UnsafeMutablePointer<Int32> = .allocate(capacity: 4)
+mib[0] = CTL_KERN
+mib[1] = KERN_PROC
+mib[2] = KERN_PROC_PID
+mib[3] = getpid()
+
+var size: Int = MemoryLayout<kinfo_proc>.size
+var info: kinfo_proc? = nil
+
+sysctl(mib, 4, &info, &size, nil, 0)
+
+while true {
+    if (info.unsafelyUnwrapped.kp_proc.p_flag & P_TRACED) > 0 {
+        exit(0)
+    }
+    sleep(2)
+}
+```
+
+```objc
+#import <Foundation/Foundation.h>
+@import Darwin;
+
+int main(int argc, const char * argv[]) {
+    int mib[4];
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+    
+    size_t size = sizeof(struct kinfo_proc);
+    struct kinfo_proc info;
+    
+    while (YES) {
+        sysctl(mib, 4, &info, &size, NULL, 0);
+        
+        if (info.kp_proc.p_flag & P_TRACED) {
+            exit(0);
+        }
+        [NSThread sleepForTimeInterval:2.0f];
+    }
+    
+    return 0;
+}
+```
+
+마찬가지로 이 코드를 무력화시키려면 아래 symbol에서 비슷하게 하면 된다.
+
+```
+(lldb) image lookup -n sysctl
+1 match found in /usr/lib/system/libsystem_c.dylib:
+        Address: libsystem_c.dylib[0x00000001801f20e0] (libsystem_c.dylib.__TEXT.__text + 18484)
+        Summary: libsystem_c.dylib`sysctl
+```
