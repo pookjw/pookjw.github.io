@@ -2416,7 +2416,7 @@ Program ended with exit code: 45
 이를 하기 위해 `-w` 옵션을 쓰자.
 
 ```
-% sudo lldb -n "helloptrace" -w com.apple.dt.IDEWatchSupportCore
+% sudo lldb -n "helloptrace" -w
 (lldb) process attach --name "helloptrace" --waitfor
 ```
 
