@@ -2532,3 +2532,230 @@ int main(int argc, const char * argv[]) {
         Address: libsystem_c.dylib[0x00000001801f20e0] (libsystem_c.dylib.__TEXT.__text + 18484)
         Summary: libsystem_c.dylib`sysctl
 ```
+
+# <a name="chapter-15">Chapter 15: Dynamic Frameworks</a>
+
+iOS 8 이후로 서드파티 dynamic library가 허용되었다. 이러한 dynamic library들은 런타임 상에서 dyld를 통해 required framework와 optional framework를 메모리에 불러온다. required framework를 불러 올 때 문제가 발생하면 프로그램이 종료된다. optional framework는 불러 올 떄 문제가 발생해도 실행에 문제는 없지만 해당 framework에 있는 기능을 쓸 수 없다.
+
+연습을 위해 사진처럼 Objective-C 기반 iOS 앱을 만들고 `CoreBluetooth`는 Optional, `CallKit`은 Required로 설정한다.
+
+![](7.png)
+
+이제 `otool`로 컴파일된 Mach-O 파일을 본다. `-l`와 `-L` 옵션을 쓸건데 `man otool`로 설명을 보면 아래와 같다.
+
+```
+       -l     Display the load commands.
+
+       -L     Display the names and version numbers of the shared libraries that the
+              object file uses, as well as the shared library ID if the file is a shared
+              library.
+```
+
+`-L`는 shared library들만 보여준다.
+
+```
+% otool -L /Users/pookjw/Library/Developer/Xcode/DerivedData/DeleteMe-cscvhbosmipliudcpaymflapbzrg/Build/Products/Debug-iphonesimulator/DeleteMe.app/DeleteMe
+/Users/pookjw/Library/Developer/Xcode/DerivedData/DeleteMe-cscvhbosmipliudcpaymflapbzrg/Build/Products/Debug-iphonesimulator/DeleteMe.app/DeleteMe:
+    /System/Library/Frameworks/CoreBluetooth.framework/CoreBluetooth (compatibility version 1.0.0, current version 1.0.0, weak)
+    /System/Library/Frameworks/CallKit.framework/CallKit (compatibility version 1.0.0, current version 1.0.0)
+    /System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 1860.0.0)
+    /usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)
+    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1311.120.1)
+    /System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 1860.0.0)
+    /System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 5610.0.0)
+```
+
+Optional로 설정된 framework는 `weak`로 표기된 것을 볼 수 있다.
+
+`-l`는 모든 load command를 보여준다. 너무 많으므로 shared library 부분만 보여주고 나머지는 생략하겠다.
+
+```
+ % otool -l /Users/pookjw/Library/Developer/Xcode/DerivedData/DeleteMe-cscvhbosmipliudcpaymflapbzrg/Build/Products/Debug-iphonesimulator/DeleteMe.app/DeleteMe
+/Users/pookjw/Library/Developer/Xcode/DerivedData/DeleteMe-cscvhbosmipliudcpaymflapbzrg/Build/Products/Debug-iphonesimulator/DeleteMe.app/DeleteMe:
+Load command 14
+          cmd LC_LOAD_WEAK_DYLIB
+      cmdsize 96
+         name /System/Library/Frameworks/CoreBluetooth.framework/CoreBluetooth (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 1.0.0
+compatibility version 1.0.0
+Load command 15
+          cmd LC_LOAD_DYLIB
+      cmdsize 80
+         name /System/Library/Frameworks/CallKit.framework/CallKit (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 1.0.0
+compatibility version 1.0.0
+Load command 16
+          cmd LC_LOAD_DYLIB
+      cmdsize 88
+         name /System/Library/Frameworks/Foundation.framework/Foundation (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 1860.0.0
+compatibility version 300.0.0
+Load command 17
+          cmd LC_LOAD_DYLIB
+      cmdsize 56
+         name /usr/lib/libobjc.A.dylib (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 228.0.0
+compatibility version 1.0.0
+Load command 18
+          cmd LC_LOAD_DYLIB
+      cmdsize 56
+         name /usr/lib/libSystem.B.dylib (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 1311.120.1
+compatibility version 1.0.0
+Load command 19
+          cmd LC_LOAD_DYLIB
+      cmdsize 96
+         name /System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 1860.0.0
+compatibility version 150.0.0
+Load command 20
+          cmd LC_LOAD_DYLIB
+      cmdsize 80
+         name /System/Library/Frameworks/UIKit.framework/UIKit (offset 24)
+   time stamp 2 Thu Jan  1 09:00:02 1970
+      current version 5610.0.0
+compatibility version 1.0.0
+```
+
+Optional로 설정된 framework는 `LC_LOAD_WEAK_DYLIB`, Required로 설정된 framework는 `LC_LOAD_DYLIB`로 설정된 것을 볼 수 있다.
+
+### load command 수정하기
+
+lldb에서 현재 CallKit이 load 됐을 경우, 아래와 같이 확인할 수 있고 경로를 얻을 수 있다.
+
+```
+(lldb) image list CallKit
+[  0] E3559B5C-5EFD-32BA-AFD4-5029B235A5D9 0x000000019006d000 /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/CallKit.framework/CallKit 
+```
+
+또한 `pgrep -fl` 명령어로 프로세스의 경로를 얻을 수 있다.
+
+```
+% pgrep -fl DeleteMe
+1873 /Users/pookjw/Library/Developer/CoreSimulator/Devices/B2EBBD70-5B97-4BB3-A82F-B56D8C1B3BAF/data/Containers/Bundle/Application/AA081877-0D2C-4A69-A2D4-C8E42988DF85/DeleteMe.app/DeleteMe
+```
+
+우리는 `CallKit` 대신에 `NotificationCenter`를 load 하도록 변경할 것이다. 이를 위해 아래와 같이 변수를 할당한다.
+
+```
+app=/Users/pookjw/Library/Developer/CoreSimulator/Devices/B2EBBD70-5B97-4BB3-A82F-B56D8C1B3BAF/data/Containers/Bundle/Application/AA081877-0D2C-4A69-A2D4-C8E42988DF85/DeleteMe.app/DeleteMe
+CK=/System/Library/Frameworks/CallKit.framework/CallKit
+NC=/System/Library/Frameworks/NotificationCenter.framework/NotificationCenter
+```
+
+`install_name_tool`을 통해 `CallKit` 대신에 `NotificationCenter`를 load 하도록 변경할 수 있다. code signature가 망가진다는 경고문이 뜨는 것을 볼 수 있다.
+
+```
+% install_name_tool -change "$CK" "$NC" "$app"
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/install_name_tool: warning: changes being made to the file will invalidate the code signature in: /Users/pookjw/Library/Developer/CoreSimulator/Devices/B2EBBD70-5B97-4BB3-A82F-B56D8C1B3BAF/data/Containers/Bundle/Application/AA081877-0D2C-4A69-A2D4-C8E42988DF85/DeleteMe.app/DeleteMe
+```
+
+변경이 잘 되었는지 확인하기 위해 `otool -L`로 보면 잘 된 것을 볼 수 있다.
+
+```
+% otool -L "$app"
+/Users/pookjw/Library/Developer/CoreSimulator/Devices/B2EBBD70-5B97-4BB3-A82F-B56D8C1B3BAF/data/Containers/Bundle/Application/AA081877-0D2C-4A69-A2D4-C8E42988DF85/DeleteMe.app/DeleteMe:
+    /System/Library/Frameworks/CoreBluetooth.framework/CoreBluetooth (compatibility version 1.0.0, current version 1.0.0, weak)
+    /System/Library/Frameworks/NotificationCenter.framework/NotificationCenter (compatibility version 1.0.0, current version 1.0.0)
+    /System/Library/Frameworks/Foundation.framework/Foundation (compatibility version 300.0.0, current version 1860.0.0)
+    /usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)
+    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1311.120.1)
+    /System/Library/Frameworks/CoreFoundation.framework/CoreFoundation (compatibility version 150.0.0, current version 1860.0.0)
+    /System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 5610.0.0)
+```
+
+lldb 상에서도 확인이 가능하다. 참고로 Xcode로 다시 빌드하면 안 되며 앱 재실행이 필요하다.
+
+```
+(lldb) image list CallKit
+error: no modules found that match 'CallKit'
+(lldb) image list NotificationCenter
+[  0] C5ECD0DA-BAC5-31F8-B5A9-00E1C286F306 0x0000000196ba1000 /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/NotificationCenter.framework/NotificationCenter 
+```
+
+### 런타임에서 framework load하기
+
+우선 `~/.lldbinit`에 `ls`라는 명령어를 만들어준다.
+
+```
+command regex ls 's/(.+)/expression -l objc -O -- @import Foundation; [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"%1" error:nil]/'
+```
+
+이미 lldb가 실행된 상태면 아래 명령어로 `~/.lldbinit`를 새로고침 할 수 있다.
+
+```
+(lldb) command source ~/.lldbinit
+```
+
+`image list -d` (`-d`는 directory) 명령어로 load된 framework의 경로를 알 수 있는데
+
+```
+(lldb) image list -d UIKit
+[  0] /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/UIKit.framework
+```
+
+`/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks`에 Public Framework들이 모여 있는 것을 알 수 있으므로, 방금 만든 `ls`로 그 목록들을 볼 수 있다.
+
+```
+(lldb) ls /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks
+<__NSArrayM 0x600002dc8030>(
+MetricKit.framework,
+Network.framework,
+GameKit.framework,
+AddressBookUI.framework,
+Speech.framework,
+# 생략...
+```
+
+만약에 lldb로 framework를 load하고 싶으면 아래 명령어로 할 수 있다.
+
+```
+(lldb) process load /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/Speech.framework/Speech
+Loading "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/Speech.framework/Speech"...ok
+Image 0 loaded.
+
+(lldb) process load MessageUI.framework/MessageUI
+Loading "MessageUI.framework/MessageUI"...ok
+Image 1 loaded.
+```
+
+### frmaework 탐색하기
+
+책에는 아래 명령어로 모든 Objective-C class(+) method들을 볼 수 있게 한다는데 내가 했을 때는 안 됐다.
+
+```
+command regex dump_stuff "s/(.+)/image lookup -rn '\+\[\w+(\(\w+\))?\ \w+\]$' %1 /"
+```
+
+대신 이렇게 고치니 되더라...
+
+```
+command regex dump_stuff "s/(.+)/image lookup -rn '\+\[\w*(\(\w*\))?(\ \w*\])?' %1 /"
+```
+
+아래처럼 활용하면 된다.
+
+```
+(lldb) dump_stuff CoreBluetooth
+42 matches found in /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/CoreBluetooth.framework/CoreBluetooth:
+        Address: CoreBluetooth[0x000000000000e81c] (CoreBluetooth.__TEXT.__text + 53080)
+        Summary: CoreBluetooth`+[CBCentralManager supportsFeatures:]        Address: CoreBluetooth[0x000000000001889c] (CoreBluetooth.__TEXT.__text + 94168)
+        Summary: CoreBluetooth`+[CBUtil preSSPStringToPairingCode:]        Address: CoreBluetooth[0x0000000000018930] (CoreBluetooth.__TEXT.__text + 94316)
+# 생략...
+```
+
+마찬가지로 `ivars`, `methods`, `lmethods` 명령어들도 만들 수 있다. `methods`는 class 내에서만 정의된 method들을 볼 수 있고, `lmethods`는 superclass까지 포함해서 볼 수 있다.
+
+```
+command regex ivars 's/(.+)/expression -l objc -O -- [%1 _ivarDescription]/'
+
+command regex methods 's/(.+)/expression -l objc -O -- [%1 _shortMethodDescription]/'
+
+command regex lmethods 's/(.+)/expression -l objc -O -- [%1 _methodDescription]/'
+```
