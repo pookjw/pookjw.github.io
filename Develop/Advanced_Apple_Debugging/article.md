@@ -28,6 +28,10 @@
 
 - [Chapter 14: Hello, Ptrace](#chapter-14)
 
+- [Chapter 15: Dynamic Frameworks](#chapter-15)
+
+- [Chapter 16: Hooking & Executing Code with dlopen & dlsym](#chapter-16)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -2758,4 +2762,264 @@ command regex ivars 's/(.+)/expression -l objc -O -- [%1 _ivarDescription]/'
 command regex methods 's/(.+)/expression -l objc -O -- [%1 _shortMethodDescription]/'
 
 command regex lmethods 's/(.+)/expression -l objc -O -- [%1 _methodDescription]/'
+```
+
+# <a name="chapter-16">Chapter 16: Hooking & Executing Code with dlopen & dlsym</a>
+
+`dlopen`과 `dlsym`을 통해 C, C++, Swift의 코드를 hook 해본다.
+
+## C
+
+![](8.png)
+
+사진처럼 `getenv`에 breakpoint를 걸고 `po (char *)$x0` (x86_64는 `$rdi`)로 하고 자동으로 `continue` 되도록 하고 앱을 실행하면 로그창에 아래와 같이 뜬다.
+
+```
+"MallocDebugReport"
+
+"MallocErrorStop"
+
+"MallocErrorSleep"
+
+"MallocNanoMaxMagazines"
+
+"_MallocNanoMaxMagazines"
+
+"LIBDISPATCH_STRICT"
+
+"LIBDISPATCH_COOPERATIVE_POOL_STRICT"
+
+"DYLD_INSERT_LIBRARIES"
+
+"NSZombiesEnabled"
+
+# 생략...
+```
+
+    만약에 모든 Environment Variables를 앱 실행시 보고 싶다면, **Edit Scheme** -> **Environment Variables** -> `DYLD_PRINT_ENV`을 value 없이 추가하면 된다.
+    
+    여담으로 `dyld`가 load command를 통해 함수를 로드하기 전에는 함수 hook이 쉽다고 한다. 함수가 최초로 실행될 경우 `dyld`가 module 내에서 location을 찾는 활동이 최초 한 번 발생하고 그 다음 호출부터는 발생하지 않는다. 이러한 과정이 일어나기 전에 hook을 하면 쉽지만, 과정이 일어난 이후에 hook을 하려면 어렵다고 한다.
+
+우리가 C 함수를 hook하는 가장 간단한 방법은 똑같은 함수를 만드는 것이다.
+
+```c
+#import <dlfcn.h>
+#import <assert.h>
+#import <stdio.h>
+#import <dispatch/dispatch.h>
+#import <string.h>
+
+char * getenv(const char *name) {
+    return "YAY!";
+}
+```
+
+이 `getenv`를 호출하면
+
+```swift
+if let cString: UnsafeMutablePointer<CChar> = getenv("HOME") {
+    let homeEnv: String = String(cString: cString)
+    print("HOME env: \(homeEnv)")
+}
+```
+
+원래는 아래같이 나오는데
+
+```
+HOME env: /Users/pookjw/Library/Developer/CoreSimulator/Devices/B2EBBD70-5B97-4BB3-A82F-B56D8C1B3BAF/data/Containers/Data/Application/4286ECFA-E4FA-4104-93E9-6A9A19CCEC2A
+
+```
+
+아래처럼 hook이 제대로 되는 것을 볼 수 있다.
+
+```
+HOME env: YAY!
+```
+
+그렇다면 원래 함수도 같이 실행하고 싶다면? 만약 아래와 같이 하면 recursive가 되어서 stack overflow가 일어날 것이다.
+
+```c
+char * getenv(const char *name) {
+    return getenv(name);
+    return "YAY!";
+}
+```
+
+이를 해결하기 위해 `dlopen`와 `dlsym`이 쓰인다. 우선 `getenv`의 symbol을 조사하자.
+
+```
+(lldb) image lookup -s getenv
+1 symbols match 'getenv' in /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/lib/system/libsystem_c.dylib:
+        Address: libsystem_c.dylib[0x0000000000056814] (libsystem_c.dylib.__TEXT.__text + 350220)
+        Summary: libsystem_c.dylib`getenv
+```
+
+handle의 주소는 ``, symble은 ``이므로
+
+```c
+char * getenv(const char *name) {
+    void *handle = dlopen("/usr/lib/system/libsystem_c.dylib", RTLD_NOW);
+    assert(handle);
+    void *real_getenv = dlsym(handle, "getenv");
+    printf("Real getenv: %p\nFake getenv: %p\n", real_getenv, getenv);
+    return "YAY!";
+}
+```
+
+```
+Real getenv: 0x103f2e814
+Fake getenv: 0x1024fbdf8
+HOME env: YAY!
+```
+
+이렇게 원래 함수의 주소를 얻어 올 수 있다. 좀 더 수정을 거치면
+
+```c
+char * getenv(const char *name) {
+    static void *handle;
+    static char * (*real_getenv)(const char *);
+
+    static dispatch_once_t onceToken;
+
+    dispatch_once(&onceToken, ^{
+        handle = dlopen("/usr/lib/system/libsystem_c.dylib", RTLD_NOW);
+        assert(handle);
+        real_getenv = dlsym(handle, "getenv");
+    });
+    
+    if (strcmp(name, "HOME") == 0) {
+        return "/WOOT";
+    }
+  
+    return real_getenv(name);
+}
+```
+
+이렇게 parameter에 `HOME`이 들어 올 때만 `/WOOT`라는 값을 반환하도록 설정할 수 있다. 참고로 C에서 함수는 포인터이므로, `char * (*real_getenv)`이라고 표기되었다.
+
+이제 아래 코드를 호출해보면 아래와 같은 결과가 나온다.
+
+```swift
+if let cString: UnsafeMutablePointer<CChar> = getenv("HOME") {
+    let homeEnv: String = String(cString: cString)
+    print("HOME env: \(homeEnv)")
+}
+
+if let cString: UnsafeMutablePointer<CChar> = getenv("PATH") {
+    let homeEnv: String = String(cString: cString)
+    print("PATH env: \(homeEnv)")
+}
+```
+
+```
+HOME env: /WOOT
+PATH env: /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/sbin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/sbin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/local/bin
+```
+
+## Swift
+
+Swift로 아래와 같은 코드가 있다고 하자.
+
+```swift
+public class CopyrightImageGenerator {
+
+  // MARK: - Properties
+  private var imageData: Data? {
+    guard let data = ds_private_data else { return nil }
+    return Data(bytes: data, count: Int(ds_private_data_len))
+  }
+
+  private var originalImage: UIImage? {
+    guard let imageData = imageData else { return nil }
+
+    return UIImage(data: imageData)
+  }
+
+  public var watermarkedImage: UIImage? {
+    guard let originalImage = originalImage,
+      let topImage = UIImage(named: "copyright",
+                             in: Bundle(identifier: "com.razeware.HookingSwift"),
+                             compatibleWith: nil) else {
+        return nil
+    }
+
+    let size = originalImage.size
+    UIGraphicsBeginImageContext(size)
+
+    let area = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+    originalImage.draw(in: area)
+
+    topImage.draw(in: area, blendMode: .normal, alpha: 0.50)
+
+    let mergedImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    return mergedImage
+  }
+
+  // MARK: - Initializers
+  public init() {}
+}
+```
+
+설명을 붙이자면, private로 `originalImage`라는 이미지가 있고, public으로 `watermarkedImage`가 있다. `watermarkedImage`는 `originalImage`에 watermark를 붙이는 역할을 한다. 우리는 private로 정의된 `originalImage`을 호출해서 watermark를 붙이는 과정을 없애려고 한다.
+
+우선 `originalImage`의 binary 파일 주소를 알아내면
+
+```
+(lldb) image lookup -rn HookingSwift.*originalImage
+1 match found in /Users/pookjw/Library/Developer/Xcode/DerivedData/Watermark-awdrgxtzjdbtczaizjthfqodngfq/Build/Products/Debug-iphonesimulator/Watermark.app/Frameworks/HookingSwift.framework/HookingSwift:
+        Address: HookingSwift[0x0000000000003208] (HookingSwift.__TEXT.__text + 328)
+        Summary: HookingSwift`HookingSwift.CopyrightImageGenerator.originalImage.getter : Swift.Optional<__C.UIImage> at CopyrightImageGenerator.swift:41
+```
+
+`./Frameworks/HookingSwift.framework/HookingSwift`이다. 또한 `symtab` (symbol table)도 보면 우리가 봐야 할 주소는 `0x0000000000003208`이므로
+
+```
+(lldb) image dump symtab -m HookingSwift
+Symtab, file = /Users/pookjw/Library/Developer/Xcode/DerivedData/Watermark-awdrgxtzjdbtczaizjthfqodngfq/Build/Products/Debug-iphonesimulator/Watermark.app/Frameworks/HookingSwift.framework/HookingSwift, num_symbols = 112:
+               Debug symbol
+               |Synthetic symbol
+               ||Externally Visible
+               |||
+Index   UserID DSX Type            File Address/Value Load Address       Size               Flags      Name
+------- ------ --- --------------- ------------------ ------------------ ------------------ ---------- ----------------------------------
+# 생략...
+[    8]     55 D X Code            0x0000000000003208 0x000000010070b208 0x00000000000000d4 0x000f0000 $s12HookingSwift23CopyrightImageGeneratorC08originalD033_71AD57F3ABD678B113CF3AD05D01FF41LLSo7UIImageCSgvg
+# 생략...
+```
+
+symbol이 `$s12HookingSwift23CopyrightImageGeneratorC08originalD033_71AD57F3ABD678B113CF3AD05D01FF41LLSo7UIImageCSgvg`인 것을 알 수 있다.
+
+따라서 우리는 아래와 같은 코드를 짤 수 있다.
+
+```swift
+if let handle: UnsafeMutableRawPointer = dlopen("./Frameworks/HookingSwift.framework/HookingSwift", RTLD_NOW),
+    let sym: UnsafeMutableRawPointer = dlsym(handle, "$s12HookingSwift23CopyrightImageGeneratorC08originalD033_71AD57F3ABD678B113CF3AD05D01FF41LLSo7UIImageCSgvg") {
+    print(sym)
+}
+```
+
+그러면 콘솔에 `0x000000010436f208` 같은 주소가 찍힌다. 여담으로 이걸로 breakpoint를 설정할 수 있다.
+
+```
+(lldb) breakpoint set -a 0x000000010436f208
+Breakpoint 1: where = HookingSwift`HookingSwift.CopyrightImageGenerator.originalImage.getter : Swift.Optional<__C.UIImage> at CopyrightImageGenerator.swift:41, address = 0x000000010436f208
+
+# b (_regexp-break)로 해도 된다.
+(lldb) b HookingSwift`HookingSwift.CopyrightImageGenerator.originalImage.getter : Swift.Optional<__C.UIImage>
+Breakpoint 2: where = HookingSwift`HookingSwift.CopyrightImageGenerator.originalImage.getter : Swift.Optional<__C.UIImage> at CopyrightImageGenerator.swift:41, address = 0x000000010436f208
+```
+
+아래와 같이 private로 호출된 `originalImage`를 호출할 수 있게 된다.
+
+```swift
+if let handle: UnsafeMutableRawPointer = dlopen("./Frameworks/HookingSwift.framework/HookingSwift", RTLD_NOW),
+    let sym: UnsafeMutableRawPointer = dlsym(handle, "$s12HookingSwift23CopyrightImageGeneratorC08originalD033_71AD57F3ABD678B113CF3AD05D01FF41LLSo7UIImageCSgvg") {
+    let imageGenerator = CopyrightImageGenerator()
+      
+    typealias privateMethodAlias = @convention(c) (Any) -> UIImage?
+    let originalImageFunction: privateMethodAlias = unsafeBitCast(sym, to: privateMethodAlias.self)
+    let originalImage: UIImage? = originalImageFunction(imageGenerator)
+    self.imageView.image = originalImage
+}
 ```
