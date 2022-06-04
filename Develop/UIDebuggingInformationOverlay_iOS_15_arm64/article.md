@@ -601,7 +601,3 @@ Process 10507 resuming
 이제 지도 화면을 누르면 `UIDebuggingInformationOverlay`이 아래처럼 정상적으로 뜨는 것을 확인할 수 있습니다! 내용이 많이 어려웠을텐데 여기까지 따라 오시느냐 고생 많으셨습니다.🎉
 
 ![](4.png)
-
-## <a name="using-swizzling">Swizzling편</a>
-
-TODO
