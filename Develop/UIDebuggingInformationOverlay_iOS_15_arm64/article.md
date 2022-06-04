@@ -147,7 +147,7 @@ UIKitCore`-[UIDebuggingInformationOverlay init]:
 }
 ```
 
-시험삼아 한 번 `-[UIDebuggingInformationOverlay overlay]`를 불러 봅시다. `+[UIDebuggingInformationOverlay overlay]`는 `UIDebuggingInformationOverlay`의 singleton 객체를 가져오며, 최초 한 번 `-[UIDebuggingInformationOverlay init]`이 호출됩니다. 그 전에 `<+44>`와 `<+48>`, 그리고 `<+152>`에서 breakpoint를 걸어 봅시다.
+시험삼아 한 번 `+[UIDebuggingInformationOverlay overlay]`를 불러 봅시다. `+[UIDebuggingInformationOverlay overlay]`는 `UIDebuggingInformationOverlay`의 singleton 객체를 가져오며, 최초 한 번 `-[UIDebuggingInformationOverlay init]`이 호출됩니다. 그 전에 `<+44>`와 `<+48>`, 그리고 `<+152>`에서 breakpoint를 걸어 봅시다.
 
 ```
 (lldb) breakpoint set -a 0x12f43d014
