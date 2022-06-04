@@ -81,7 +81,7 @@ in UIDebuggingInformationOverlay:
 (UIWindow ...)
 ```
 
-`UIDebuggingInformationOverlay`는 `UIWindow` subclassing하고 있기도 하네요. 저희는 `- (id) init; (0x12f43cfe8)` 이 부분을 파볼 예정입니다. lldb에 `disassemble -a`라는 명령어와 함께 주소를 입력하시면
+`UIDebuggingInformationOverlay`는 `UIWindow` subclassing하고 있네요. 저희는 `- (id) init; (0x12f43cfe8)` 이 부분을 파볼 예정입니다. lldb에 `disassemble -a`라는 명령어와 함께 주소를 입력하시면
 
 ```
 (lldb) disassemble -a 0x12f43cfe8
