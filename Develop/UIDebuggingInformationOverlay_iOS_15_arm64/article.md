@@ -500,6 +500,7 @@ UIKitCore`-[UIDebuggingInformationOverlay init]:
     0x12fe85048 <+96>:  mov    w2, #0x0
     0x12fe8504c <+100>: bl     0x1300ef984               ; symbol stub for: objc_msgSend
 Target 0: (Maps) stopped.
+
 (lldb) po NSSelectorFromString(@"initWithWindowScene:")
 0x00000001cc51e56f
 
@@ -528,6 +529,7 @@ libsystem_kernel.dylib'semaphore_signal_trap:    0x1cc055fbc <+0>: mov    x16, #
     0x1cc055fc4 <+8>: ret    
 libsystem_kernel.dylib'semaphore_signal_all_trap:    0x1cc055fc8 <+0>: mov    x16, #-0x22
 Target 0: (Maps) stopped.
+
 (lldb) po [[UIDebuggingInformationOverlay overlay] toggleVisibility]
 0x000000010aee8000
 
