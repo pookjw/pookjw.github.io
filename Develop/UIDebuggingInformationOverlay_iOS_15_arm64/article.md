@@ -135,7 +135,7 @@ UIKitCore`-[UIDebuggingInformationOverlay init]:
 
 이렇게 `-[UIDebuggingInformationOverlay init]`의 assembly 코드가 나옵니다. 여기서 관심있게 봐야 할 부분은 `<+36>`, `<+40>`, `<+44>` 입니다. `<+36>`에서 메모리 주소를 계산해서 `x8`에 할당하고, `<+40>`에서 `x8`에 할당된 주소에서 offset을 더해서 값을 `w8`에 읽어 오고, `<+44>`에서 `w8`의 값이 0이면 `<+124>`로 jump를 시켜 버리네요. jump가 되면 epilogue가 불리면서 `<+152>`에서 `nil`을 return해 버립니다.
 
-즉, 위 assembly 코드는 대략적으로 아래와 같다고 유추할 수 있습니다. (정확한건 아니니 참고만 해주세요. raywenderlich의 원래 글을 읽은 분이라면 `dispatch_once`도 아래 코드에 있어야 한다고 생각하실 수 있습니다. 맞는 말씀이지만 이 가이드에서는 필요가 없어서 생략했습니다.)
+즉, 위 assembly 코드는 대략적으로 아래와 같다고 유추할 수 있습니다. (정확한건 아니니 참고만 해주세요. raywenderlich의 원래 글을 읽은 분이라면 `dispatch_once`도 아래 코드에 있어야 한다고 생각하실 수 있습니다. 하지만 이 가이드에서는 해당 부분을 언급할 필요가 없어서 생략했습니다.)
 
 ```objc
 - (instancetype)init {
