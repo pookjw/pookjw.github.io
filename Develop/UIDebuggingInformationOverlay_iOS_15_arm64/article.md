@@ -10,7 +10,7 @@ iOS 11 이후로 애플은 `UIDebuggingInformationOverlay` 객체를 쉽게 만�
 
 따라서 저는 iOS 15와 arm64에 맞게 가이드를 여기에 작성하겠습니다. 또한 보너스로 `UIDebuggingInformationOverlay`는 [UIApplicationSceneManifest](https://developer.apple.com/documentation/bundleresources/information_property_list/uiapplicationscenemanifest) 환경을 지원하지 않는데 이걸 가능하게 하는 방법도 소개하려고 합니다.
 
-이 가이드는 iOS 15.5 (19F70) 기준입니다.
+이 가이드는 iOS 15.5 (19F70) 기준입니다. 저는 CS 전공도 아니고 assembly를 전문적으로 배우지도 않은, 구글링 만으로 며칠만에 어설프게 assembly를 배운 사람입니다. 따라서 오류가 있을 수 있는 점 참고 부탁드립니다.
 
 ## 목차
 
@@ -157,7 +157,7 @@ UIKitCore`-[UIDebuggingInformationOverlay init]:
 (lldb) breakpoint set -a 0x12f43d080
 ```
 
-이제 `-[UIDebuggingInformationOverlay overlay]`을 불러 봅시다. breakpoint에 걸리게 하기 위해 `-i0` 옵션도 같이 써줄게요.
+이제 `+[UIDebuggingInformationOverlay overlay]`을 불러 봅시다. breakpoint에 걸리게 하기 위해 `-i0` 옵션도 같이 써줄게요.
 
 ```
 (lldb) expression -i0 -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") overlay]
@@ -250,7 +250,7 @@ Completed expression: (id) $1 = nil
 0x12ff85c68: 0x0000000000000000
 ```
 
-`w8`에 `0x0000000000000000`을 할당하게 됩니다. 이거때문에 `<+44>`에서 `<+124>`로 jump하게 되므로, 이 값을 0이 아닌 값(`0xffffffffffffffff`)으로 설정하면 jump가 일어나지 않을 것입니다.
+`0x000000012ff85c68`이 `0x0000000000000000`이므로, `ldrb   w8, [x8, #0xc68]`는 `w8`에 `0x0000000000000000`을 할당하게 됩니다. 이거때문에 `<+44>`에서 `<+124>`로 jump하게 되므로, 이 값을 `0x0000000000000000`이 아닌 값(`0xffffffffffffffff`)으로 설정하면 jump가 일어나지 않을 것입니다.
 
 ```
 (lldb) mem write 0x000000012ff85c68 0xffffffffffffffff -s 8
@@ -264,6 +264,7 @@ Completed expression: (id) $1 = nil
 (lldb) breakpoint delete
 About to delete all breakpoints, do you want to do that?: [Y/n] y
 All breakpoints removed. (3 breakpoints)
+
 (lldb) expression -i0 -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") new]
 <UIDebuggingInformationOverlay: 0x2a9008f50; frame = (0 0; 1133 744); hidden = YES; gestureRecognizers = <NSArray: 0x600000bb0c30>; layer = <UIWindowLayer: 0x600000bb00f0>>
 ```
