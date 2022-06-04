@@ -537,7 +537,7 @@ Process 10507 resuming
 
 ![](3.png)
 
-그러면 위 사진처럼 뭔가가 떴습니다! 하지만 아무 내용이 없네요. 이걸 고칠 차례입니다.
+그러면 위 사진처럼 뭔가가 떴습니다! 하지만 아무 내용이 없네요. 이걸 고칠 차례입니다. 일단 **Dismiss** 버튼을 눌러 줍시다.
 
 ### <a name="handling-UIDebuggingInformationOverlayInvokeGestureHandler">UIDebuggingInformationOverlayInvokeGestureHandler 다루기</a>
 
