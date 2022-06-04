@@ -32,6 +32,8 @@
 
 - [Chapter 16: Hooking & Executing Code with dlopen & dlsym](#chapter-16)
 
+- [Chapter 17: Exploring & Method Swizzling Objective-C Frameworks](#chapter-17)
+
 # <a name="chapter-1">Chapeter 1: Getting Started</a>
 
 ```
@@ -3023,3 +3025,7 @@ if let handle: UnsafeMutableRawPointer = dlopen("./Frameworks/HookingSwift.frame
     self.imageView.image = originalImage
 }
 ```
+
+# <a name="chapter-17">Chapter 17: Exploring & Method Swizzling Objective-C Frameworks</a>
+
+[UIDebuggingInformationOverlay를 iOS 15 arm64 환경에서 써보자](../UIDebuggingInformationOverlay_iOS_15_arm64/article.md)
