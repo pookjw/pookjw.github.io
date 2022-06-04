@@ -2,7 +2,7 @@
 
 ## 개발
 
-- [UIDebuggingInformationOverlay를 iOS 15 arm64 환경에서 써보자](UIDebuggingInformationOverlay_iOS_15_arm64/article.md)
+- [UIDebuggingInformationOverlay를 iOS 15 arm64 환경에서 써보자](Develop/UIDebuggingInformationOverlay_iOS_15_arm64/article.md)
 - [Swift AsyncStream + 메모리 관리](Develop/Swift_AsyncStream_Memory_Management/article.md)
 - [watchOS에서 UICollectionView를 써보자 (PUICCollectionViewController)](Develop/PUICCollectionViewController/article.md)
 - [Advanced Apple Debugging & Reverse Engineering](Develop/Advanced_Apple_Debugging/article.md)
