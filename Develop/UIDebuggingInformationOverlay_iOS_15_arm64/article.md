@@ -362,7 +362,7 @@ Process 9113 resuming
 Process 9113 resuming
 ```
 
-... 역시나 아무 일도 일어나지 않습니다. 아마 `+[UIDebuggingInformationOverlay overlay]`이 singleton이라 잘못 생성된 객체로 할당되어서 그런 것 같습니다. 앱을 재실행해서 위에서 했던 내용을 다시 해야 할 것 같습니다. 정리하면
+... 역시나 아무 일도 일어나지 않습니다. 아마 `+[UIDebuggingInformationOverlay overlay]`에 잘못 생성된 객체로 할당되어서 그런 것 같습니다. 앱을 재실행해서 위에서 했던 내용을 다시 해야 할 것 같습니다. 정리하면
 
 1. `(lldb) expression -l objc -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") _shortMethodDescription]`를 통해 `-[UIDebuggingInformationOverlay init]`의 주소를 가져온다.
 
