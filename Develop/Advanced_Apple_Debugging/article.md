@@ -2856,7 +2856,7 @@ char * getenv(const char *name) {
         Summary: libsystem_c.dylib`getenv
 ```
 
-handle의 주소는 ``, symble은 ``이므로
+handle의 주소는 /usr/lib/system/libsystem_c.dylib``, symbol은 `getenv`이므로
 
 ```c
 char * getenv(const char *name) {
