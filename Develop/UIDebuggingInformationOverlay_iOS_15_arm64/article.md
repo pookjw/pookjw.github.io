@@ -10,7 +10,7 @@ iOS 11 이후로 애플은 `UIDebuggingInformationOverlay` 객체를 쉽게 만�
 
 따라서 저는 iOS 15와 arm64에 맞게 가이드를 여기에 작성하겠습니다. 또한 보너스로 `UIDebuggingInformationOverlay`는 [UIApplicationSceneManifest](https://developer.apple.com/documentation/bundleresources/information_property_list/uiapplicationscenemanifest) 환경을 지원하지 않는데 이걸 가능하게 하는 방법도 소개하려고 합니다.
 
-이 가이드는 iOS 15.5 (19F70) 기준입니다. 저는 CS 전공도 아니고 assembly를 전문적으로 배우지도 않은, 구글링 만으로 며칠만에 어설프게 assembly를 배운 사람입니다. 따라서 오류가 있을 수 있는 점 참고 부탁드립니다.
+제 가이드는 iOS 15.5 (19F70) 기준입니다. 저는 CS 전공도 아니고 assembly를 전문적으로 배우지도 않은, 구글링 만으로 며칠만에 어설프게 assembly를 배운 사람입니다. 따라서 오류가 있을 수 있는 점 참고 부탁드립니다.
 
 ## 목차
 
