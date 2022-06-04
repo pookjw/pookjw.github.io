@@ -283,13 +283,15 @@ Process 9113 resuming
 저희는 **Simulator에서 지도 앱**으로 작업을 진행하고 있었습니다. 지도 앱은 `UIWindowScene`을 쓰고 있습니다. `UIWindowScene` 기반 앱에서는 작동하지 않고, `UIWindowScene`을 쓰지 않는 앱에서는 작동한다? 그리고 `UIDebuggingInformationOverlay`는 `UIWindow`를 subclassing하고 있다? 이거는 `<+72>`에서 [`-[UIWindow initWithWindowScene:]`](https://developer.apple.com/documentation/uikit/uiwindow/3197961-init)을 호출하지 않고 `-[UIWindow init]`을 호출하고 있다는 의심을 할 수 있습니다. 이를 확인하기 위해 `<+72>`에서 breakpoint를 찍어줍니다.
 
 
+그리고 이번에는 `+[UIDebuggingInformationOverlay overlay]` 대신에, `+[UIDebuggingInformationOverlay new]`로 해봅시다.
+
 ```
 (lldb) breakpoint set -a 0x12f43d030
 Breakpoint 6: where = UIKitCore`-[UIDebuggingInformationOverlay init] + 72, address = 0x000000012f43d030
 
 (lldb) process interrupt
 
-(lldb) expression -i0 -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") overlay]
+(lldb) expression -i0 -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") new]
 error: Execution was interrupted, reason: breakpoint 6.1.
 The process has been left at the point where it was interrupted, use "thread return -x" to return to the state before expression evaluation.
 Process 9113 stopped
@@ -345,6 +347,14 @@ Completed expression: (id) $22 = 0x000000014fc080a0
 `0x000000014fc080a0`의 주소를 가진 `UIDebuggingInformationOverlay`이 생성되었습니다. 이제 다시 `-[UIDebuggingInformationOverlay toggleVisibility]`를 호출해주면
 
 ```
+(lldb) po [0x000000014fc080a0 toggleVisibility]
+0x000000014fc080a0
+
+(lldb) c
+Process 9113 resuming
+
+(lldb) process interrupt
+
 (lldb) po [[UIDebuggingInformationOverlay overlay] toggleVisibility]
 0x0000000106f14000
 
@@ -352,7 +362,7 @@ Completed expression: (id) $22 = 0x000000014fc080a0
 Process 9113 resuming
 ```
 
-... 역시나 아무 일도 일어나지 않습니다. 아마 `+[UIDebuggingInformationOverlay overlay]`이 singleton이라 잘못 생성된 객체로 작동되고 있는 것 같습니다. 앱을 재실행해서 위에서 했던 내용을 다시 해야 할 것 같습니다. 정리하면
+... 역시나 아무 일도 일어나지 않습니다. 아마 `+[UIDebuggingInformationOverlay overlay]`이 singleton이라 잘못 생성된 객체로 할당되어서 그런 것 같습니다. 앱을 재실행해서 위에서 했던 내용을 다시 해야 할 것 같습니다. 정리하면
 
 1. `(lldb) expression -l objc -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") _shortMethodDescription]`를 통해 `-[UIDebuggingInformationOverlay init]`의 주소를 가져온다.
 
