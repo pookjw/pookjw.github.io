@@ -133,7 +133,7 @@ UIKitCore`-[UIDebuggingInformationOverlay init]:
     0x12f43d098 <+176>: b      0x12f43d00c               ; <+36>
 ```
 
-이렇게 `-[UIDebuggingInformationOverlay init]`의 assembly 코드가 나옵니다. 여기서 관심있게 봐야 할 부분은 `<+36>`, `<+40>`, `<+44>` 입니다. `<+36>`에서 메모리 주소를 계산해서 `x8`에 할당하고, `<+40>`에서 `x8`에 할당된 주소에서 offset을 더해서 값을 `w8`에 읽어 오고, `<+44>`에서 `w8`의 값이 0이면 `<+124>`로 jump를 시켜 버리네요. jump가 되면 epilogue가 불리면서 `<+152>`에서 `nil`을 return해 버립니다. 또한 `UIDebuggingInformationOverlay`를 subclassing하고 있기도 하네요.
+이렇게 `-[UIDebuggingInformationOverlay init]`의 assembly 코드가 나옵니다. 여기서 관심있게 봐야 할 부분은 `<+36>`, `<+40>`, `<+44>` 입니다. `<+36>`에서 메모리 주소를 계산해서 `x8`에 할당하고, `<+40>`에서 `x8`에 할당된 주소에서 offset을 더해서 값을 `w8`에 읽어 오고, `<+44>`에서 `w8`의 값이 0이면 `<+124>`로 jump를 시켜 버리네요. jump가 되면 epilogue가 불리면서 `<+152>`에서 `nil`을 return해 버립니다. 또한 `UIDebuggingInformationOverlay`는 `UIWindow` subclassing하고 있기도 하네요.
 
 즉, 위 assembly 코드는 대략적으로 아래와 같다고 유추할 수 있습니다. (정확한건 아니니 참고로만)
 
