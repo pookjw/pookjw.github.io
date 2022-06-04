@@ -8,19 +8,14 @@ iOS 11 이후로 애플은 `UIDebuggingInformationOverlay` 객체를 쉽게 만�
 
 하지만 위 가이드는 iOS 11과 x86_64 기준으로 설명하고 있습니다. 요즘은 Apple Silicon의 등장으로 arm64용 가이드가 필요해 졌다고 생각합니다. 또한 위 가이드에서 소개하는 방법은 [UIWindowScene](https://developer.apple.com/documentation/uikit/uiwindowscene)의 등장으로 인해 iOS 13 이상에서 더 이상 작동하지 않습니다. `-[UIApplication statusBarWindow]`가 더 이상 제 역할을 하지 않는 것도 영향이 있습니다.
 
-따라서 저는 iOS 15와 arm64에 맞게 가이드를 여기에 작성하겠습니다. 또한 보너스로 `UIDebuggingInformationOverlay`는 [UIApplicationSceneManifest](https://developer.apple.com/documentation/bundleresources/information_property_list/uiapplicationscenemanifest) 환경을 지원하지 않는데 이걸 가능하게 하는 방법도 소개하려고 합니다.
+따라서 저는 iOS 15와 arm64에 맞게 가이드를 여기에 작성하겠습니다. 또한 보너스로 `UIDebuggingInformationOverlay`는 [UIApplicationSceneManifest](https://developer.apple.com/documentation/bundleresources/information_property_list/uiapplicationscenemanifest) 환경을 지원하지 않는데 이걸 가능하게 하는 방법도 소개하려고 합니다 (TODO).
 
 제 가이드는 iOS 15.5 (19F70) 기준입니다. 저는 CS 전공도 아니고 assembly를 전문적으로 배우지도 않은, 구글링 만으로 며칠만에 어설프게 assembly를 배운 사람입니다. 따라서 오류가 있을 수 있는 점 참고 부탁드립니다.
 
 ## 목차
 
-- [lldb편](#using-lldb)
-    - [UIDebuggingInformationOverlay 다루기](#handling-UIDebuggingInformationOverlay)
-    - [UIDebuggingInformationOverlayInvokeGestureHandler 다루기](#handling-UIDebuggingInformationOverlayInvokeGestureHandler)
-    
-- [Swizzling편](#using-swizzling)
-
-## <a name="using-lldb">lldb편</a>
+- [UIDebuggingInformationOverlay 다루기](#handling-UIDebuggingInformationOverlay)
+- [UIDebuggingInformationOverlayInvokeGestureHandler 다루기](#handling-UIDebuggingInformationOverlayInvokeGestureHandler)
 
 ### <a name="handling-UIDebuggingInformationOverlay">UIDebuggingInformationOverlay 다루기</a>
 
