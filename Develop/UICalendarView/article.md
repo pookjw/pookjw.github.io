@@ -166,7 +166,7 @@ class MyCalendarView: UICalendarView, UICollectionViewDelegate {
 }
 ```
 
-'[`UICalendarSelection`를 쓰면 되는데 왜 저렇게 복잡하게 함?](https://developer.apple.com/documentation/uikit/uicalendarselection)'이라고 생각할 수 있는데, `UIContextMenuConfiguration`를 추가하고 제목에 날짜를 넣는 장난을 치려면 `IndexPath`에서 `Date`를 가져오는 방법이 필요하기 때문이다.
+'[`UICalendarSelection`를 쓰면 되는데 왜 저렇게 복잡하게 함?](https://developer.apple.com/documentation/uikit/uicalendarselection)'이라고 생각할 수 있는데, 아래처럼 `UIContextMenuConfiguration`를 추가하고 제목에 날짜를 넣는 장난을 치려면 `IndexPath`에서 `Date`를 가져오는 방법이 필요하기 때문이다.
 
 ```swift
 @MainActor
