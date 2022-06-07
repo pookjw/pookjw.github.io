@@ -152,6 +152,7 @@ in UICalendarView:
 ```swift
 @MainActor
 class MyCalendarView: UICalendarView, UICollectionViewDelegate {
+    // _UIDatePickerCalendarMonth, _UIDatePickerCalendarDay
     private var dataSource: UICollectionViewDiffableDataSourceReference { value(forKey: "_dataSource") as! UICollectionViewDiffableDataSourceReference }
     
     private func date(at indexPath: IndexPath) -> Date {
@@ -171,6 +172,7 @@ class MyCalendarView: UICalendarView, UICollectionViewDelegate {
 ```swift
 @MainActor
 class MyCalendarView: UICalendarView, UICollectionViewDelegate {
+    // _UIDatePickerCalendarMonth, _UIDatePickerCalendarDay
     private var dataSource: UICollectionViewDiffableDataSourceReference { value(forKey: "_dataSource") as! UICollectionViewDiffableDataSourceReference }
     
     private func date(at indexPath: IndexPath) -> Date {
