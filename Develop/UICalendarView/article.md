@@ -180,8 +180,7 @@ class MyCalendarView: UICalendarView, UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
-        let item: NSObject = dataSource.itemIdentifier(for: indexPaths.first!) as! NSObject
-        let date: NSDate = item.value(forKey: "_date") as! NSDate
+        let date: Date = date(at: indexPaths.first!)
         let formatter: DateFormatter = .init()
         formatter.dateFormat = "YY/MM/dd"
         let string: String = formatter.string(from: date as Date)
