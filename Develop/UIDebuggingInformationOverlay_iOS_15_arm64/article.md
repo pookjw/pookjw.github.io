@@ -368,7 +368,7 @@ Process 9113 resuming
 
 2. `(lldb) disassemble -a ${가져온 주소}`를 통해 `<+36>`, `<+40>`, `<+44>`의 offset을 보고 메모리 주소를 구해서 값을 `0xffffffffffffffff`로 설정한다.
 
-3. `<+72>`에서 breakpoint를 설정하고 `+[UIDebuggingInformationOverlay overlay]`을 실행하고 breakpoint가 걸리면, `init`을 `initWithWindowScene:`로 바꿔주고 argumenr에 `UIWindowScene`을 넣어준다.
+3. `<+72>`에서 breakpoint를 설정하고 `+[UIDebuggingInformationOverlay overlay]`을 실행하고 breakpoint가 걸리면, `init`을 `initWithWindowScene:`로 바꿔주고 argument에 `UIWindowScene`을 넣어준다.
 
 4. `+[UIDebuggingInformationOverlay overlay]`를 끝내고 `-[UIDebuggingInformationOverlay toggleVisibility]`를 호출한다.
 
