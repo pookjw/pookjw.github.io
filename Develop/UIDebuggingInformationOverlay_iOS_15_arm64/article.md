@@ -366,7 +366,7 @@ Process 9113 resuming
 
 1. `(lldb) expression -l objc -O -- [NSClassFromString(@"UIDebuggingInformationOverlay") _shortMethodDescription]`를 통해 `-[UIDebuggingInformationOverlay init]`의 주소를 가져온다.
 
-2. `(lldb) disassemble -a ${가져온 주소}`를 통해 `<+36>`, `<+40>`, `<+44>`의 offset을 보고 값을 `0xffffffffffffffff`로 설정한다.
+2. `(lldb) disassemble -a ${가져온 주소}`를 통해 `<+36>`, `<+40>`, `<+44>`의 offset을 보고 메모리 주소를 구해서 값을 `0xffffffffffffffff`로 설정한다.
 
 3. `<+72>`에서 breakpoint를 설정하고 `+[UIDebuggingInformationOverlay overlay]`을 실행하고 breakpoint가 걸리면, `init`을 `initWithWindowScene:`로 바꿔주고 argumenr에 `UIWindowScene`을 넣어준다.
 
