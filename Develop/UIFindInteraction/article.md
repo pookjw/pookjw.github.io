@@ -1,4 +1,4 @@
-# iOS 16 - UIFindInteraction, 그리고 버그
+# iOS 16 - UIFindInteraction
 
 **iOS 16.0 beta 1 (20A5283p) 기준입니다.**
 
@@ -114,7 +114,7 @@ terminating with uncaught exception of type NSException
 
 ???
 
-`UIFindInteraction`은 자기가 속한 View를 알 수 없어서, `UIScene`을 찾을 수 없다는 뜻 같네요. 생각해보니 `UIFindInteraction`에 View를 넣어주는 걸 안 넣어줬으니 당연한 결과이긴 하네요...
+`UIFindInteraction`은 자기가 속한 View를 알 수 없어서, `UIScene`을 찾을 수 없다는 뜻 같네요. 생각해보니 `UIFindInteraction`에 View의 정의를 안 넣어줬으니 당연한 결과이긴 하네요...
 
 근데 Documentation을 아무리 읽어봐도 이걸 넣어주는 기능이 없네요. 그러면 대체 scene 정의를 어떻게 하라는건지...??? `UITextView` 같이 기본적으로 `UIFindInteraction`을 지원하는 View는 잘 되는 걸 보아 분명 방법이 있을텐데요. 혹시나 하는 마음에 `+[UIFindInteraction _shortMethodDescription]`을 해보면
 
@@ -168,7 +168,7 @@ in UIFindInteraction:
 (NSObject ...)
 ```
 
-내부적으로 `_view`라는 ivar가 존재하는데 아마 [UIInteraction.view](https://developer.apple.com/documentation/uikit/uiinteraction/2890990-view)와 synthesize하는 의도같네요. 근데 이걸 정의해주는 방법이 없네요...??? 한 번 KVC으로 강제로 주입해 볼게요.
+내부적으로 `_view`라는 ivar가 존재하는데 아마 [UIInteraction.view](https://developer.apple.com/documentation/uikit/uiinteraction/2890990-view)와 synthesize하는 의도같네요. 한 번 KVC으로 강제로 주입해 볼게요.
 
 ```objc
 @implementation TestFindView
@@ -188,6 +188,30 @@ in UIFindInteraction:
 @end
 ```
 
-이렇게 하니까 잘 되네요. 뭔가 SDK 설계가 잘못 된 것 같은데;; 제가 잘못한 걸 수도 있겠지만 개선이 되어야 할 것 같네요.
+이렇게 하니까 잘 되긴 하는데...
 
 ![](1.png)
+
+뭔가 이상해서... 일단 내려놓고 10시간 정도 지나니 머릿속으로 [addInteraction:](https://developer.apple.com/documentation/uikit/uiview/2891013-addinteraction)이 갑자기 떠올라서...
+
+```objc
+@implementation TestFindView
+
+- (instancetype)init {
+    if (self = [super init]) {
+        self.backgroundColor = UIColor.systemPinkColor;
+        
+        UIFindInteraction *findInteraction = [[UIFindInteraction alloc] initWithSessionDelegate:self];
+        [self addInteraction:findInteraction];
+        [self->_findInteraction release];
+        self->_findInteraction = [findInteraction retain];
+        [findInteraction release];
+    }
+    
+    return self;
+}
+
+@end
+```
+
+이렇게 하니 되네요 -_-; 이 기본적인게 생각이 안 나서 KVC까지 써가면서 개뻘짓...
