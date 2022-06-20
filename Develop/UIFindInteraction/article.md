@@ -199,8 +199,6 @@ in UIFindInteraction:
 
 - (instancetype)init {
     if (self = [super init]) {
-        self.backgroundColor = UIColor.systemPinkColor;
-        
         UIFindInteraction *findInteraction = [[UIFindInteraction alloc] initWithSessionDelegate:self];
         [self addInteraction:findInteraction];
         [self->_findInteraction release];
