@@ -116,7 +116,7 @@ terminating with uncaught exception of type NSException
 
 `UIFindInteraction`은 자기가 속한 View를 알 수 없어서, `UIScene`을 찾을 수 없다는 뜻 같네요. 생각해보니 `UIFindInteraction`에 View를 넣어주는 걸 안 넣어줬으니 당연한 결과이긴 하네요...
 
-근데 Documentation을 아무리 읽어봐도 이걸 넣어주는 기능이 없네요...??? 그러면 대체 scene 정의를 어떻게 하라는건지...??? `UITextView` 같이 기본적으로 `UIFindInteraction`을 지원하는 View는 잘 되는 걸 보아 분명 방법이 있을텐데요. 혹시나 하는 마음에 `+[UIFindInteraction _shortMethodDescription]`을 해보면
+근데 Documentation을 아무리 읽어봐도 이걸 넣어주는 기능이 없네요. 그러면 대체 scene 정의를 어떻게 하라는건지...??? `UITextView` 같이 기본적으로 `UIFindInteraction`을 지원하는 View는 잘 되는 걸 보아 분명 방법이 있을텐데요. 혹시나 하는 마음에 `+[UIFindInteraction _shortMethodDescription]`을 해보면
 
 ```
 (lldb) expression -l objc -O -- [UIFindInteraction _shortMethodDescription]
@@ -168,7 +168,7 @@ in UIFindInteraction:
 (NSObject ...)
 ```
 
-내부적으로 `_view`라는 ivar가 존재하는데 이걸 정의해주는 방법이 없네요...??? 한 번 KVC으로 강제로 주입해 볼게요.
+내부적으로 `_view`라는 ivar가 존재하는데 아마 [UIInteraction.view](https://developer.apple.com/documentation/uikit/uiinteraction/2890990-view)와 synthesize하는 의도같네요. 근데 이걸 정의해주는 방법이 없네요...??? 한 번 KVC으로 강제로 주입해 볼게요.
 
 ```objc
 @implementation TestFindView
@@ -188,6 +188,6 @@ in UIFindInteraction:
 @end
 ```
 
-이렇게 하니까 잘 되네요...??? 뭔가 SDK 설계가 잘못 된 것 같은데;; 제가 잘못한 걸 수도 있겠지만 개선이 되어야 할 것 같네요.
+이렇게 하니까 잘 되네요. 뭔가 SDK 설계가 잘못 된 것 같은데;; 제가 잘못한 걸 수도 있겠지만 개선이 되어야 할 것 같네요.
 
 ![](1.png)
