@@ -1,8 +1,10 @@
 # iPad에서 SwiftUI NavigationView의 Display Mode Button을 없애기
 
-![](1.png)
+- Update 2022/06/22: **iOS 16에서는 [`NavigationSplitView`](https://developer.apple.com/documentation/swiftui/navigationsplitview)를 사용하실 경우 이 방법은 작동하지 않습니다.** `NavigationSplitView`는 `UISplitViewController`로 구현되지 않은 걸로 보이네요.
 
-**iOS 16에서는 [`NavigationSplitView`](https://developer.apple.com/documentation/swiftui/navigationsplitview)를 사용하실 경우 이 방법은 작동하지 않습니다.** `NavigationSplitView`는 `UISplitViewController`로 구현되지 않은 걸로 보이네요.
+---
+
+![](1.png)
 
 iPad에서 SwiftUI로 NavigationView을 쓸 경우, 좌측 상단에 Display Mode Button이 뜨는데, 아무리 찾아봐도 이걸 지우는 방법이 안 나오길래 만든 방법입니다.
 
