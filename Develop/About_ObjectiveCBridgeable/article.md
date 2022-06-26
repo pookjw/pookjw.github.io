@@ -41,7 +41,7 @@ bridged.itemIdentifiers.forEach {
 
 이렇게 `as`라는 키워드 하나로 Swift 타입과 Objective-C 타입을 쉽게 오갈 수 있습니다. 이는 `_ObjectiveCBridgeable`라는 protocol 덕분에 가능합니다.
 
-예시로 `SwiftView`라는 Swift 타입을 만들어 보겠습니다. [`UIView`](https://developer.apple.com/documentation/uikit/uiview)에서 [backgroundColor](https://developer.apple.com/documentation/uikit/uiview/1622591-backgroundcolor)를 유지한채 Swift 타입과 Objective-C 타입이 bridging 되는 구조입니다.
+예시로 `SwiftView`라는 Swift 타입을 만들어 보겠습니다. [`UIView`](https://developer.apple.com/documentation/uikit/uiview)에서 [`backgroundColor`](https://developer.apple.com/documentation/uikit/uiview/1622591-backgroundcolor)를 유지한채 Swift 타입과 Objective-C 타입이 bridging 되는 구조입니다.
 
 ```swift
 struct SwiftView: _ObjectiveCBridgeable {
@@ -91,7 +91,7 @@ class ViewController: UIViewController {
 }
 ```
 
-문득... SwiftUI의 [Color](https://developer.apple.com/documentation/swiftui/color)와 UIKit의 [UIColor](https://developer.apple.com/documentation/uikit/uicolor)의 brigding 구조도 만들 수 있지 않을까? 싶어서 한 번 해봤습니다.
+문득... SwiftUI의 [`Color`](https://developer.apple.com/documentation/swiftui/color)와 UIKit의 [`UIColor`](https://developer.apple.com/documentation/uikit/uicolor)의 brigding 구조도 만들 수 있지 않을까? 싶어서 한 번 해봤습니다.
 
 ```swift
 extension Color: _ObjectiveCBridgeable {
