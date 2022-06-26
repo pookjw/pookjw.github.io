@@ -74,7 +74,7 @@ struct SwiftView: _ObjectiveCBridgeable {
 }
 ```
 
-그러면 아래처럼 briding이 쉽게 가능해 집니다.
+그러면 아래처럼 bridging이 쉽게 가능해 집니다.
 
 ```swift
 class ViewController: UIViewController {
