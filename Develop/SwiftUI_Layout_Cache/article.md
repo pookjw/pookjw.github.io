@@ -266,8 +266,8 @@ struct WeatherLayout: Layout {
     
     // NEW
     func makeCache(subviews: Subviews) -> CacheStore {
-        let cache: UUID = .init()
-        return cache
+        let cacheStore: CacheStore = .init()
+        return cacheStore
     }
     
     // NEW
