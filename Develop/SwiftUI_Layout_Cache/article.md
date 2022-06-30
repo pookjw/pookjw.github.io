@@ -274,6 +274,7 @@ struct WeatherLayout: Layout {
     func updateCache(_ cache: inout CacheStore, subviews: Subviews) {
     
     }
+}
 ```
 
 이제 캐싱을 저장하고 불러오는 로직을 짜볼게요.
