@@ -258,10 +258,10 @@ struct WeatherLayout: Layout {
     
     typealias Cache = CacheStore
     
-    // () -> UUID
+    // () -> CacheData
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout CacheStore) -> CGSize { /* ... */ }
     
-    // () -> UUID
+    // () -> CacheData
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout CacheStore) { /* ... */ }
     
     // NEW
