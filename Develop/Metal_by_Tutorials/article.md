@@ -7,6 +7,8 @@
 
 - [Chapter 2: 3D Models](#chapter-2)
 
+- [Chapeter 3: The Rendering Pipeline](#chapter-3)
+
 # <a name="chapter-1">Chapeter 1: Hello, Metal!</a>
 
 Metal을 사용할 때는 'Metal 초기 설정 (Initialize Metal)' -> 'Model을 불러 옴 (Load a model)' -> 'Set up the pipeline (pipeline 설정)' -> 'Render' 과정을 거치게 된다.
@@ -277,5 +279,135 @@ extension ViewController: MTKViewDelegate {
         commandBuffer.present(drawable)
         commandBuffer.commit()
     }
+}
+```
+
+# <a name="chapter-3">Chapeter 3: The Rendering Pipeline</a>
+
+- GPU : 사진, 영상처럼 거대한 양을 빠른 속도로 처리하는데 특화되어 있다. 캐시 메모리의 양이 적은 대신 코어가 엄청 많다.
+
+- CPU : 자원과 컴퓨터의 작업들(operations)을 관리한다. CPU는 GPU처럼 거대한 양의 데이터를 처리하진 못하지만 연속적인 작업을 빠르게 처리할 수 있다. 캐시 메모리를 통해 저지연(low latency)인 것이 장점이다.
+
+![](5.png)
+
+![](6.png)
+
+![](7.png)
+
+## Practice
+
+![](8.png)
+
+### `Renderer.swift`
+
+```swift
+import MetalKit
+
+class Renderer: NSObject {
+    static var device: MTLDevice!
+    static var commandQueue: MTLCommandQueue!
+    static var library: MTLLibrary!
+    var mesh: MTKMesh!
+    var vertexBuffer: MTLBuffer!
+    var pipelineState: MTLRenderPipelineState!
+    
+    init(metalView: MTKView) {
+        let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+        let commandQueue: MTLCommandQueue = device.makeCommandQueue()!
+        
+        Self.device = device
+        Self.commandQueue = commandQueue
+        
+        metalView.device = device
+        metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 0.8, alpha: 1.0)
+        
+        super.init()
+        
+        metalView.delegate = self
+        
+        // create the mesh
+        let allocator: MTKMeshBufferAllocator = .init(device: device)
+        let size: Float = 0.8
+        let mdlMesh: MDLMesh = .init(boxWithExtent: [size, size, size],
+                                     segments: [1, 1, 1],
+                                     inwardNormals: false,
+                                     geometryType: .triangles,
+                                     allocator: allocator)
+        
+        self.mesh = try! .init(mesh: mdlMesh, device: device)
+        vertexBuffer = self.mesh.vertexBuffers[0].buffer
+        
+        // create the shader function library
+        let library: MTLLibrary = device.makeDefaultLibrary()!
+        Self.library = library
+        let vertexFunction: MTLFunction = library.makeFunction(name: "vertex_main")!
+        let fragmentFunction: MTLFunction = library.makeFunction(name: "fragment_main")!
+        
+        // create the pipeline state object
+        let pipelineDescriptor: MTLRenderPipelineDescriptor = .init()
+        pipelineDescriptor.vertexFunction = vertexFunction
+        pipelineDescriptor.fragmentFunction = fragmentFunction
+        pipelineDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
+        pipelineDescriptor.vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(mdlMesh.vertexDescriptor)
+        
+        self.pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+    }
+}
+
+extension Renderer: MTKViewDelegate {
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        
+    }
+    
+    func draw(in view: MTKView) {
+        let commandBuffer: MTLCommandBuffer = Self.commandQueue.makeCommandBuffer()!
+        let descriptor: MTLRenderPassDescriptor = view.currentRenderPassDescriptor!
+        let renderEncoder: MTLRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)!
+        
+        renderEncoder.setRenderPipelineState(pipelineState)
+        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        
+        mesh.submeshes.forEach { submesh in
+            renderEncoder.drawIndexedPrimitives(type: .triangle,
+                                                indexCount: submesh.indexCount,
+                                                indexType: submesh.indexType,
+                                                indexBuffer: submesh.indexBuffer.buffer,
+                                                indexBufferOffset: submesh.indexBuffer.offset)
+        }
+        
+        renderEncoder.endEncoding()
+        let drawable: CAMetalDrawable = view.currentDrawable!
+        
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+    }
+}
+```
+
+### `Shaders.metal`
+
+```cpp
+#include <metal_stdlib>
+using namespace metal;
+
+// vertex descriptor와 대응하는 데이터
+/*
+ let vertexDescriptor: MTLVertexDescriptor = .init()
+ vertexDescriptor.attributes[0].format = .float3
+ vertexDescriptor.attributes[0].offset = 0
+ vertexDescriptor.attributes[0].bufferIndex = 0
+ */
+struct VertexIn {
+    float4 position [[attribute(0)]];
+};
+
+vertex float4 vertex_main(const VertexIn vertexIn [[stage_in]]) {
+    float4 position = vertexIn.position;
+    position.y -= 0.3;
+    return position;
+}
+
+fragment float4 fragment_main() {
+    return float4(0, 0, 1, 1);
 }
 ```
