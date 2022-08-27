@@ -9,6 +9,8 @@
 
 - [Chapeter 3: The Rendering Pipeline](#chapter-3)
 
+- [Chapeter 4: The Vertex Function](#chapter-4)
+
 # <a name="chapter-1">Chapeter 1: Hello, Metal!</a>
 
 Metal을 사용할 때는 'Metal 초기 설정 (Initialize Metal)' -> 'Model을 불러 옴 (Load a model)' -> 'Set up the pipeline (pipeline 설정)' -> 'Render' 과정을 거치게 된다.
@@ -411,3 +413,13 @@ fragment float4 fragment_main() {
     return float4(0, 0, 1, 1);
 }
 ```
+
+# <a name="chapter-4">Chapeter 4: The Vertex Function</a>
+
+- `MDLVertexDescriptor` : `.obj` 파일 안에 있는 정보를 담고 있는 Model I/O이다. Model I/O는 attributes, position, normals 같은 texture coordinates 정보를 담고 있다.
+
+- `MTLVertexDescriptor` : pipeline state를 만들어서 `[[stage_in]]` 같은 attribute를 정의한다.
+
+![](9.png)
+
+TODO
