@@ -5,8 +5,9 @@
 
 - [Chapter 1: Hello, Metal!](#chapter-1)
 
-# <a name="chapter-1">Chapeter 1: Hello, Metal!</a>
+- [Chapter 2: 3D Models](#chapter-2)
 
+# <a name="chapter-1">Chapeter 1: Hello, Metal!</a>
 
 Metal을 사용할 때는 'Metal 초기 설정 (Initialize Metal)' -> 'Model을 불러 옴 (Load a model)' -> 'Set up the pipeline (pipeline 설정)' -> 'Render' 과정을 거치게 된다.
 
@@ -125,6 +126,7 @@ extension ViewController: MTKViewDelegate {
         
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setVertexBuffer(mtkMesh.vertexBuffers[0].buffer, offset: 0, index: 0)
+        renderEncoder.setTriangleFillMode(.lines)
         
         let submesh: MTKSubmesh = mtkMesh.submeshes.first!
         
@@ -133,6 +135,141 @@ extension ViewController: MTKViewDelegate {
                                             indexType: submesh.indexType,
                                             indexBuffer: submesh.indexBuffer.buffer,
                                             indexBufferOffset: 0)
+        
+        renderEncoder.endEncoding()
+        
+        let drawable: CAMetalDrawable = view.currentDrawable!
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+    }
+}
+```
+
+# <a name="chapter-2">Chapter 2: 3D Models</a>
+
+- `MTLVertexDescriptor`, `MDLVertexDescriptor`을 통해 pipeline에서 통신되는 데이터 구조를 정의하며
+
+- `train.obj`이라는 3D Model을 불러 온다.
+
+![](4.png)
+
+```swift
+import UIKit
+import MetalKit
+
+class ViewController: UIViewController {
+    private var commandQueue: MTLCommandQueue!
+    private var mtkMesh: MTKMesh!
+    private var pipelineState: MTLRenderPipelineState!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        let device: MTLDevice = MTLCreateSystemDefaultDevice()!
+        print(device.name) // 'Apple iOS simulator GPU' or 'Apple M1 Ultra'
+        
+        let frame: CGRect = .init(x: .zero, y: .zero, width: 600.0, height: 600.0)
+        let mtkView: MTKView = .init(frame: frame, device: device)
+        mtkView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 0.8, alpha: 1.0)
+        mtkView.delegate = self
+        
+        view.addSubview(mtkView)
+        mtkView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            mtkView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            mtkView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            mtkView.widthAnchor.constraint(equalToConstant: frame.width),
+            mtkView.heightAnchor.constraint(equalToConstant: frame.height)
+        ])
+        
+        //
+        
+        // mesh data를 관리할 메모리를 할당해주는 객체
+        let allocator: MTKMeshBufferAllocator = .init(device: device)
+        
+        // Model 불러 오기
+        let vertexDescriptor: MTLVertexDescriptor = .init()
+        vertexDescriptor.attributes[0].format = .float3 // train.obj이 3차원임
+        vertexDescriptor.attributes[0].offset = 0
+        vertexDescriptor.attributes[0].bufferIndex = 0
+        vertexDescriptor.layouts[0].stride = MemoryLayout<SIMD3<Float>>.stride
+        
+        let meshDescriptor: MDLVertexDescriptor = MTKModelIOVertexDescriptorFromMetal(vertexDescriptor)
+        (meshDescriptor.attributes[0] as! MDLVertexAttribute).name = MDLVertexAttributePosition
+        
+        let assetUrl: URL = Bundle.main.url(forResource: "train", withExtension: "obj")!
+        let mdlAsset: MDLAsset = .init(url: assetUrl, vertexDescriptor: meshDescriptor, bufferAllocator: allocator)
+        let mdlMesh: MDLMesh = mdlAsset.childObjects(of: MDLMesh.self).first as! MDLMesh
+        
+        // MetalKit에서 쓸 수 있는 Mesh 생성
+        let mtkMesh: MTKMesh = try! .init(mesh: mdlMesh, device: device)
+        self.mtkMesh = mtkMesh
+        
+        // queue 생성
+        let commandQueue: MTLCommandQueue = device.makeCommandQueue()!
+        self.commandQueue = commandQueue
+        
+        // Library 정의
+        let shader: String = """
+        #include <metal_stdlib>
+        using namespace metal;
+        
+        struct VertexIn {
+            float4 position [[attribute(0)]];
+        };
+        
+        vertex float4 vertex_main(const VertexIn vertex_in [[stage_in]])
+        {
+            return vertex_in.position;
+        }
+        
+        fragment float4 fragment_main() {
+            return float4(0, 0.4, 0.21, 1);
+        }
+        """
+        
+        let library: MTLLibrary = try! device.makeLibrary(source: shader, options: nil)
+        let vertexFunction: MTLFunction = library.makeFunction(name: "vertex_main")!
+        let fragmentFunction: MTLFunction = library.makeFunction(name: "fragment_main")!
+        
+        // Pipline 설정
+        let pipelineDescriptor: MTLRenderPipelineDescriptor = .init()
+        pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+        pipelineDescriptor.vertexFunction = vertexFunction
+        pipelineDescriptor.fragmentFunction = fragmentFunction
+        pipelineDescriptor.vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(mtkMesh.vertexDescriptor)
+        
+        let pipelineState: MTLRenderPipelineState = try! device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+        self.pipelineState = pipelineState
+    }
+}
+
+extension ViewController: MTKViewDelegate {
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        
+    }
+    
+    func draw(in view: MTKView) {
+        // command buffer 생성
+        let commandBuffer: MTLCommandBuffer = commandQueue.makeCommandBuffer()!
+        
+        // View의 Render Pass Descriptor를 생성한다. 이 descriptor는 render를 어디로 해야 할지 (attachments)를 담고 있다.
+        let renderPassDescriptor: MTLRenderPassDescriptor = view.currentRenderPassDescriptor!
+        
+        // encoder 생성
+        let renderEncoder: MTLRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
+        
+        renderEncoder.setRenderPipelineState(pipelineState)
+        renderEncoder.setVertexBuffer(mtkMesh.vertexBuffers[0].buffer, offset: 0, index: 0)
+        renderEncoder.setTriangleFillMode(.lines)
+        
+        mtkMesh.submeshes.forEach { submesh in
+            renderEncoder.drawIndexedPrimitives(type: .triangle,
+                                                indexCount: submesh.indexCount,
+                                                indexType: submesh.indexType,
+                                                indexBuffer: submesh.indexBuffer.buffer,
+                                                indexBufferOffset: submesh.indexBuffer.offset)
+        }
         
         renderEncoder.endEncoding()
         
