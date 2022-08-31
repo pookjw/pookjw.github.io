@@ -422,4 +422,253 @@ fragment float4 fragment_main() {
 
 ![](9.png)
 
-TODO
+## shader에 데이터 넣기
+
+shader의 parameter에 데이터를 전달하려면 여러가지 방법이 있는데, 그 중 `MTLBuffer`를 이용하는 방법과 직접 넣는 방법이 있다. 아래처럼 `Quad.vertices`와 `Quad.indices` - 2개의 데이터가 있고, 전자는 `MTLBuffer`를 쓸 것이며 후자는 직접 넣어 보겠다.
+
+`MTLBuffer`는 데이터 및 데이터의 규격을 담은 데이터라 할 수 있다.
+
+```swift
+import MetalKit
+
+struct Quad {
+    var vertices: [Float] = [
+        -1, 1, 0,
+         1, 1, 0,
+         -1, -1, 0,
+         1, -1, 0
+    ]
+    
+    var indices: [UInt16] = [
+        0, 3, 2,
+        0, 1, 3
+    ]
+    
+    let vertexBuffer: MTLBuffer
+    
+    init(device: MTLDevice, scale: Float = 1) {
+        vertices = vertices.map { $0 * scale }
+        
+        self.vertexBuffer = device.makeBuffer(bytes: &vertices, length: MemoryLayout<Float>.stride * vertices.count, options: [])!
+    }
+}
+```
+
+`draw(in:)`에서...
+
+```swift
+extension Renderer: MTKViewDelegate {
+    func draw(in view: MTKView) {
+        let renderEncoder: MTLRenderCommandEncoder = /* */
+        
+        timer += 0.005
+        var currentTime = sin(timer)
+        
+        // [[buffer(11)]
+        renderEncoder.setVertexBytes(&currentTime, length: MemoryLayout<Float>.stride, index: 11)
+        
+        // [[buffer(0)]
+        renderEncoder.setVertexBuffer(quad.vertexBuffer, offset: 0, index: 0)
+        
+        // [[buffer(1)]
+        renderEncoder.setVertexBytes(&quad.indices, length: MemoryLayout<UInt16>.stride * quad.indices.count, index: 1)
+        
+        // [[vertex_id]]에 0부터 quad.indices.count까지 넣어준다.
+        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: quad.indices.count)
+        
+        renderEncoder.endEncoding()
+    }
+}
+```
+
+이제 shader의 vertex 함수를 보면, `[Float]`는 `packed_float3` (`float3`랑은 데이터 사이즈가 다름)으로 되며, 각각 데이터가 들어 온 것을 볼 수 있다.
+
+```cpp
+vertex float4 vertex_main(constant packed_float3 *vertices [[buffer(0)]], constant ushort *indices [[buffer(1)]], constant float &timer [[buffer(11)]], uint vertexID [[vertex_id]]) {
+    ushort index = indices[vertexID];
+    float4 position = float4(vertices[index], 1);
+    position.y += timer;
+    return position;
+}
+```
+
+## `MTLVertexDescriptor`와 `[[stage_in]]`
+
+위처럼 pipeline에 Array 전체 데이터를 넣어주는 것은 성능에 안 좋으므로 [`drawIndexedPrimitives(type:indexCount:indexType:indexBuffer:indexBufferOffset:)`](https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515542-drawindexedprimitives)로 개선할 수 있다. 우선 `MTLVertexDescriptor`를 정의해준다.
+
+```swift
+import MetalKit
+
+extension MTLVertexDescriptor {
+    static var defaultLayout: MTLVertexDescriptor {
+        let vertexDescriptor = MTLVertexDescriptor()
+        vertexDescriptor.attributes[0].format = .float3
+        vertexDescriptor.attributes[0].offset = 0
+        vertexDescriptor.attributes[0].bufferIndex = 0
+        
+        vertexDescriptor.layouts[0].stride = MemoryLayout<Float>.stride * 3
+        
+        return vertexDescriptor
+    }
+}
+```
+
+이걸 `MTLRenderPipelineDescriptor`에 넣어 준다.
+
+```swift
+class Renderer: NSObject {
+    init(metalView: MTKView) {
+        /* ... */
+        
+        let pipelineDescriptor = MTLRenderPipelineDescriptor()
+        pipelineDescriptor.vertexDescriptor = MTLVertexDescriptor.defaultLayout
+        
+        /* ... */
+    }
+```
+
+`draw(in:)`에서...
+
+```swift
+extension Renderer: MTKViewDelegate {
+    func draw(in view: MTKView) {
+        let renderEncoder: MTLRenderCommandEncoder = /* */
+        
+        timer += 0.005
+        var currentTime = sin(timer)
+        
+        // [[buffer(11)]
+        renderEncoder.setVertexBytes(&currentTime, length: MemoryLayout<Float>.stride, index: 11)
+        
+        renderEncoder.setVertexBuffer(quad.vertexBuffer, offset: 0, index: 0)
+        
+        // quad.indices에 있는 값들을 quad.vertexBuffer (offset: 0)의 index의 값을 [[stage_in]]에 전달한다.
+        renderEncoder.drawIndexedPrimitives(type: .triangle,
+                                            indexCount: quad.indices.count,
+                                            indexType: .uint16,
+                                            indexBuffer: quad.indexBuffer,
+                                            indexBufferOffset: 0)
+        
+        renderEncoder.endEncoding()
+    }
+}
+```
+
+이제 shader에서...
+
+```cpp
+// [[attribute(0)]]는 `MTLVertexDescriptor.defaultLayout`에서 정의한 것이다.
+vertex float4 vertex_main(float4 position [[attribute(0)]] [[stage_in]], constant float &timer [[buffer(11)]]) {
+    float4 _position = float4(position.x,
+                              position.y + timer,
+                              position.z,
+                              position.w);
+    return _position;
+}
+```
+
+## `[[stage_in]]`, 그리고 색 정의
+
+Quad에 색상값 정의를 만들어준다.
+
+```swift
+import MetalKit
+
+struct Quad {
+    /* ... */
+    
+    var colors: [simd_float3] = [
+        [1, 0, 0], // red
+        [0, 1, 0], // green
+        [0, 0, 1], // blue
+        [1, 1, 0] // yellow
+    ]
+    
+    let colorBuffer: MTLBuffer
+    
+    init(device: MTLDevice, scale: Float = 1) {
+        /* ... */
+        
+        self.colorBuffer = device.makeBuffer(bytes: &colors, length: MemoryLayout<simd_float3>.stride * colors.count, options: [])!
+    }
+}
+```
+
+`draw(in:)`에서 위에서 만든 색상값 데이터를 vertex에 넣어주고
+
+```swift
+extension Renderer: MTKViewDelegate {
+    func draw(in view: MTKView) {
+        /* ... */
+                
+        renderEncoder.setVertexBuffer(quad.colorBuffer, offset: 0, index: 1)
+        
+        /* ... */
+    }
+}
+```
+
+위에서 `index: 1`을 해줬으므로, `MTLVertexDescriptor`에도 해당 값을 정의해준다.
+
+```swift
+import MetalKit
+
+extension MTLVertexDescriptor {
+    static var defaultLayout: MTLVertexDescriptor {
+        let vertexDescriptor = MTLVertexDescriptor()
+        vertexDescriptor.attributes[0].format = .float3
+        vertexDescriptor.attributes[0].offset = 0
+        vertexDescriptor.attributes[0].bufferIndex = 0
+        
+        vertexDescriptor.attributes[1].format = .float3
+        vertexDescriptor.attributes[1].offset = 0
+        vertexDescriptor.attributes[1].bufferIndex = 1
+        
+        vertexDescriptor.layouts[0].stride = MemoryLayout<Float>.stride * 3
+        vertexDescriptor.layouts[1].stride = MemoryLayout<simd_float3>.stride
+        
+        return vertexDescriptor
+    }
+}
+```
+
+`[[stage_in]]`을 처리할 데이터가 여러 개이고 위에서 `offset = 0`으로 정의했으므로, input은 아래처럼 `VertexIn`이라는 구조체로 정리할 수 있다.
+
+그리고 vertex -> fragment에 값을 전달하기 위해 `VertexOut`를 정의하며, Metal은 `[[position]]`을 통해 좌표를 가져 온다. 또한 `[[point_size]]`을 통해 point의 크기도 정의할 수 있다.
+
+```cpp
+#include <metal_stdlib>
+using namespace metal;
+
+struct VertexIn {
+    float4 position [[attribute(0)]];
+    float4 color [[attribute(1)]];
+};
+
+struct VertexOut {
+    float4 position [[position]];
+    float4 color;
+    float pointSize [[point_size]];
+};
+
+vertex VertexOut vertex_main(VertexIn in [[stage_in]], constant float &timer [[buffer(11)]]) {
+    float4 position = float4(in.position.x,
+                             in.position.y + timer,
+                             in.position.z,
+                             in.position.w);
+    VertexOut out {
+        .position = position,
+        .color = in.color,
+        .pointSize = 30
+    };
+    
+    return out;
+}
+
+fragment float4 fragment_main(VertexOut in [[stage_in]]) {
+    return in.color;
+}
+
+```
+
+![](10.png)
