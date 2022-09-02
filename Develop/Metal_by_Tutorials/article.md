@@ -7,11 +7,13 @@
 
 - [Chapter 2: 3D Models](#chapter-2)
 
-- [Chapeter 3: The Rendering Pipeline](#chapter-3)
+- [Chapter 3: The Rendering Pipeline](#chapter-3)
 
-- [Chapeter 4: The Vertex Function](#chapter-4)
+- [Chapter 4: The Vertex Function](#chapter-4)
 
-# <a name="chapter-1">Chapeter 1: Hello, Metal!</a>
+- [Chapter 5: 3D Transformations](#chapter-5)
+
+# <a name="chapter-1">Chapter 1: Hello, Metal!</a>
 
 Metal을 사용할 때는 'Metal 초기 설정 (Initialize Metal)' -> 'Model을 불러 옴 (Load a model)' -> 'Set up the pipeline (pipeline 설정)' -> 'Render' 과정을 거치게 된다.
 
@@ -284,7 +286,7 @@ extension ViewController: MTKViewDelegate {
 }
 ```
 
-# <a name="chapter-3">Chapeter 3: The Rendering Pipeline</a>
+# <a name="chapter-3">Chapter 3: The Rendering Pipeline</a>
 
 - GPU : 사진, 영상처럼 거대한 양을 빠른 속도로 처리하는데 특화되어 있다. 캐시 메모리의 양이 적은 대신 코어가 엄청 많다.
 
@@ -414,7 +416,7 @@ fragment float4 fragment_main() {
 }
 ```
 
-# <a name="chapter-4">Chapeter 4: The Vertex Function</a>
+# <a name="chapter-4">Chapter 4: The Vertex Function</a>
 
 - `MDLVertexDescriptor` : `.obj` 파일 안에 있는 정보를 담고 있는 Model I/O이다. Model I/O는 attributes, position, normals 같은 texture coordinates 정보를 담고 있다.
 
@@ -672,3 +674,91 @@ fragment float4 fragment_main(VertexOut in [[stage_in]]) {
 ```
 
 ![](10.png)
+
+# <a name="chapter-5">Chapter 5: 3D Transformations</a>
+
+## Translation
+
+![](11.png)
+
+이런 식으로 좌표이동을 하고 싶다면, 원래(회색 삼각형)의 좌표에 offset (position) 만큼 더해주면 된다.
+
+```cpp
+float3 translation = in.position.xyz + position;
+```
+
+이는 다르게도 정의할 수 있다. 아래처럼 4x4 identity matrix를 만들고
+
+```swift
+var translation = matrix_float4x4()
+translation.columns.0 = [1, 0, 0, 0]
+translation.columns.1 = [0, 1, 0, 0]
+translation.columns.2 = [0, 0, 1, 0]
+translation.columns.3 = [0, 0, 0, 1]
+```
+
+offset을 세번째 column에 각각 넣어주고
+
+```swift
+let position = simd_float3(0.3, -0.4, 0)
+translation.columns.3.x = position.x
+translation.columns.3.y = position.y
+translation.columns.3.z = position.z
+
+matrix = translation
+```
+
+`offset * position (회색 삼각형)`을 해주면 같은 연산 결과가 나온다.
+
+```cpp
+float4 translation = matrix * in.position;
+```
+
+![](12.png)
+
+이렇게 하는 이유는 이제 이동, 회전 등을 연쇄적으로 하기 위함이다.
+
+## Scaling
+
+아까 translation했던 코드 대신에, `matrix`를 아래처럼 짜면 scaling이 된다.
+
+```swift
+let scaleX: Float = 1.2
+let scaleY: Float = 0.5
+let scaleMatrix = float4x4(
+    [scaleX, 0, 0, 0],
+    [0, scaleY, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+)
+
+matrix = scaleMatrix
+```
+
+![](13.png)
+
+아래처럼 translation -> scaling 같은 연쇄작업도 가능하다.
+
+```swift
+matrix = translation * scaleMatrix
+```
+
+![](14.png)
+
+## Rotation
+
+```swift
+let angle = Float.pi / 2.0
+let rotationMatrix = float4x4(
+    [cos(angle), -sin(angle), 0, 0],
+    [sin(angle), cos(angle), 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+)
+
+matrix = rotationMatrix
+```
+
+원점을 기점으로 회전시킨다.
+
+![](15.png)
