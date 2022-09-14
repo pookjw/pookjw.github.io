@@ -31,10 +31,6 @@ iPhone 14 Pro (Max)에서 스크린샷을 찍으면 위 사진처럼 까만색 �
 # 새로운 Terminal 창에서 SpringBoard 재시작 (실제 iOS 기기일 경우)
 % killall -9 backboardd
 
-# 그러면 lldb attach가 됨...
-(lldb) process attach --name "SpringBoard" --waitfor
-Process 75226 stopped.
-
 # breakpoint 설정 - 아직 image load가 전혀 안 된 상태이고 symbolic breakpoint를 설정하는거라 경고가 나지만, 무시하셔도 됩니다.
 (lldb) breakpoint set -n '-[CAGainMapLayer setRenderMode:]' -C "register write x2 0x0" -G1
 Breakpoint 1: no locations (pending).
