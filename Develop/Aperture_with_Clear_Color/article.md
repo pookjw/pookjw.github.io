@@ -25,7 +25,10 @@ iPhone 14 Pro (Max)에서 스크린샷을 찍으면 위 사진처럼 까만색 �
 ```
 % lldb -n SpringBoard -w
 
-# 새로운 Terminal 창에서 SpringBoard 재시작
+# 새로운 Terminal 창에서 SpringBoard 재시작 (Simulator일 경우)
+% xcrun simctl spawn booted launchctl stop com.apple.SpringBoard
+
+# 새로운 Terminal 창에서 SpringBoard 재시작 (실제 iOS 기기일 경우)
 % killall -9 backboardd
 
 # 그러면 lldb attach가 됨...
