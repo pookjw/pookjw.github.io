@@ -112,7 +112,7 @@ in CAGainMapLayer:
 (lldb) breakpoint set -n '-[CAGainMapLayer setRenderMode:]' -C "register write x2 0x0" -G1
 ```
 
-이렇게 하니 되네요... 과정이 많이 생략되긴 했는데 ㅎㅎ 머 알아서... ㅎㅎ
+이렇게 하니 되네요... 과정이 많이 생략되긴 했는데 ㅎㅎ assembly 코드 하나하나 다 읽어주기엔 글이 너무 길어져서 ㅎㅎ
 
 ![](1.png)
 
