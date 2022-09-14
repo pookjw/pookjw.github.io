@@ -110,7 +110,7 @@ in CAGainMapLayer:
 (CALayer ...)
 ```
 
-`-[CAGainMapLayer setRenderMode:]`에서 breakpoint를 찍어보고 `$x2` register를 읽어보니 `gainFill`라는 값을 넣어주고 있네요. 이거를 `0x0` 값을 주입해서 날려 버릴게요.
+`-[CAGainMapLayer setRenderMode:]`에서 breakpoint를 찍어보고 `$x2` register를 읽어보니 `gainFill`라는 값을 넣어주고 있네요. 이 값을 날려 버리고 `0x0` 값을 주입할게요.
 
 ```
 (lldb) breakpoint set -n '-[CAGainMapLayer setRenderMode:]' -C "register write x2 0x0" -G1
