@@ -9,6 +9,7 @@
 - [iOS 16 - UICalendarView](Develop/UICalendarView/article.md)
 - [iOS 16 - UIFindInteraction](Develop/UIFindInteraction/article.md)
 - [iOS 16 - SwiftUI Layout의 Cache에 대해](Develop/SwiftUI_Layout_Cache/article.md)
+- [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](Develop/Aperture_with_Clear_Color/article.md)
 - [Swift로 정의된 NSObject 객체의 이름에 대해](Develop/Swift_Demangle/article.md)
 - [Swift의 AnyObject에 대해](Develop/About_Swift_AnyObject/article.md)
 - [watchOS에서 UIKit 사용](Develop/Native_UIKit_watchOS/article.md)
