@@ -120,6 +120,31 @@ in CAGainMapLayer:
 
 - Dynamic Island의 코드 네임은 Aperture이다.
 
+- `손쉬운 사용`에서 `색상 반전`을 해도 Dynamic Island의 배경색은 바뀌지 않는다.
+
+```
+(lldb) expression -l objc -O -- [SBSystemApertureWindow _shortMethodDescription]
+<SBSystemApertureWindow: 0x1065ebb20>:
+in SBSystemApertureWindow:
+    Class Methods:
+        + (Class) safeCategoryBaseClass; (0x1538eb478)
+    Instance Methods:
+        - (BOOL) _accessibilityPrefersNonAttributedHint; (0x1318d2c58)
+        - (BOOL) _accessibilityPrefersNonAttributedValue; (0x1318d2c3c)
+        - (BOOL) _accessibilityPrefersNonAttributedLabel; (0x1318d2c58)
+        - (BOOL) _accessibilityIsInJindo; (0x1538eb488)
+        - (BOOL) _accessibilityInvertColorsIsDarkWindow; (0x10605de20)
+        - (BOOL) accessibilityIgnoresInvertColors; (0x10605de28)
+        - (void) accessibilityApplyInvertFilter; (0x10605de30)
+        - (void) setAutorotates:(BOOL)arg1 forceUpdateInterfaceOrientation:(BOOL)arg2; (0x10605de34)
+(SBFSecureTouchPassThroughWindow ...)
+
+(lldb) disassemble -a 0x10605de28
+SpringBoard`-[SBSystemApertureWindow accessibilityIgnoresInvertColors]:
+    0x10605de28 <+0>: mov    w0, #0x1
+    0x10605de2c <+4>: ret    
+```
+
 - 궁금한건...
 
 ```
