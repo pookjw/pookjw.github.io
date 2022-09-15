@@ -118,7 +118,15 @@ in CAGainMapLayer:
 
 ## 여담
 
-- Dynamic Island의 코드 네임은 Aperture이다.
+- Dynamic Island의 코드 네임은 Aperture이다. Dynamic Island에서 우리가 보는 섬의 이름은 [`Jindo`](https://en.wikipedia.org/wiki/Jindo_(island))라고 한다.
+
+```
+(lldb) expression -l objc -O -- 0x160282710 
+<SBSystemApertureWindow: 0x160282710; Jindo Window-0x160282710-4; baseClass = UIWindow; frame = (0 0; 430 932); gestureRecognizers = <NSArray: 0x600001bb1170>; layer = <UIWindowLayer: 0x600001bb0750>>
+
+(lldb) expression -l objc -O -- [0x160282710 accessibilityIdentifier]
+jindo
+```
 
 - `손쉬운 사용`에서 `색상 반전`을 해도 Dynamic Island의 배경색은 바뀌지 않는다.
 
