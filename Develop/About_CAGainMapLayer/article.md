@@ -42,6 +42,7 @@ iOS 16.0 베타 및 iPadOS 16.1 베타 1에서는 해당 API가 존재하지 않
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
+    // gainBorderRenderFill 또는 gainFill
     ((void (*)(id, SEL, NSString *))objc_msgSend)(self.layer, NSSelectorFromString(@"setRenderMode:"), @"gainFill");
   }
 
