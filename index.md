@@ -3,6 +3,8 @@
 ## 개발
 
 - [UIDebuggingInformationOverlay를 iOS 15 arm64 환경에서 써보자](Develop/UIDebuggingInformationOverlay_iOS_15_arm64/article.md)
+- [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](Develop/Aperture_with_Clear_Color/article.md)
+- [Dynamic Island에서 쓰이는 도형 랜더링을 써보자](Develop/About_CAGainMapLayer/article.md)
 - [Swift AsyncStream + 메모리 관리](Develop/Swift_AsyncStream_Memory_Management/article.md)
 - [watchOS에서 UICollectionView를 써보자 (PUICCollectionViewController)](Develop/PUICCollectionViewController/article.md)
 - [Advanced Apple Debugging & Reverse Engineering](Develop/Advanced_Apple_Debugging/article.md)
@@ -10,7 +12,6 @@
 - [iOS 16 - UICalendarView](Develop/UICalendarView/article.md)
 - [iOS 16 - UIFindInteraction](Develop/UIFindInteraction/article.md)
 - [iOS 16 - SwiftUI Layout의 Cache에 대해](Develop/SwiftUI_Layout_Cache/article.md)
-- [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](Develop/Aperture_with_Clear_Color/article.md)
 - [Swift로 정의된 NSObject 객체의 이름에 대해](Develop/Swift_Demangle/article.md)
 - [Swift의 AnyObject에 대해](Develop/About_Swift_AnyObject/article.md)
 - [watchOS에서 UIKit 사용](Develop/Native_UIKit_watchOS/article.md)
