@@ -51,9 +51,6 @@ iOS 16.0 베타 및 iPadOS 16.1 베타 1에서는 해당 API가 존재하지 않
 @end
 
 @interface ViewController : UIViewController
-@end
-
-@interface ViewController ()
 @property (strong) UIStackView *stackView;
 @property (strong) UIView *normalView;
 @property (strong) GainMapView *gainMapView;
