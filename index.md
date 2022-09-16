@@ -1,5 +1,3 @@
-<meta name="google-site-verification" content="5XmKrVCLwIjF1NqfHpOkoBT-DIXHuqsytVGWatW6PD8" />
-
 # Hello
 
 ## 개발
