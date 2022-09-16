@@ -8,7 +8,7 @@ iPhone 14 Pro / Pro Max에 탑재된 Dyanmic Island에는 위 사진처럼 독�
 
 제가 이전에 [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](/Develop/Aperture_with_Clear_Color/article.md)이라는 글을 작성했습니다. 보시면 Dynamic Island를 표현하는 View는 `_SBGainMapView`이며 `CAGainMapLayer`라는 커스텀 `CALayer`를 가지고 있습니다.
 
-문득... 이걸 직접 써볼까? 해서 직접 써봤습니다.
+문득... 이걸 직접 써볼까? 해서 직접 써봤습니다. [프로젝트 소스코드](https://github.com/pookjw/GainMap)
 
 ![](1.png)
 
@@ -26,4 +26,3 @@ iPhone 14 Pro / Pro Max에 탑재된 Dyanmic Island에는 위 사진처럼 독�
 
 iOS 16.0 베타 및 iPadOS 16.1 베타 1에서는 해당 API가 존재하지 않아서 크래시가 납니다. 또한 iPhone 14 Pro / Pro Max 및 Simulator에서만 정상적으로 랜더링되며, 그 외 환경에서는 폰 화면이 검정색으로 변합니다. 아마 디스플레이 전용 칩셋이 없어서 그런 것 같네요...
 
-[프로젝트 소스코드](https://github.com/pookjw/GainMap)
