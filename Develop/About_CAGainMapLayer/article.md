@@ -6,7 +6,7 @@
 
 iPhone 14 Pro / Pro Max에 탑재된 Dyanmic Island에는 위 사진처럼 독특한 형태의 Corner Radius가 적용되어 있습니다.
 
-제가 이전에 [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](/Develop/Aperture_with_Clear_Color/article.md)이라는 글을 작성했습니다. 보시면 Dynamic Island를 표현하는 View는 `_SBGainMapView`이며 `CAGainMapLayer`라는 커스텀 `CALayer`를 가지고 있다고 말했습니다.
+제가 이전에 [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](../Aperture_with_Clear_Color/article.md)이라는 글을 작성했습니다. 보시면 Dynamic Island를 표현하는 View는 `_SBGainMapView`이며 `CAGainMapLayer`라는 커스텀 `CALayer`를 가지고 있다고 말했습니다.
 
 문득... 이걸 직접 써볼까? 해서 직접 써봤습니다. [프로젝트 소스코드](https://github.com/pookjw/GainMap)
 
