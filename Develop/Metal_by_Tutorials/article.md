@@ -13,6 +13,8 @@
 
 - [Chapter 5: 3D Transformations](#chapter-5)
 
+- [Chapter 6: Coordinate Spaces](#chapter-6)
+
 # <a name="chapter-1">Chapter 1: Hello, Metal!</a>
 
 Metal을 사용할 때는 'Metal 초기 설정 (Initialize Metal)' -> 'Model을 불러 옴 (Load a model)' -> 'Set up the pipeline (pipeline 설정)' -> 'Render' 과정을 거치게 된다.
@@ -762,3 +764,67 @@ matrix = rotationMatrix
 원점을 기점으로 회전시킨다.
 
 ![](15.png)
+
+# <a name="chapter-6">Chapter 6: Coordinate Spaces</a>
+
+![](16.png)
+
+model을 불러 오면 위처럼 좌표계가 맞지 않는 모습을 볼 수 있다.
+
+우선 `Uniforms`라는 struct를 만들어주고
+
+```cpp
+#import <simd/simd.h>
+
+typedef struct {
+    matrix_float4x4 modelMatrix;
+    matrix_float4x4 viewMatrix;
+    matrix_float4x4 projectionMatrix;
+} Uniforms;
+```
+
+`MTLRenderCommandEncoder`에 index: 11에 넣어주고
+
+```swift
+uniforms = .init(modelMatrix: .identity, viewMatrix: .identity, projectionMatrix: .identity)
+
+renderEncoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 11)
+```
+
+shader에서는 아래처럼 넣어 주는 설정을 해주자.
+
+```cpp
+vertex VertexOut vertex_main(
+                             VertexIn in [[stage_in]],
+                             constant Uniforms &uniforms [[buffer(11)]]
+                             )
+{
+    float4 position = uniforms.projectionMatrix * uniforms.viewMatrix * uniforms.modelMatrix * in.position;
+    VertexOut out {
+        .position = position
+    };
+    return out;
+}
+```
+
+그 다음에 y 좌표의 translation을 해주면
+
+```swift
+let translationMatrix: float4x4 = .init(translation: [0, -0.6, 0])
+uniforms.modelMatrix = translationMatrix
+```
+
+![](17.png)
+
+잘 보인다. 이제 rotation을 해주면
+
+```swift
+timer += 0.005
+let translationMatrix: float4x4 = .init(translation: [0, -0.6, 0])
+let rotationMatrix: float4x4 = .init(rotationY: sin(timer))
+uniforms.modelMatrix = translationMatrix * rotationMatrix
+```
+
+회전은 잘 되는데 잘린다...
+
+TODO
