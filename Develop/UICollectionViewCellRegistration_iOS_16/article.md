@@ -1,8 +1,8 @@
-# UICollectionView, 그리고 iOS 15와 iOS 16
+# UICollectionView.CellRegistration, 그리고 iOS 15와 iOS 16
 
 ## 서론
 
-iOS 15와 iOS 16에서 `UICollectionView`의 `UIContentConfiguration`와 `UICollectionView.CellRegistration`의 일부 바뀐 점을 설명합니다.
+iOS 15와 iOS 16에서 `UICollectionView.CellRegistration`의 일부 바뀐 점을 설명합니다. 우선 `UIContentConfiguration`과 `UICollectionView.CellRegistration`이 무엇인지 설명드려야 할 것 같습니다.
 
 ### UIContentConfiguration이란
 
