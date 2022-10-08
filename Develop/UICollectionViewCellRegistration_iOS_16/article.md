@@ -453,7 +453,9 @@ let dataSource: ViewModel.DataSource = .init(collectionView: collectionView) { c
 
 ## 총평
 
-iOS 14 때 나온 API들인데 애플은 이런 중요한 내용들을 이제야 고지하는 것인가... -_-
+iOS 14 때 나온 API들인데 애플은 이런 중요한 내용들을 왜 이제야 고지하는 것인가... -_-
+
+혹시 제가 또 놓친 것이 있어서 iOS 17에서는 작동하지 않을 수도 있어요... ㅎㅎ;
 
 ## 완성된 코드
 
