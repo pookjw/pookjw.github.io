@@ -2,7 +2,7 @@
 
 Objective-C의 경우 closed-source framework를 배포할 경우 Header 파일을 공개하면 framework의 API를 활용할 수 있었습니다.
 
-하지만 Swift는 Header 파일은 존재하지 않습니다. 그렇다면 Apple에서 제공하는 Swift 라이브러리 (Combine, SwiftUI 등...) 및 xcframeworks 처럼 closed-source framework에서 어떻게 API를 활용할 수 있는지 설명하려고 합니다.
+하지만 Swift는 Header 파일은 존재하지 않습니다. 그렇다면 Apple에서 제공하는 Swift 라이브러리 (Combine, SwiftUI 등...) 및 xcframeworks 같은 closed-source framework에서 어떻게 API를 활용할 수 있는지 설명하려고 합니다.
 
 (사실 개인적으로 옛날부터 궁금했던 부분인데... Playgorunds에서 앱 개발하는 방법을 공부하는데 애플이 `AppleProductTypes`라는 framework의 문서화를 아예 안해놔서 -_- 삽질하다가 우연히 알게 된 정보입니다.)
 
