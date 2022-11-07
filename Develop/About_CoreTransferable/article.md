@@ -1,4 +1,4 @@
-# Core Transferable
+# iOS 16 - Core Transferable
 
 iOS 16.0, macOS 13.0 이후로 [Core Transferable](https://developer.apple.com/documentation/coretransferable)이라는 API가 등장했습니다.
 
@@ -12,7 +12,7 @@ iOS 16.0, macOS 13.0 이후로 [Core Transferable](https://developer.apple.com/d
 
 ![](video.webp)
 
-위 영상처럼 돌아가는 예제 앱은 [이 링크]()에서 다운로드 받으실 수 있어요. Drag & Drop으로 배경색을 변경할 수 있어요.
+위 영상처럼 돌아가는 예제 앱은 [이 링크](https://github.com/pookjw/Practice_Transferable)에서 다운로드 받으실 수 있어요. Drag & Drop으로 배경색을 변경할 수 있어요.
 
 코드를 설명드리자면, 우선 색을 표현하는 `MyColor`라는 데이터 형식을 만들게요.
 
