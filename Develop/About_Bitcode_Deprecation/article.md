@@ -1,6 +1,6 @@
 # LLVM에서 Bitcode의 deprecation에 대해
 
-Xcode 14 부터 Bitcode는 deprecated되며 개인적인 생각을 적는 글입니다.
+Xcode 14 부터 Bitcode는 deprecated되며 개인적인 생각을 정리한 글입니다.
 
 ## Bitcode의 목적
 
