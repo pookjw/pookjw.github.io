@@ -183,6 +183,10 @@ $(xcode-select -p)/usr/bin/momc --sdkroot $(xcode-select -p)/Platforms/iPhoneOS.
 
 제가 예전에 [NamuTracker](https://github.com/pookjw/NamuTracker)를 만들었는데, theos 환경에서 앱을 개발할 때 (Xcode 없이 앱을 개발할 때) 쓴 기법이기도 합니다.
 
+### Swift Playgrounds는 Unit Testing을 지원하지 않습니다.
+
+하지만 Xcode에서 SwiftPM을 실행하면 지원합니다.
+
 ### iOS App만 개발할 수 있습니다.
 
 위에서 보여 드렸다시피 AppleProductTypes은 iOS App 개발만 지원합니다.
