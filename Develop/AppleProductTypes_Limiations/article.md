@@ -2,7 +2,7 @@
 
 애플은 WWDC 2021에서 Swift Playgrounds 4.0 부터 iPadOS에서 앱 개발을 할 수 있다고 발표했습니다. [(기사)](https://www.macrumors.com/2021/06/07/ipados-15-allows-you-to-build-iphone-and-ipad-apps/) 이 글에서는 Swift Playgrounds에서 앱을 개발하는 기법을 `SwiftPM`이라고 하겠습니다. (사실 정식적인 명칭이 아직 없어요.)
 
-SwiftPM은 Swift Playgrounds에서 앱을 개발할 수 있다는 장점이 있고, SPM 기반이며 [Tuist](https://tuist.io) 처럼 앱 프로젝트를 관리할 수 있는 First-Party 프레임워크로도 볼 수 있습니다. SPM 기반이니까요.
+SwiftPM은 Swift Playgrounds에서 앱을 개발할 수 있다는 장점이 있고, SPM 기반이며 [Tuist](https://tuist.io) 처럼 앱 프로젝트를 관리할 수 있는 First-Party 프레임워크로도 볼 수 있습니다. 아마 몇년 뒤에 Tuist를 대체하지 않을까 싶어요.
 
 저는 최근에 Gitmoji를 관리할 수 있는 앱인 [AnGitmoji](https://github.com/pookjw/AnGitmoji)를 SwiftPM으로 개발했으며, 개발하면서 알게 된 SwiftPM의 기본 구조와 제약 사항을 이 글에서 적고자 합니다.
 
