@@ -1,4 +1,4 @@
-# [C++20] constexpr, consteval, constinit
+# [C++20] const, constexpr, consteval, constinit
 
 C++20에서는 값을 다양한 방법으로 정의할 수 있다.
 
@@ -23,6 +23,20 @@ consteval int sqr(int n) {
 ```
 
 이들의 차이점과 함께, 어떠한 성능 차이를 야기하는지에 대한 글이다.
+
+## 요약
+
+- 변수는 runtime의 assembly를 생성하고, runtime 또는 compile-time에서 정의된 함수를 실행할 수 있다.
+
+- `const`는 runtime 또는 compile-time의 assembly를 생성하고, runtime 또는 compile-time에서 정의된 함수를 실행할 수 있다.
+
+- `constexpr`도 runtime 또는 compile-time의 assembly를 생성하지만, compile-time으로 정의된 함수만 실행할 수 있다. 그렇기에 `const` 보다 더 빈번하게 compile-time의 assembly를 작성해준다.
+
+- `consteval`은 함수를 정의할 때 쓰이며 compile-time의 assembly를 생성하고, compile-time으로 정의된 함수만 실행할 수 있다. compile-time을 보장한다.
+
+- `constinit`은 변수/상수를 정의할 때 쓰이며 compile-time의 assembly를 생성하고, compile-time으로 정의된 함수만 실행할 수 있다. compile-time을 보장한다.
+
+- `define`은 preprocessor 단계에서 돌아 가기에 `consteval`와 `constinit`와는 다르다. 무엇보다 C Style이기 때문에 modern하지도 않다.
 
 ## 변수
 
@@ -467,13 +481,7 @@ MyScript`main:
 
 C++20에 추가된 keyword다. 이름이 상수를 정의할 것 처럼 생겼지만 상수를 정의하는 용도가 아니다.
 
-`constinit`은 값의 초기화되는 시점을 compile-time을 보장한다.
-
-- `const`는 runtime 또는 compile-time이고, runtime 또는 compile-time에서 정의된 함수를 실행할 수 있으며
-
-- `constexpr`도 runtime 또는 compile-time이지만, compile-time으로 정의된 함수만 실행할 수 있으며
-
-- `constinit`은 compile-time이며 compile-time으로 정의된 함수만 실행할 수 있다. `consteval`은 함수에서 쓰인다면 `constinit`은 변수/상수에서 쓰인다.
+`constinit`은 `consteval` 처럼 값의 초기화되는 시점을 compile-time을 보장한다.
 
 ```cpp
 #include <iostream>
