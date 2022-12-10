@@ -473,7 +473,7 @@ C++20에 추가된 keyword다. 이름이 상수를 정의할 것 처럼 생겼�
 
 - `constexpr`도 runtime 또는 compile-time이지만, compile-time으로 정의된 함수만 실행할 수 있으며
 
-- `constinit`은 compile-time이며 compile-time으로 정의된 함수만 실행할 수 있다.
+- `constinit`은 compile-time이며 compile-time으로 정의된 함수만 실행할 수 있다. `consteval`은 함수에서 쓰인다면 `constinit`은 변수/상수에서 쓰인다.
 
 ```cpp
 #include <iostream>
