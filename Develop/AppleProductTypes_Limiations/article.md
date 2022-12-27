@@ -165,7 +165,7 @@ Swift Package Manager를 직접 커스텀하면 될 수도 있습니다. PIF의 
 
 ### Swift Playgrounds는 Objective-C를 지원하지 않습니다.
 
-Objective-C 코드를 추가할 경우 Swift Playgrounds에서 빌드되지 않으며, Xcode에서는 빌드가 되는데 아래와 같은 경고가 뜹니다. `clang`이 없어서 그런 것 같네요. 아마 C/C++/Metal도 안 될 것 같네요? Swift 언어만 지원하는 것 같습니다.
+Objective-C 코드를 추가할 경우 Swift Playgrounds에서 빌드되지 않으며, Xcode에서는 빌드가 되는데 아래와 같은 경고가 뜹니다. Swift Playgrounds는 `clang`이 없어서 그런 것 같네요. 아마 C/C++/Metal도 안 될 것 같네요? Swift 언어만 지원하는 것 같습니다.
 
 ```
 This Swift Playgrounds project depends on a target containing non-Swift source code, and will therefore not be buildable in Swift Playgrounds.
