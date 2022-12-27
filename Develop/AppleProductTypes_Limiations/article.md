@@ -171,7 +171,7 @@ Objective-C 코드를 추가할 경우 Swift Playgrounds에서 빌드되지 않�
 This Swift Playgrounds project depends on a target containing non-Swift source code, and will therefore not be buildable in Swift Playgrounds.
 ```
 
-### Swift Playgrounds는 Core Data를 지원하지 않습니다.
+### Swift Playgrounds는 Core Data의 mom 빌드를 지원하지 않습니다.
 
 Swift Playgrounds는 Core Data의 모델을 빌드해주는 `momc`을 갖고 있지 않습니다. Xcode에서는 `momc`이 있으므로 가능합니다.
 
@@ -180,6 +180,8 @@ Swift Playgrounds는 Core Data의 모델을 빌드해주는 `momc`을 갖고 있
 ```bash
 $(xcode-select -p)/usr/bin/momc --sdkroot $(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk --iphoneos-deployment-target 14.0 --module NamuTrackerApp ${model} ".theos/_/Library/Application Support/NamuTracker"
 ```
+
+아니면 mom 없이 모델을 만드시는 방법도 있습니다. https://tigi44.github.io/ios/iOS,-Swift-Core-Data-Model-in-a-Swift-Package/
 
 제가 예전에 [NamuTracker](https://github.com/pookjw/NamuTracker)를 만들었는데, theos 환경에서 앱을 개발할 때 (Xcode 없이 앱을 개발할 때) 쓴 기법이기도 합니다.
 
