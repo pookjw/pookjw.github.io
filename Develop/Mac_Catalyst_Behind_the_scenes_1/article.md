@@ -1,6 +1,6 @@
 # Mac Catalyst: Behind the scenes (1)
 
-Mac Catalyst에 대해 적은 글입니다.
+Mac Catalyst는 iOS 앱 프로젝트를 macOS에서 실행할 수 있게 해줍니다. 이 Mac Catalyst에 대해 다루는 글입니다.
 
 ## 역사
 
