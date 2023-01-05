@@ -34,7 +34,7 @@ macOS Mojave에 iOSMac/Marzipan이라는 이름으로 최초 등장한 것으로
 
 Designed for iPad는 iOS와 같은 UI를 가지고 있기에, 기존 iOS 프로젝트와 호환성이 좋습니다. 하지만 Mac Catalyst 전용 API를 직접 호출할 수 없으며, [objc_msgSend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend) 같은 Rutime 함수로 강제로 호출하면 되긴 합니다.
 
-Mac Catalyst는 UIKit 코드를 macOS와 같은 UI로 변환해 줍니다. 따라서 Desktop 수준의 앱을 UIKit 코드로 개발할 수 있습니다.
+Mac Catalyst는 UIKit 코드를 macOS의 UI로 변환해 줍니다. 따라서 Desktop 수준의 앱을 UIKit 코드로 개발할 수 있습니다.
 
 더 자세히 알고 싶으시면 [WWDC22 - Bring your iOS app to the Mac](https://developer.apple.com/videos/play/wwdc2022/10076/)에서 7분 25초 부분부터 보시면 됩니다.
 
