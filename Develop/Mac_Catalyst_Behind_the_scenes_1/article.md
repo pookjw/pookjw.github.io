@@ -32,7 +32,7 @@ macOS Mojave에 iOSMac/Marzipan이라는 이름으로 최초 등장한 것으로
 
 만약에 여러분이 iOS 앱을 App Store에 등록한다면 Designed for iPad로 작동합니다. Designed for iPad는 arm64만 지원하기 때문에 Apple Silicon Mac만 지원합니다. Intel/AMD Mac에서는 지원하지 않습니다.
 
-Designed for iPad는 iOS와 같은 UI를 가지고 있기에, 기존 iOS 프로젝트와 호환성이 좋습니다. 하지만 Mac Catalyst 전용 API를 직접 호출할 수 없습니다.
+Designed for iPad는 iOS와 같은 UI를 가지고 있기에, 기존 iOS 프로젝트와 호환성이 좋습니다. 하지만 Mac Catalyst 전용 API를 직접 호출할 수 없으며, 애플은 향후 App Store 등록을 중단할 예정입니다.
 
 Mac Catalyst는 UIKit 코드를 macOS의 UI로 변환해 줍니다. 따라서 Desktop 수준의 앱을 UIKit 코드로 개발할 수 있습니다.
 
