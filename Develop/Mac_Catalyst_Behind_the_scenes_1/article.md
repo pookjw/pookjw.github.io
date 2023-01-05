@@ -18,7 +18,7 @@ macOS Mojave에 iOSMac/Marzipan이라는 이름으로 최초 등장한 것으로
 
 애플이 macOS Catalina를 발표하면서 공식적으로 Project Catalyst를 공식화 했습니다. iOS 프로젝트를 macOS에서 실행할 수 있게 하는 프로젝트 입니다.
 
-이후로 애플은 Mac Catalyst라는 이름으로 매년 많은 개선을 이뤘으며, 수많은 AppKit API를 UIKit으로 porting해주고 있습니다. 덕분에 iOS 앱 개발자들은 AppKit을 몰라도 macOS 앱을 개발할 수 있게 해줍니다. 
+이후로 애플은 Mac Catalyst라는 이름으로 매년 많은 개선을 이뤘으며, 수많은 AppKit API를 UIKit으로 porting해주고 있습니다. 덕분에 iOS 앱 개발자들은 AppKit을 몰라도 macOS 앱을 개발할 수 있게 해줍니다. (그래도 조금은 아셔야 해요.) 
 
 ## 종류
 
