@@ -40,6 +40,8 @@ Designed for iPad, Mac Catalyst 둘 다 AppKit API를 정상적인 방법으로 
 
 차이점을 더 자세히 알고 싶으시면 [WWDC22 - Bring your iOS app to the Mac](https://developer.apple.com/videos/play/wwdc2022/10076/)에서 7분 25초 부분부터 보시면 됩니다.
 
+Designed for iPad와 Mac Catalyst의 근본적인 동작 방식은 똑같으므로, 이 글에서는 Mac Catalyst라는 명칭으로 통일하겠습니다.
+
 ## 기본 구조
 
     macOS 13.2 SDK 기준입니다.
@@ -48,9 +50,9 @@ Designed for iPad, Mac Catalyst 둘 다 AppKit API를 정상적인 방법으로 
 
 UIKit은 iOS와 macOS가 공통된 로직을 가지고 있으나, UIKitCore는 별개로 처리되어 있습니다. 또한 macOS의 UIKitCore는 내부적으로 UIKitMacHelper라는 Private Frameworks를 참조하고 있으며, UIKitMacHelper에서는 AppKit API를 호출합니다.
 
-즉, 정리하면 Mac Catalyst/Designed for iPad는 UIKit을 AppKit으로 변환해주는 역할을 합니다. 때문에 macOS의 UIKit은 iOS의 UIKit이랑 동작 방식이 완전히 다릅니다.
+즉, 정리하면 Mac Catalyst는 UIKit을 AppKit으로 변환해주는 역할을 합니다. 때문에 macOS의 UIKit은 iOS의 UIKit이랑 동작 방식이 완전히 다릅니다.
 
-Mac Catalyst/Designed for iPad는 UIKit 이외에도 Photos 같은 iOS 전용 Framework들도 지원합니다. 이는 `/System/iOSSupport/System/Library`에서 Framework들의 목록을 보실 수 있습니다.
+Mac Catalyst는 UIKit 이외에도 Photos 같은 iOS 전용 Framework들도 지원합니다. 이는 `/System/iOSSupport/System/Library`에서 Framework들의 목록을 보실 수 있습니다.
 
 ### UIKit -> AppKit
 
