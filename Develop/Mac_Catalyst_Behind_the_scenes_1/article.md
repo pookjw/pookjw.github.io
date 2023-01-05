@@ -1,6 +1,6 @@
 # Mac Catalyst: Behind the scenes (1)
 
-Mac Catalyst에 적는 글입니다.
+Mac Catalyst에 대해 적은 글입니다.
 
 ## 역사
 
