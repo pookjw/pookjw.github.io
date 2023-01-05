@@ -38,7 +38,7 @@ Mac Catalyst는 UIKit 코드를 macOS의 UI로 변환해 줍니다. 따라서 De
 
 Designed for iPad, Mac Catalyst 둘 다 AppKit API를 정상적인 방법으로 호출할 수 없습니다. 만약에 강제로 호출하고 싶으시다면 [objc_msgSend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend) 같은 Rutime 함수를 쓰시면 됩니다. UIKit에 AppKit의 API가 아직 완전히 porting되지 않았기 때문에 가끔씩 필요할 때가 있습니다.
 
-더 자세히 알고 싶으시면 [WWDC22 - Bring your iOS app to the Mac](https://developer.apple.com/videos/play/wwdc2022/10076/)에서 7분 25초 부분부터 보시면 됩니다.
+차이점을 더 자세히 알고 싶으시면 [WWDC22 - Bring your iOS app to the Mac](https://developer.apple.com/videos/play/wwdc2022/10076/)에서 7분 25초 부분부터 보시면 됩니다.
 
 ## 기본 구조
 
