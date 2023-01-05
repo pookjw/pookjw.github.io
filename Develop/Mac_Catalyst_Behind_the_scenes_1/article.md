@@ -87,6 +87,8 @@ AppKit에서는 NSWindow를 관리하는 NSWindowController가 존재합니다. 
 <UIWindowScene: 0x13de07060>
 ```
 
+(3년 전이었나? 그때는 UIView를 NSView로 바로 바꿔주는 Private API가 있었던 걸로 기억하는데 macOS 13.2에서는 안 보이네요... 제가 못 찾는건지...)
+
 ## 마치며
 
 여기까지가 Mac Catalyst: Behind the scenes의 1편입니다. 1편은 Mac Catalyst의 소개와 UIKit API들이 어떻게 AppKit으로 변환되는지 간략하게 소개드렸습니다. 2편은 API 변환의 과정을 더 깊게 다루게 될 것 같네요.
