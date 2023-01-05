@@ -48,7 +48,7 @@ Designed for iPad, Mac Catalyst 둘 다 AppKit API를 정상적인 방법으로 
 
 UIKit은 iOS와 macOS가 공통된 로직을 가지고 있으나, UIKitCore는 별개로 처리되어 있습니다. 또한 macOS의 UIKitCore는 내부적으로 UIKitMacHelper라는 Private Frameworks를 참조하고 있으며, UIKitMacHelper에서는 AppKit API를 호출합니다.
 
-즉, 정리하면 Mac Catalyst는 UIKit을 AppKit으로 변환해주는 역할을 합니다. iOS의 UIKit이랑 동작 방식이 다릅니다.
+즉, 정리하면 Mac Catalyst는 UIKit을 AppKit으로 변환해주는 역할을 합니다. macOS의 UIKit은 iOS의 UIKit이랑 동작 방식이 완전히 다릅니다.
 
 Mac Catalyst는 UIKit 이외에도 Photos 같은 iOS 전용 Framework들도 지원합니다. 이는 `/System/iOSSupport/System/Library`에서 Framework들의 목록을 보실 수 있습니다.
 
