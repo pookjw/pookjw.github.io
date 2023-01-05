@@ -18,7 +18,7 @@ macOS Mojave에 iOSMac/Marzipan이라는 이름으로 최초 등장한 것으로
 
 애플이 macOS Catalina를 발표하면서 공식적으로 Project Catalyst를 공식화 했습니다. iOS 프로젝트를 macOS에서 실행할 수 있게 하는 프로젝트 입니다.
 
-이후로 애플은 Mac Catalyst라는 이름으로 매년 많은 개선을 이뤘으며, 수많은 AppKit API를 UIKit으로 port해주고 있습니다. iOS 앱 개발자들은 AppKit을 몰라도 macOS 앱을 개발할 수 있게 해줍니다. 
+이후로 애플은 Mac Catalyst라는 이름으로 매년 많은 개선을 이뤘으며, 수많은 AppKit API를 UIKit으로 porting해주고 있습니다. 덕분에 iOS 앱 개발자들은 AppKit을 몰라도 macOS 앱을 개발할 수 있게 해줍니다. 
 
 ## 종류
 
@@ -32,9 +32,11 @@ macOS Mojave에 iOSMac/Marzipan이라는 이름으로 최초 등장한 것으로
 
 만약에 여러분이 iOS 앱을 App Store에 등록한다면 Designed for iPad로 작동합니다. Designed for iPad는 arm64만 지원하기 때문에 Apple Silicon Mac만 지원합니다. Intel/AMD Mac에서는 지원하지 않습니다.
 
-Designed for iPad는 iOS와 같은 UI를 가지고 있기에, 기존 iOS 프로젝트와 호환성이 좋습니다. 하지만 Mac Catalyst 전용 API를 직접 호출할 수 없으며, [objc_msgSend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend) 같은 Rutime 함수로 강제로 호출하면 되긴 합니다.
+Designed for iPad는 iOS와 같은 UI를 가지고 있기에, 기존 iOS 프로젝트와 호환성이 좋습니다. 하지만 Mac Catalyst 전용 API를 직접 호출할 수 없습니다.
 
 Mac Catalyst는 UIKit 코드를 macOS의 UI로 변환해 줍니다. 따라서 Desktop 수준의 앱을 UIKit 코드로 개발할 수 있습니다.
+
+Designed for iPad, Mac Catalyst 둘 다 AppKit API를 호출할 수 없습니다. 만약에 강제로 호출하고 싶으시다면 [objc_msgSend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend) 같은 Rutime 함수를 쓰시면 됩니다.
 
 더 자세히 알고 싶으시면 [WWDC22 - Bring your iOS app to the Mac](https://developer.apple.com/videos/play/wwdc2022/10076/)에서 7분 25초 부분부터 보시면 됩니다.
 
