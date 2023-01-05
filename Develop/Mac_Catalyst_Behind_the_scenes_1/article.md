@@ -42,7 +42,7 @@ Designed for iPad, Mac Catalyst 둘 다 AppKit API를 정상적인 방법으로 
 
 ## 기본 구조
 
-    `arm64-apple-ios-macabi` 기준입니다.
+    `arm64-apple-ios-macabi`, macOS 13.2 SDK 기준입니다.
     
 애플은 UIKit을 iOS와 macOS에 호환성을 갖게 하기 위해 UIKitCore라는 Private Framework를 도입했습니다. 과거에는 UIKit이 구현 코드 (implementation)들을 갖고 있었다면, Mac Catalyst 이후로 UIKit은 wrapper 역할만 하고 있고 구현 코드는 UIKitCore로 이관되었습니다.
 
