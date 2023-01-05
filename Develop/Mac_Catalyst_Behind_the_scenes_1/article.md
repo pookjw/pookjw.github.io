@@ -78,7 +78,7 @@ AppKit에서는 NSWindow를 관리하는 NSWindowController가 존재합니다. 
 <UINSSceneWindowController: 0x600000bb82d0>
 ```
 
-이 UINSSceneWindowController은 `-[UINSSceneWindowController setUIScene]`을 통해 UIScene을 NSWindowController로 변환해주는 역할을 합니다. UIKit 코드를 AppKit으로 변환해주는 첫번째 관문인 셈입니다.
+이 UINSSceneWindowController은 `-[UINSSceneWindowController setUIScene:]`을 통해 UIScene을 NSWindowController로 변환해주는 역할을 합니다. UIKit 코드를 AppKit으로 변환해주는 첫번째 관문인 셈입니다.
 
 ```
 (lldb) expression -l objc -O -- [0x600000bb82d0 UIScene]
