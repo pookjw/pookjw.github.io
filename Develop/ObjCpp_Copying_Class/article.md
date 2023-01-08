@@ -26,7 +26,7 @@ CppClass::CppClass() {
 
 CppClass::CppClass(const NSInteger number) {
     this->number = new NSInteger;
-    memcpy(this->number, &number, sizeof(number));
+    memcpy(this->number, &number, sizeof number);
 }
 
 CppClass::~CppClass() {
@@ -75,13 +75,13 @@ public:
 ```cpp
 CppClass::CppClass(const CppClass &other) {
     this->number = new NSInteger;
-    memcpy(this->number, other.number, sizeof(number));
+    memcpy(this->number, other.number, sizeof number);
 }
 
 CppClass & CppClass::operator=(const CppClass &other) {
     delete this->number;
     this->number = new NSInteger;
-    memcpy(this->number, other.number, sizeof(number));
+    memcpy(this->number, other.number, sizeof number);
 
     return *this;
 }
@@ -116,7 +116,7 @@ Objective-C++에서도 NSCopying을 통해 객체 복사를 할 수 있습니다
 - (instancetype)initWithNumber:(const NSInteger)number {
     if (self = [super init]) {
         self.number = new NSInteger;
-        memcpy(self.number, &number, sizeof(number));
+        memcpy(self.number, &number, sizeof number);
     }
     return self;
 }
@@ -173,7 +173,7 @@ malloc: *** set a breakpoint in malloc_error_break to debug
     if (copy) {
         delete copy.number;
         copy.number = new NSInteger;
-        memcpy(copy.number, self.number, sizeof(self.number));
+        memcpy(copy.number, self.number, sizeof self.number);
     }
     
     return copy;
