@@ -40,7 +40,7 @@ CppClass::~CppClass() {
 int main(int argc, const char * argv[]) {
     CppClass original {3};
     CppClass copy = original; // 복사
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -152,7 +152,7 @@ int main(int argc, const char * argv[]) {
     [copy release];
 
     [pool release];
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 ```
