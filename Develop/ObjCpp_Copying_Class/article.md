@@ -89,7 +89,7 @@ CppClass & CppClass::operator=(const CppClass &other) {
 
 그러면 문제 없이 잘 작동되는 것을 보실 수 있습니다.
 
-## Objectice-C++ 객체
+## Objective-C++ 객체
 
 Objective-C++에서도 NSCopying을 통해 객체 복사를 할 수 있습니다. 아래와 같이 `ObjCppClass`라는 NSObject 객체를 정의합니다.
 
