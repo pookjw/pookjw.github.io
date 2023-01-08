@@ -95,7 +95,7 @@ Objective-C++에서도 NSCopying을 통해 객체 복사를 할 수 있습니다
 
 ```objc
 @interface ObjCppClass : NSObject <NSCopying>
-- (instancetype)initWithNumber:(NSInteger)number;
+- (instancetype)initWithNumber:(const NSInteger)number;
 @end
 ```
 
@@ -113,7 +113,7 @@ Objective-C++에서도 NSCopying을 통해 객체 복사를 할 수 있습니다
     return self;
 }
 
-- (instancetype)initWithNumber:(NSInteger)number {
+- (instancetype)initWithNumber:(const NSInteger)number {
     if (self = [super init]) {
         self.number = new NSInteger;
         memcpy(self.number, &number, sizeof(number));
