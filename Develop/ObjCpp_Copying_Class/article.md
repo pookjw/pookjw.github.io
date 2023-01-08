@@ -14,7 +14,7 @@ public:
     CppClass();
     CppClass(const NSInteger number);
     
-#pragma mark - Desctructors
+#pragma mark - Destructors
     ~CppClass();
 };
 ```
