@@ -202,7 +202,7 @@ UIKitCore`-[UIView(UIKB_UIViewExtras) _convertToAutolayoutSizingIfNecessary]:
     0x10bc1b95c <+180>: ret    
 ```
 
-다행히 짧네요. 이해를 돕기 위해 pseudo code를 작성해보면
+다행히 짧네요. 이해를 돕기 위해 pseudo code를 작성해보면 (대충 쓴거니 참고만)
 
 ```objc
 @implementation UIView (UIKB_UIViewExtras)
