@@ -145,7 +145,7 @@ UIKitCore`-[UIView(UIKB_UIViewExtras) _convertToAutolayoutSizingIfNecessary]:
     0x10bc1b93c <+148>: ldp    x20, x19, [sp, #0x20]
     0x10bc1b940 <+152>: ldp    d9, d8, [sp, #0x10]
     0x10bc1b944 <+156>: add    sp, sp, #0x40
-(lldb) p/x (long)0x000000010bc1b928 - 128
+(lldb) p/x (long long)0x000000010bc1b928 - 128
 (long) $0 = 0x000000010bc1b8a8
 ```
 
