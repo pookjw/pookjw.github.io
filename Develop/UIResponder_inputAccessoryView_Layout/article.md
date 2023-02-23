@@ -221,6 +221,7 @@ UIKitCore`-[UIView(UIKB_UIViewExtras) _convertToAutolayoutSizingIfNecessary]:
     self.inputAccessoryView.translatesAutoresizingMaskIntoConstraints = NO;
     
     UIViewAutoresizing autoresizingMask = self.inputAccessoryView.autoresizingMask;
+    if (autoresizingMask.???) return;
     /* autoresizingMask 가져와서 어쩌구 저쩌구 하는듯? 중요한 부분은 아닌 것 같으니 생략 */
     
     // 높이 정해주는 constraint. 위에서 구한 bounds로 정하는듯?
