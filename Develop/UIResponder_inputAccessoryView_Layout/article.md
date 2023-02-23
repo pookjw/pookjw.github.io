@@ -92,7 +92,7 @@
 
 ![](1.png)
 
-하지만 아래 사진을 보면 분명 View는 추가되어 있습니다. 다만 Height가 0이 나오며, 이는 `_UIKBAutolayoutHeightConstraint`라는 identifier를 가진 Constraint 때문에 발생하는 현상으로 보입니다.
+하지만 아래 사진을 보면 분명 View는 추가되어 있습니다. 다만 Height가 0이 나오며, 이는 `_UIKBAutolayoutHeightConstraint`라는 identifier와 Height Attribute를 가졌으며 Constant가 0인 Constraint 때문에 발생하는 현상으로 보입니다.
 
 ![](2.png)
 
