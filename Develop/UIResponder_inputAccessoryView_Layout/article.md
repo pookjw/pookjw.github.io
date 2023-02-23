@@ -266,6 +266,6 @@ UIKitCore`-[UIView(UIKB_UIViewExtras) _convertToAutolayoutSizingIfNecessary]:
 
 애플이 이 내용에 대해 문서화를 안해둔 것 같고 검색해보니 피해자가 많은 것 같네요.
 
-iOS 8 이후로 발생한 문제같은데 아마 Custom Keyboard가 등장하면서 키보드 로직이 XPC로 옮겨지면서 이런 문제가 발생한 것 같은데...
+iOS 8 이후로 발생한 문제같은데 아마 Custom Keyboard가 등장하면서 키보드 로직이 XPC로 옮겨지면서 리팩토링되면서 이런 문제가 발생한 것 같은데...
 
 애플이 귀찮아서 안 고치는건지, 아니면 이게 정상동작인데 제가 UIKit에 대해 잘못 이해해서 그런건진 모르겠네요.
