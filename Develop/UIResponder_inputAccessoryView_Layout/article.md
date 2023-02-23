@@ -1,6 +1,6 @@
 # inputAccessoryView에서 Layout이 안 잡히는 문제해결
 
-> - step-by-step guide 글이 아닙니다.
+> - step-by-step guide가 아닙니다.
 > - 과정 다 필요 없고 해답만 원하시는 분에게 : `-[UIView setTranslatesAutoresizingMaskIntoConstraints:NO]` 호출하세요.
 
 `UIResponder`에는 [`-[UIResponder inputAccessoryView]`](https://developer.apple.com/documentation/uikit/uiresponder/1621119-inputaccessoryview)라는 기능이 존재합니다. 예를 들어 `UITextField`의 경우 키보드가 올라 올 경우 (First Responder가 될 경우) 아래와 같이 키보드 위에 View를 띄울 수 있습니다.
