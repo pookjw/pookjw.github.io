@@ -116,6 +116,7 @@ lldb를 통해 해당 Constraint를 강제로 끄면 정상적으로 작동합�
 우선 디버깅을 위해 아래처럼 breakpoint를 설정합니다. 해당 Constraint는 `_UIKBAutolayoutHeightConstraint`라는 identifier를 가지고 있기 때문에 `-[NSLayoutConstraint setIdetifier:]`가 불릴 것입니다.
 
 > dyld 상에 Symbol Table이 load되지 않았다면 아래 명령어는 작동하지 않습니다. 이럴 경우 [`class_getMethodImplementation`](https://developer.apple.com/documentation/objectivec/1418811-class_getmethodimplementation)를 통해 IMP의 메모리 주소를 얻어 온 뒤, 메모리 주소를 기반으로 한 breakpoint를 생성하시면 됩니다.
+> 아니면 `-[NSObject(IvarDescription) _shortMethodDescription]`를 통해 IMP 주소 얻어 오셔도 되고요.
 
 ```
 (lldb) breakpoint set -n '-[NSLayoutConstraint setIdentifier:]' -c '(BOOL)[$x2 isEqualToString:@"_UIKBAutolayoutHeightConstraint"]'
