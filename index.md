@@ -11,6 +11,7 @@
 - [Dynamic Island에서 쓰이는 도형 랜더링을 써보자](Develop/About_CAGainMapLayer/article.md)
 - [Swift AsyncStream + 메모리 관리](Develop/Swift_AsyncStream_Memory_Management/article.md)
 - [watchOS에서 UICollectionView를 써보자 (PUICCollectionViewController)](Develop/PUICCollectionViewController/article.md)
+- [inputAccessoryView에서 Layout이 안 잡히는 문제해결](Develop/UIResponder_inputAccessoryView_Layout/article.md)
 - [SwiftPM의 제약에 대해](Develop/AppleProductTypes_Limiations/article.md)
 - [Advanced Apple Debugging & Reverse Engineering](Develop/Advanced_Apple_Debugging/article.md)
 - [Metal by Tutorials](Develop/Metal_by_Tutorials/article.md)
