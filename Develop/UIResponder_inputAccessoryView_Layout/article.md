@@ -48,7 +48,7 @@
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        UILabel *label = [UILabel new];
+        UILabel *label = [[UILabel alloc] initWithFrame:self.bounds];
         label.text = @"Genius is not the answer to all questions.";
         label.textAlignment = NSTextAlignmentCenter;
         label.textColor = UIColor.whiteColor;
