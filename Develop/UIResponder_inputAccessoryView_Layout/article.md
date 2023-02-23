@@ -242,11 +242,6 @@ UIKitCore`-[UIView(UIKB_UIViewExtras) _convertToAutolayoutSizingIfNecessary]:
 ```objc
 @implementation ViewController
 
-- (void)dealloc {
-    [_textField release];
-    [super dealloc];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
