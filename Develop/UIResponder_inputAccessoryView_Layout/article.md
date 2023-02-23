@@ -227,8 +227,6 @@ UIKitCore`-[UIView(UIKB_UIViewExtras) _convertToAutolayoutSizingIfNecessary]:
     
     constraint.identifier = @"_UIKBAutolayoutHeightConstraint";
     [self.inputAccessoryView addConstraint:constraint];
-    
-    [constraint release];
 }
 
 @end
