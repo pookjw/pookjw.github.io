@@ -107,7 +107,7 @@ lldb를 통해 해당 Constraint를 강제로 끄면 정상적으로 작동합�
 
 ![](0.png)
 
-저는 두가지 가설이 떠올랐습니다.
+저는 두 가지 가설이 떠올랐습니다.
 
 - UIKit에서는 `_UIKBAutolayoutHeightConstraint`라는 Constraint로 Accessory View의 높이를 강제한다. 하지만 무언가의 이유로 0이 나온다. 0이 안 나오게 해야 하는 방법을 찾아야 한다.
     - 하지만 내 코드는 Auto Layout에 문제가 없다. 그냥 Custom View 하나에 Label을 추가한 거잖아?
