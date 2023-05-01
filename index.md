@@ -30,6 +30,7 @@
 - [ObjectiveCBridgeable](Develop/About_ObjectiveCBridgeable/article.md)
 - [Swift Interface](Develop/About_Swift_Interface/article.md)
 - [[Objective-C++] 포인터 주소를 가진 객체의 복사](Develop/ObjCpp_Copying_Class/article.md)
+- [[Metal by Tutorials] Chapter 8 - obj 랜더링](Develop/Metal_by_Tutorials_Chapter_8_obj/article.md)
 
 ## 기타
 
