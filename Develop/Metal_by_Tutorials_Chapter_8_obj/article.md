@@ -88,13 +88,9 @@ https://www.cs.cmu.edu/~mbz/personal/graphics/obj.html
 
 Mesh를 불러오면 [`-[MTKMesh vertexBuffers]`](https://developer.apple.com/documentation/metalkit/mtkmesh/1536021-vertexbuffers?language=objc)에 buffer들이 불러와질 것이다.
 
-위 obj 파일을 불러오면 2개의 buffer가 불러와진다.
+이 buffer들은 `-[MDLAsset initWithURL:vertexDescriptor:bufferAllocator:]`의 `vertexDescriptor`에 의해 결정된다.
 
-- 첫번째 : v + vn이 합쳐짐
-
-- 두번째 : vt만
-
-즉 아래처럼 두개의 layout을 구성할 수 있다. 첫번째 layout에는 v와 vt가 합쳐져 있다.
+`vertexDescriptor`를 아래처럼 아래처럼 두개의 layout을 구성할 수 있다. 첫번째 layout에는 v와 vt가 합쳐져 있게 정의하면
 
 ```swift
 extension MDLVertexDescriptor {
@@ -132,6 +128,12 @@ extension MDLVertexDescriptor {
 }
 ```
 
+2개의 buffer가 불러와진다.
+
+- 첫번째 : v + vn이 합쳐짐
+
+- 두번째 : vt만
+
 ## 랜더링
 
 이제 랜더링을 할 때 첫번째, 두번째를 순차적으로 설정해주면
@@ -161,7 +163,7 @@ extension MDLVertexDescriptor {
     }
 ```
 
-shader의 `[[stage_in]]`에는 아래처럼 데이터 구조가 형성된다. position이 왜 float4로 변환되었는진 모르겠다...
+shader의 `[[stage_in]]`에는 아래처럼 데이터 구조가 형성된다. position이 왜 float4로 변환되었는진 모르겠다... 좌표라서?
 
 ```cpp
 struct VertexIn {
