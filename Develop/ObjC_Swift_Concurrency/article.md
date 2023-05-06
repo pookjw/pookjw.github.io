@@ -81,28 +81,13 @@ NS_HEADER_AUDIT_END(nullability, sendability)
 Swift 코드에서는 아래처럼 실행하면
 
 ```swift
-import SwiftUI
-
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
-        }
-        .padding()
-        .onAppear {
-            let task: Task<Void, Never> = .init {
-                try? await Task.sleep(for: .seconds(1))
-                let object: AsyncObject = .init()
-                await object.perform()
-            }
-            
-            task.cancel()
-        }
-    }
+let task: Task<Void, Never> = .init {
+    try? await Task.sleep(for: .seconds(1))
+    let object: AsyncObject = .init()
+    await object.perform()
 }
+
+task.cancel()
 ```
 
 `Cancelled`라는 로그가 잘 찍히는 것을 확인할 수 있네요.
