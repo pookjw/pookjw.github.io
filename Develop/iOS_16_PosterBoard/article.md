@@ -4,7 +4,9 @@
 
 iOS 16에서 배경화면 기능이 완전히 리뉴얼 되었습니다. 이전에는 배경화면 기능이 SpringBoard에서 담당하고 있었다면, iOS 16 부터는 PosterBoard가 담당합니다.
 
-PosterBoard는 iOS 16에서 새로 추가된 [ExtensionFoundation](https://developer.apple.com/documentation/extensionfoundation)와 [ExtensionKit](https://developer.apple.com/documentation/extensionkit) API들 기반으로 작동합니다. XPC를 통해 Remote View 방식으로 배경화면이 랜더링되는 방식입니다.
+PosterBoard는 iOS 16에서 새로 추가된 [ExtensionFoundation](https://developer.apple.com/documentation/extensionfoundation)와 [ExtensionKit](https://developer.apple.com/documentation/extensionkit) API들 기반으로 작동하며 Objective-C++와 Swift로 구성된 것으로 보입니다.
+
+또한 ExtensionKit을 활용한 XPC를 통해 Remote View 방식으로 배경화면이 랜더링되는 방식입니다.
 
 이 글에서는 PosterBoard에 대해 조사한 정보들을 두서 없이 적는 글입니다. 😥
 
