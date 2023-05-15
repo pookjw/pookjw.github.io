@@ -132,7 +132,7 @@ PosterBoard는 iOS 16에서 새로 추가된 [ExtensionFoundation](https://devel
         
     - PosterBoard에서 위에서 생성한 NSExtension을 load해야 한다.
     
-        - 난 이걸 어떻게 하는지 모르겠음. macOS의 경우 [`EXAppExtensionBrowserViewController`](https://developer.apple.com/documentation/extensionkit/exappextensionbrowserviewcontroller)로 쉽게 load 할 수 있지만 iOS는 Private API를 아무리 찾아봐도 도저히 발견을 못하겠음... 아마 Kernel 쪽을 직접 건드려야 할 것 같은데... 방법 아시는 분?
+        - 난 이걸 어떻게 하는지 모르겠음. macOS의 경우 [`EXAppExtensionBrowserViewController`](https://developer.apple.com/documentation/extensionkit/exappextensionbrowserviewcontroller)로 쉽게 load 할 수 있지만 iOS는 Private API를 아무리 찾아봐도 도저히 발견을 못하겠음... 아마 Kernel 쪽을 직접 건드려야 할 것 같은데... extensionkitservice 건드리면 되는거임? 방법 아시는 분?
         
         - 일단 load하는 방법을 도저히 몰라서 포기한 상태 -_-;; 만약 load가 된다면 `-[PBFPosterExtensionDataStore knownExtensions]`를 통해 load된 extension들을 조회할 수 있음
             
