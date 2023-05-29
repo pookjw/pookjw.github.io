@@ -48,7 +48,7 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-이 현상이 나타나는 이유는 concept를 활용하면 constraint가 생성되고 이는 compiler가 overloading 할 떄 도움이 되는 지표기 때문이다.
+이 현상이 나타나는 이유는 concept를 활용하면 constraint가 생성되고 이는 compiler가 overloading 할 떄 도움이 되는 지표이기 때문이다.
 
 - 처음에 conctept 없이 `std::is_same`을 썼을 때는, 첫번째 함수와 두번쨰 함수가 모두 조건을 충족하므로 overloading에 실패해서 ambiguous 오류가 뜬 것이다. 다시 말해, condition에서 단순한 bit 연산이 일어났기 때문이다.
 
