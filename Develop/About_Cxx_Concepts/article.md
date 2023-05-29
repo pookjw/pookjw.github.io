@@ -215,7 +215,7 @@ int main(int argc, const char * argv[]) {
 
 ### std::common_reference_with
 
-두 type이 공통 참조 관계에 있는지 확인한다. std::convertible_to 보다 상위 개념이며 std::convertible_to는 순서가 중요하지만 std::common_reference_with은 순서가 중요하지 않다.
+두 type이 공통 참조 관계에 있는지 확인한다. std::convertible_to는 순서가 중요하지만 std::common_reference_with은 순서가 중요하지 않다.
 
 ```cpp
 class MyObjectA {};
