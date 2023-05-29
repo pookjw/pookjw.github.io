@@ -162,7 +162,9 @@ ambiguous 오류가 뜬다. 이유는 `std::is_same`은 concept가 아니기 때
 
 라는 가벼운 마음으로 공부하다가 전혀 그렇지 않다는 것을 느꼈다 😥
 
-사실 Swift도 내부적으로 비슷하게 동작할거다. 하지만 개발자에게 이런 micro control을 요구하지 않을 뿐 
+사실 Swift도 내부적으로 비슷하게 동작할거다. 하지만 개발자에게 이런 micro control을 요구하지 않을 뿐
+
+Objective-C에서도 Generic 기능이 있긴 한데 그냥 없다시피한 기능이고 내부 동작도 다르기에, concept와 Objective-C++ 상호 호환성은 없어 보인다.
 
 ## 참고하면 좋은 글
 
