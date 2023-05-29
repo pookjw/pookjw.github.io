@@ -259,6 +259,8 @@ int main(int argc, const char * argv[]) {
 
 만약 operator에 const 키워드가 없다면 위는 성립하지 않는다.
 
+위 코드는 operator 관계일 때인데 class 상속 관계에서도 성립한다.
+
 ## 마치며
 
 > concept는 Swift의 Generic 개념과 같네! 별거 없네!
