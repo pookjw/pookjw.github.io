@@ -68,7 +68,7 @@ concept same_as = __same_as_impl<_Tp, _Up> && __same_as_impl<_Up, _Tp>;
 
 T, U이라는 type이 들어오면 T == U, U == T를 모두 확인한다.
 
-... T == U만 확인해도 되는 것 아닌가? 라는 생각이 들 것이다. 그렇지 않은 이유를 설명하기 위해, same_as 같은 concept를 직접 만들어보자
+... T == U만 확인해도 되는 것 아닌가? 라는 생각이 들 것이다. 그렇지 않은 이유를 설명하기 위해, std::same_as 같은 concept를 직접 만들어보자
 
 ```cpp
 template<class T, class U>
@@ -87,7 +87,7 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-딱히 문제가 없다. 이제 두번째 함수의 T와 U를 바꿔보자
+위 코드에서는 T == U만 비교해도 문제가 없다. 이제 두번째 함수의 T와 U를 바꿔보자
 
 ```cpp
 template<class T, class U>
