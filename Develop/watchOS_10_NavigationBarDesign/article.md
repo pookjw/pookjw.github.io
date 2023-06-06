@@ -16,6 +16,10 @@ PepperUICore API (PUICNavigationController, PUICListCollectionView 등)를 직�
 
 아래는 상태바 무시한거
 
+```
+(lldb) expression -l objc -O -- [0x6000035040b0 setNavigationBarDesign:2]
+```
+
 ![](2.gif)
 
 아래는 Legacy 디자인
