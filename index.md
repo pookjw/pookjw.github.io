@@ -4,7 +4,7 @@
 
 - [UIDebuggingInformationOverlay를 iOS 15 arm64 환경에서 써보자](Develop/UIDebuggingInformationOverlay_iOS_15_arm64/article.md)
 - [Swift Concurrency와 Objective-C 혼용 팁](Develop/ObjC_Swift_Concurrency/article.md)
-- [watchOS 10 - PUICNavigationBarVisualProvider의 새로은 디자인](Develop/watchOS_10_NavigationBarDesign.article.md)
+- [watchOS 10 - PUICNavigationBarVisualProvider의 새로운 디자인](Develop/watchOS_10_NavigationBarDesign/article.md)
 - [iOS 16 - PosterBoard에 대해](Develop/iOS_16_PosterBoard/article.md)
 - [iOS 16 - Screenshot 원리 학습](Develop/iOS_16_Screenshot/article.md)
 - [[C++20] Concepts](Develop/About_Cxx_Concepts/article.md)
