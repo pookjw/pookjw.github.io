@@ -1,6 +1,6 @@
 # watchOS 10 - PUICNavigationBarVisualProvider의 새로운 디자인
 
-애플이 WWDC23에서 watchOS 10을 발표하면서 UI가 많이 바뀐다고 언급했었고 이는 PepperUICore에 변화를 일으켰다. 그 중 PUICNavigationBarVisualProvider에도 변화가 생겼다. 기존에는 PUICNavigationBarVisualProvider에는 한 가지 디자인만 존재했는데, 이번에 세 가지 디자인으로 Private하게 등장했다.
+애플이 WWDC23에서 watchOS 10을 발표하면서 UI가 많이 바뀐다고 언급했고 이는 PepperUICore에 변화를 일으켰다. 그 중 PUICNavigationBarVisualProvider에도 변화가 생겼다. 기존에는 PUICNavigationBarVisualProvider에는 한 가지 디자인만 존재했는데, 이번에 세 가지 디자인으로 Private하게 등장했다.
 
 이는 `-[PUICNavigationBarVisualProvider setNavigationBarDesign:]`으로 디자인을 Runtime 상에서 변경할 수 있다.
 
