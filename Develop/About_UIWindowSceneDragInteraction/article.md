@@ -33,7 +33,7 @@ Stage Manager 환경에서 View를 Drag하면 UIWindowScene의 위치를 움직�
 
 간단하게 내부 구조를 보면
 
-- `-impl`에서 `_UIWindowSceneDragInteractionImpl_iOS`라는 것을 가지고 있음 (Platform마다 다를듯 - macOS의 경우 아마 NSWindow의 frame을 직접 건들지 않을까? iOS는 그게 안 되니 FBScene -> XPC -> SpringBoard로 바꿔줌)
+- `-impl`에서 `_UIWindowSceneDragInteractionImpl_iOS`라는 것을 가지고 있음 (Platform마다 다를듯 - macOS의 경우 아마 NSWindow의 frame을 직접 건들지 않을까? iOS는 그게 안 되니 FBScene -> XPC -> SpringBoard로 함)
 
 - `_UIWindowSceneDragInteractionImpl_iOS`은 `-_wrappedRecognizerDidRecognize:`를 가지고 있음. 내부적으로 가지고 있는 `UIPanGestureRecognizer`에서 이벤트를 보냄
 
