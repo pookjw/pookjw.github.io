@@ -50,9 +50,9 @@ clientEncoded = NO;>
 )}
 ```
 
-- 1은 _UIRelationshipGestureRecognizer의 state 말하는듯
+- 1은 _UIRelationshipGestureRecognizer의 state
 
-- wndwdrag이 뭘까? [`-gestureForFailureRelationships`](https://developer.apple.com/documentation/uikit/uiwindowscenedraginteraction/4200083-gestureforfailurerelationships)은 아래와 같은데
+- wndwdrag이 뭘까? `-[_UIClientToHostRelationshipGestureInteraction hostIdentifer]`에서 가져 오는 값임. [`-gestureForFailureRelationships`](https://developer.apple.com/documentation/uikit/uiwindowscenedraginteraction/4200083-gestureforfailurerelationships)은 아래와 같은데
 
 ```
 <_UIRelationshipGestureRecognizer: 0x105e1c010 (UIWindowSceneDragRelationshipRecognizer); state = Possible; view = <UIView: 0x105e11cf0>>
