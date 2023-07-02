@@ -33,7 +33,7 @@ final class Note {
 var defaultModelExecutor: DefaultModelExecutor!
 
 // ModelContext init할 때 defaultModelExecutor 생성하기
-// 아래처럼 하면 Actor의 executor를 Context 기반으로 할 수 있음. 만약 thread를 커스텀하고 싶으면 ModelExecutor를 직접 정의하면 됨
+// 아래처럼 하면 Actor의 executor를 Context 기반으로 할 수 있음. 만약 thread를 커스텀하고 싶으면 ModelExecutor를 직접 정의하면 됨 https://github.com/apple/swift-evolution/blob/main/proposals/0392-custom-actor-executors.md
 let sdContainer: ModelContainer = try .init(for: Note.self)
 let sdContext: ModelContext = await sdContainer.mainContext
 defaultModelExecutor = .init(context: sdContext)
