@@ -2,7 +2,7 @@
 
 Core Data의 [`NSManagedObject`](https://developer.apple.com/documentation/coredata/nsmanagedobject)을 비롯해서, SwiftData의 [`PersistentModel`](https://developer.apple.com/documentation/swiftdata/persistentmodel)에서는 thread-safe하지 않습니다.
 
-SwiftData에서는 [`ModelActor`](https://developer.apple.com/documentation/swiftdata/modelactor)를 통해 thread-safe하게 만들 수 있습니다. 이 글에서는 [`ModelActor`]의 사용법을 알게 된 과정, iOS 17.0 beta 1/2의 버그를 임시로 수정하는 방법을 소개합니다.
+SwiftData에서는 [`ModelActor`](https://developer.apple.com/documentation/swiftdata/modelactor)를 통해 thread-safe하게 만들 수 있습니다. 이 글에서는 [`ModelActor`](https://developer.apple.com/documentation/swiftdata/modelactor)의 사용법을 알게 된 과정, iOS 17.0 beta 1/2의 버그를 임시로 수정하는 방법을 소개합니다.
 
 ## 과정
 
