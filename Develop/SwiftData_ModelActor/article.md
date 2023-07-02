@@ -201,6 +201,8 @@ objc[38405]: objc_setAssociatedObject called on instance (0x6000002a6ea0) of cla
 
 이상한 점들이 여러가지지만... `x0` register에 아래처럼 임의의 NSObject 메모리 주소를 주입해주면 해결됩니다.
 
+참고로 아래에서 설명하는 offset은 SDK마다 다를 수 있기에... assembly 읽어보고 offset을 정확히 구하시는걸 추천
+
 ```
 # SwiftData._ModelMetadata의 메모리 주소 가져옴
 (lldb) image lookup -vn '$s9SwiftData15PersistentModelPAAE9_metadataAA01_D8MetadataCyF'
