@@ -47,8 +47,6 @@ actor Note: ModelActor {
     @Attribute([.unique], originalName: nil, hashModifier: nil) let uniqueID: UUID
     @Attribute([.encrypt], originalName: nil, hashModifier: nil) var body: String
     @Attribute var modifiedDate: Date
-    
-    // TODO: Replace with imageData and migrate it
     @Attribute([.externalStorage], originalName: nil, hashModifier: nil) var imageData: Data?
     
     init(uniqueID: UUID, body: String, modifiedDate: Date, imageData: Data?) {
