@@ -231,6 +231,6 @@ Breakpoint 2: where = SwiftData`SwiftData.PersistentModel._metadata() -> SwiftDa
 Breakpoint 3: where = SwiftData`SwiftData.PersistentModel._metadata() -> SwiftData._ModelMetadata + 56, address = 0x00000001a945e54c
 ```
 
-이렇게 `x0` register 값을 변조하면 잘 실행되네요.
+이렇게 `x0` register 값을 변조하면 잘 작동하네요.
 
 Model type이 여러개면 크래시날 가능성 있는데... 그건 알아서 해결하시길 ㅎ
