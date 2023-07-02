@@ -197,7 +197,7 @@ objc[38405]: objc_setAssociatedObject called on instance (0x6000002a6ea0) of cla
 `objc_setAssociatedObject`의 `x0` register에 actor 타입이 쌩으로 들어가서 생기는 문제입니다.
 
 - 왜인지는 모르겠으나 actor가 Objective-C Runtime으로 넘어갈 떄 `__SwiftValue`로 변환되지 않는 것 같네요. Swift 버그로 보이는데... class는 `__SwiftValue`로 잘 변환되는데 말이죠.
-- 애초에 Swift Type을 `id` parameter에 넣는 것은 위험하다고 생각하는데;; SwiftData 내부 구조도 이상하다고 생각하네요.
+- 애초에 Swift Type을 `id` parameter에 넣는 것은 위험하다고 생각하는데;; SwiftData 내부 구조도 왜 저렇게 짰을지....
 
 이상한 점들이 여러가지지만... `x0` register에 아래처럼 임의의 NSObject 메모리 주소를 주입해주면 해결됩니다.
 
