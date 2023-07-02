@@ -35,7 +35,7 @@ var defaultModelExecutor: DefaultModelExecutor!
 // ModelContext init할 때 defaultModelExecutor 생성하기
 // 아래처럼 하면 Actor의 executor를 Context 기반으로 할 수 있음. 만약 thread를 커스텀하고 싶으면 ModelExecutor를 직접 정의하면 됨
 // https://github.com/apple/swift-evolution/blob/main/proposals/0392-custom-actor-executors.md
-let sdContainer: ModelContainer = try .init(for: Note.self)
+let sdContainer: ModelContainer = try .init(for: [Note.self])
 let sdContext: ModelContext = await sdContainer.mainContext
 defaultModelExecutor = .init(context: sdContext)
 
@@ -200,7 +200,28 @@ objc[38405]: objc_setAssociatedObject called on instance (0x6000002a6ea0) of cla
 - 왜인지는 모르겠으나 actor가 Objective-C Runtime으로 넘어갈 떄 `__SwiftValue`로 변환되지 않는 것 같네요. Swift 버그로 보이는데... class는 `__SwiftValue`로 잘 변환되는데 말이죠.
 - 애초에 Swift Type을 `id` parameter에 넣는 것은 위험하다고 생각하는데;; SwiftData 내부 구조도 왜 저렇게 짰을지....
 
-이상한 점들이 여러가지지만... `x0` register에 아래처럼 임의의 NSObject 메모리 주소를 주입해주면 해결됩니다.
+이상한 점들이 여러가지네요. 한 번 actor를 NSObject 기반으로 바꿔봅시다.
+
+```swift
+actor Note: NSObject, PersistentModel, ModelActor
+```
+
+그러면 Runtime에서 아래와 같은 에러가 납니다.
+
+```
+SwiftData/Schema.swift:294: Fatal error: Entity Note specifies SwiftNativeNSObject as its parent but no such entity was found in the provided types: [Noteground.Note]
+```
+
+뭔 소리인가 했더니 actor가 NSObject를 subclassing하면, NSObject를 subclassing하지 않고 SwiftNativeNSObject를 subclassing하고 있네요.
+
+```
+(lldb) expression -l objc -O -- [NSClassFromString(@"_TtC10Noteground4Note") superclass]
+SwiftNativeNSObject
+```
+
+SwiftData는 SwiftNativeNSObject이 뭔지 모르니까 Model type으로 인식해 버린거고, 아까 위 코드 `let sdContainer: ModelContainer = try .init(for: [Note.self])`에서 type들에 SwiftNativeNSObject을 정의하지 않았기 때문에 크래시가 발생하네요.... 총체적 난국 ㅎㅎㅎ;;
+
+일단 NSObject를 subclassing하는 것은 포기하고 다른 방법을 모색해 봅시다. NSObject 표기를 지우고, `objc_setAssociatedObject`와 `objc_getAssociatedObject`들이 호출될 때마다 `x0` register에 아래처럼 임의의 NSObject 메모리 주소를 주입해주면 해결될 것 같네요.
 
 참고로 아래에서 설명하는 offset은 SDK마다 다를 수 있기에... assembly 읽어보고 offset을 정확히 구하시는걸 추천
 
