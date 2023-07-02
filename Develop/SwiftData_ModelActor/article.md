@@ -62,7 +62,7 @@ actor Note: ModelActor {
 
 위 코드는 컴파일 에러가 납니다. `@Model`과 `@PersistedProperty` macro들은 property의 KeyPath를 활용하는데, macro들은 actor-nonisolated KeyPath를 필요로 합니다. 그 KeyPath들은 actor-isolated이기 때문에 에러가 납니다.
 
-결국 `@Model`과 `@PersistedProperty`을 쓰면 안 된다는 결론에 이르게 됩니다. 아래처럼 Model을 직접 만들어야 합니다.
+결국 `@Model`과 `@PersistedProperty`을 쓰면 안 되는 것 같네요. 아래처럼 Model을 직접 만들어야 합니다.
 
 ```swift
 final class NonisolatedValueStore<T: Sendable>: Sendable {
