@@ -139,7 +139,7 @@ let foo: Foo = .init()
 foo.text = "BOO!"
 ```
 
-그러면 `-setText:`에서 pause가 걸린다. 문서대로 Objective-C Runtime에서 dispatch가 우선적으로 되며, `<+48>`에서 Swift Runtime으로 넘어간다.
+그러면 `-setText:`에서 pause가 걸린다. 문서대로 Objective-C Runtime에서 dispatch가 먼저 발동하며, `<+48>`에서 Swift Runtime으로 넘어간다.
 
 ```
 MiscellaneousObservation`@objc Foo.text.setter:
