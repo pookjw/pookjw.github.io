@@ -167,7 +167,7 @@ MiscellaneousObservation`@objc Foo.text.setter:
 
 ### KVO
 
-`dynamic` 키워드를 적으면 KVO이 된다.
+`dynamic` 키워드를 적으면 Swift 코드에서 setter를 발동시킬 때 KVO이 된다.
 
 ```swift
 import Foundation
