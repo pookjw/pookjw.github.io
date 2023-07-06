@@ -89,7 +89,7 @@ let foo: Foo = .init()
 foo.text = "BOO!"
 ```
 
-breakpoint가 안 걸린다. `-setText:`가 안 불린다는 뜻이다. 한 번 `text`에 watchpoint를 걸어보면 아래처럼 `Foo.text.setter:`에서 pause가 걸린다. `-setText:`가 아닌, Swift Runtime에서 돌아가는 코드에서 pause가 걸린 것을 볼 수 있으며, 보시다시피 `-setText:` (Objective-C Runtime)을 호출하지 않고 있다.
+breakpoint에 의한 pause가 안 걸린다. `-setText:`가 안 불린다는 뜻이다. 한 번 `text`에 watchpoint를 걸어보면 아래처럼 `Foo.text.setter:`에서 pause가 걸린다. `-setText:`가 아닌, Swift Runtime에서 돌아가는 코드에서 pause가 걸린 것을 볼 수 있으며, 보시다시피 `-setText:` (Objective-C Runtime)을 호출하지 않고 있다.
 
 ```
 MiscellaneousObservation`Foo.text.setter:
