@@ -22,6 +22,8 @@ p.deallocate()
 
 이 글에서는 NSObject를 subclassing하지 않으면서 위 코드가 되게 하는 방법을 소개합니다.
 
+arm64e assembly로 설명합니다.
+
 ## 왜 크래시가 나는지
 
 - [`objc_setAssociatedObject`](https://github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-runtime.mm#L720)는 [`_object_set_associative_reference`](https://github.com/apple-oss-distributions/objc4/blob/c3f002513d195ef564f3c7e9496c2606360e144a/runtime/objc-references.mm#L160)를 호출합니다.
