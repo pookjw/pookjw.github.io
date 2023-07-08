@@ -28,10 +28,10 @@ p.deallocate()
 
 - `_object_set_associative_reference`에서 [이 부분](https://github.com/apple-oss-distributions/objc4/blob/c3f002513d195ef564f3c7e9496c2606360e144a/runtime/objc-references.mm#L167)을 보면
 
-```objc
+    ```objc
     if (object->getIsa()->forbidsAssociatedObjects())
         _objc_fatal("objc_setAssociatedObject called on instance (%p) of class %s which does not allow associated objects", object, object_getClassName(object));
-```
+    ```
 
     object의 Class (`getIsa`)의 forbidsAssociatedObjects()을 확인해서 associated object가 금지되어 있을 경우 크래시가 납니다.
     
