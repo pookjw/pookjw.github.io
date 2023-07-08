@@ -234,3 +234,9 @@ foo.text = "TEST"
 ## Swift class에서
 
 TODO
+
+Swift에서도 dynamic 붙일 수 있음
+
+Swift에서 dynamic 키워드가 없으면 inline하게 getter/setter가 생성되고
+
+dynamic 키워드가 있으면 getter/setter를 호출하는 방식

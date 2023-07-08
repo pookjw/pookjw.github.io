@@ -176,9 +176,9 @@ actor Note: PersistentModel, ModelActor {
 }
 ```
 
-## iOS 17.0 beta 1/2에서 문제점
+## iOS 17.0 beta 1~3에서 문제점
 
-위 코드를 iOS 17.0 beta 1/2 환경에서 돌리면 아래처럼 크래시가 납니다.
+위 코드를 iOS 17.0 beta 1~3 환경에서 돌리면 아래처럼 크래시가 납니다.
 
 ```
 objc[38405]: objc_setAssociatedObject called on instance (0x6000002a6ea0) of class Noteground.Note which does not allow associated objects
@@ -193,14 +193,54 @@ objc[38405]: objc_setAssociatedObject called on instance (0x6000002a6ea0) of cla
     frame #6: 0x00000001a945e64c SwiftData`SwiftData.PersistentModel._metadata() -> SwiftData._ModelMetadata + 312
 ```
 
-`objc_setAssociatedObject`의 `x0` register에 actor 타입이 쌩으로 들어가서 생기는 문제입니다.
+`objc_setAssociatedObject`의 `x0` register에 [`SwiftObject`](https://github.com/apple/swift/blob/main/stdlib/public/runtime/SwiftObject.h)가 들어가서 생긴 문제입니다.
 
-- 왜인지는 모르겠으나 actor가 Objective-C Runtime으로 넘어갈 떄 `__SwiftValue`로 변환되지 않는 것 같네요. Swift 버그로 보이는데... class는 `__SwiftValue`로 잘 변환되는데 말이죠.
-- 애초에 Swift Type을 `id` parameter에 넣는 것은 위험하다고 생각하는데;; SwiftData 내부 구조도 왜 저렇게 짰을지....
+[링크](https://github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-references.mm#L167)에 따르면, `objc_setAssociatedObject`의 경우 `Class` (`getIsa`)의 `forbidsAssociatedObjects()`의 값을 확인하고, associated objects가 금지된 Class이면 fatal을 발생시킵니다.
 
-**업데이트 : ** 걍 [SwiftObject](https://github.com/apple/swift/blob/main/stdlib/public/runtime/SwiftObject.h)가 Objective-C Class이긴 한데 NSObject 기반이 아니라서 발생하는 문제... 어쨋든 내부 이슈
+`objc_setAssociatedObject`의 assembly에서는 `<+92>`에서 수행하고 있습니다.
 
-이상한 점들이 여러가지네요. 한 번 actor를 NSObject 기반으로 바꿔봅시다.
+```
+libobjc.A.dylib`objc_setAssociatedObject:
+    0x18005201c <+0>:    sub    sp, sp, #0x80
+    0x180052020 <+4>:    stp    d9, d8, [sp, #0x20]
+    0x180052024 <+8>:    stp    x26, x25, [sp, #0x30]
+    0x180052028 <+12>:   stp    x24, x23, [sp, #0x40]
+    0x18005202c <+16>:   stp    x22, x21, [sp, #0x50]
+    0x180052030 <+20>:   stp    x20, x19, [sp, #0x60]
+    0x180052034 <+24>:   stp    x29, x30, [sp, #0x70]
+    0x180052038 <+28>:   add    x29, sp, #0x70
+    0x18005203c <+32>:   str    x1, [sp, #0x10]
+    0x180052040 <+36>:   orr    x8, x0, x2
+    0x180052044 <+40>:   cbz    x8, 0x180052348           ; <+812>
+    0x180052048 <+44>:   mov    x20, x3
+    0x18005204c <+48>:   mov    x22, x2
+    0x180052050 <+52>:   mov    x21, x1
+    0x180052054 <+56>:   mov    x19, x0
+    0x180052058 <+60>:   tbnz   x0, #0x3f, 0x1800523ac    ; <+912>
+    0x18005205c <+64>:   ldr    x8, [x19]
+    0x180052060 <+68>:   and    x8, x8, #0x7ffffffffffff8
+    0x180052064 <+72>:   mov    x25, #0x7ffffffffff8
+    0x180052068 <+76>:   movk   x25, #0xf00, lsl #48
+    0x18005206c <+80>:   ldr    x8, [x8, #0x20]
+    0x180052070 <+84>:   and    x8, x8, x25
+    0x180052074 <+88>:   ldrb   w8, [x8, #0x2]
+->  0x180052078 <+92>:   tbnz   w8, #0x4, 0x180052474     ; <+1112>
+```
+
+ㅇㅋ breakpoint를 아래와 같이 걸어봅시다.
+
+```
+(lldb) breakpoint set -a 0x180052078 -G1 -C 'register write w8 0x8'
+Breakpoint 2: where = libobjc.A.dylib`objc_setAssociatedObject + 92, address = 0x0000000180052078
+```
+
+이렇게 하니까 잘 되네요.
+
+memory leak이 발생할 거에요. NSObject의 경우 dealloc에서 _object_remove_associations를 부르는데 SwiftObject는 그런거 없어서...
+
+## 업데이트 이전 내용 : iOS 17.0 beta 1~3에서 문제점
+
+한 번 actor를 NSObject 기반으로 바꿔봅시다.
 
 ```swift
 actor Note: NSObject, PersistentModel, ModelActor
