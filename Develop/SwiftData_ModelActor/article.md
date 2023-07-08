@@ -198,6 +198,8 @@ objc[38405]: objc_setAssociatedObject called on instance (0x6000002a6ea0) of cla
 - 왜인지는 모르겠으나 actor가 Objective-C Runtime으로 넘어갈 떄 `__SwiftValue`로 변환되지 않는 것 같네요. Swift 버그로 보이는데... class는 `__SwiftValue`로 잘 변환되는데 말이죠.
 - 애초에 Swift Type을 `id` parameter에 넣는 것은 위험하다고 생각하는데;; SwiftData 내부 구조도 왜 저렇게 짰을지....
 
+**업데이트 : ** 걍 [SwiftObject](https://github.com/apple/swift/blob/main/stdlib/public/runtime/SwiftObject.h)가 Objective-C Class이긴 한데 NSObject 기반이 아니라서 발생하는 문제... 어쨋든 내부 이슈
+
 이상한 점들이 여러가지네요. 한 번 actor를 NSObject 기반으로 바꿔봅시다.
 
 ```swift
