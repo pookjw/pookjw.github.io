@@ -182,9 +182,9 @@ Swift class가 Objective-C Runtime에 넘어갈 떄 하나의 SwiftObject가 생
 
 하지만 여러개 생성되지 않으므로 문제될건 없어 보이는데... 모르겠네요.
 
-## 이런거 하는 이유
+## 이런 이상한 짓을 하는 이유
 
-SwiftData의 내부 버그 때문
+SwiftData의 내부 버그를 고치기 위해... ㅠ
 
 SwiftData의 내부에서 `SwiftObject`를 `objc_setAssociatedObject`에 넣어서 크래시나는 이슈가 있었고 이를 해결하기 위해 이짓거리를 했어요.
 
