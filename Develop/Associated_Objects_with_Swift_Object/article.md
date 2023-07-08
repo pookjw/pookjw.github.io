@@ -108,7 +108,7 @@ p.deallocate()
     Breakpoint 10: where = libobjc.A.dylib`realizeClassWithoutSwift(objc_class*, objc_class*) + 1660, address = 0x00000001825e56f0
     ```
     
-    이렇게 하니 잘 되네요.
+이렇게 하니 잘 되네요.
     
 ## 크래시 피하기 (2)
 
