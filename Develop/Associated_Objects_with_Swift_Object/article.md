@@ -47,7 +47,7 @@ p.deallocate()
 
 - flag에 `RW_FORBIDS_ASSOCIATED_OBJECTS`을 기록하는 것은 Runtime의 `realizeClassWithoutSwift`에서 처리되고 있습니다. [링크](https://github.com/apple-oss-distributions/objc4/blob/c3f002513d195ef564f3c7e9496c2606360e144a/runtime/objc-runtime-new.mm#L2724)
 
-    ```
+    ```objc
     // Propagate the associated objects forbidden flag from ro or from
     // the superclass.
     if ((ro->flags & RO_FORBIDS_ASSOCIATED_OBJECTS) ||
