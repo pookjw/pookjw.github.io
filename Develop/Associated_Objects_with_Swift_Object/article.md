@@ -170,7 +170,17 @@ SwiftObject는 associated object를 지원하지 않기에 위 NSObject와 같�
 
 - [`-[_TtCs12_SwiftObject release]`](https://github.com/apple/swift/blob/a682358a2954a413074bf72bb980068b9eec1941/stdlib/public/runtime/SwiftObject.h#L72)가 호출될 때 retainCount가 0일 경우 [`objc_removeAssociatedObjects`](https://developer.apple.com/documentation/objectivec/1418683-objc_removeassociatedobjects)을 호출
 
-이런 방법들이 있을 것 같은데 해보진 않음...
+이런 방법들이 있을 것 같은데 해보진 않음... 성능에 너무 안 졸은 방법이라 ㅠ
+
+## 애플이 SwiftObject에서 associated object를 허용하지 않는 이유?
+
+Swift class가 Objective-C Runtime에 넘어갈 떄 하나의 SwiftObject가 생성되고, 그렇게 만들어진 Swift class와 SwiftObject는 일대일 관계를 이룹니다.
+
+하나의 Swift class가 Objective-C Runtime에 여러번 넘어간다고 해서 SwiftObject가 여러개 생성되지 않습니다.
+
+만약 여러개 생성된다면 여러개의 SwiftObject들끼리 associated object이 동기화되지 않을 것이기에 문제가 될 것 같네요.
+
+하지만 여러개 생성되지 않으므로 문제될건 없어 보이는데... 모르겠네요.
 
 ## 이런거 하는 이유
 
