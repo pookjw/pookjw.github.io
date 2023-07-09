@@ -14,6 +14,7 @@
 - [Swift Concurrency와 Objective-C 혼용 팁](Develop/ObjC_Swift_Concurrency/article.md)
 - [LLVM에서 Bitcode의 deprecation에 대해](Develop/About_Bitcode_Deprecation/article.md)
 - [[C++20] const, constexpr, consteval, constinit](Develop/About_const_constexpr_consteval_constinit/article.md)
+- [iOS 코드 난독화 간략하게 살펴본 후기](Develop/iOS_Code_Obfuscation/article.md)
 - [UICollectionView.CellRegistration, 그리고 iOS 15와 iOS 16](Develop/UICollectionViewCellRegistration_iOS_16/article.md)
 - [iPhone 14 Pro (Max)에서 Dynamic Island 영역을 투명하게 만들기](Develop/Aperture_with_Clear_Color/article.md)
 - [Dynamic Island에서 쓰이는 도형 랜더링을 써보자](Develop/About_CAGainMapLayer/article.md)
