@@ -101,7 +101,7 @@ arm64e assembly로 설명합니다.
     0x1825e5714 <+1696>: str    w8, [x9]
     ```
 
-    `<+1684>`와 `<+1660>`의 `w8` register에 둘다 `0x0`을 주입해주면 `orr    w8, w8, #0x100000`을 막을 수 있고, 이는 flag에 `RW_FORBIDS_ASSOCIATED_OBJECTS`이 주입되는 것을 막을 수 있게 됩니다.
+    `<+1604>`와 `<+1660>`의 `w8` register에 둘다 `0x0`을 주입해주면 `orr    w8, w8, #0x100000`을 막을 수 있고, 이는 flag에 `RW_FORBIDS_ASSOCIATED_OBJECTS`이 주입되는 것을 막을 수 있게 됩니다.
     
     ```
     (lldb) breakpoint set -a 0x1825e56b8 -G1 -C 'register write w8 0x0'
