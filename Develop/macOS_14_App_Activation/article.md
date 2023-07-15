@@ -14,6 +14,8 @@ macOS 14 부터 App Activation의 로직이 바뀌었습니다. 이전 로직은
 
 - [`NSApplicationActivateIgnoringOtherApps`](https://developer.apple.com/documentation/appkit/nsapplicationactivationoptions/nsapplicationactivateignoringotherapps) : 사용자에게 불쾌한 경험을 주게 하는 option이었습니다. 이는 deprecated 됩니다.
 
+- [`-[NSApplication activateIgnoringOtherApps:`](https://developer.apple.com/documentation/appkit/nsapplication/1428468-activateignoringotherapps?changes=latest_minor) : 상기한 이유
+
 ### Added
 
 - [`-[NSRunningApplication activateFromApplication:options:]`](https://developer.apple.com/documentation/appkit/nsrunningapplication/4168356-activatefromapplication) : parameter의 application이 activate 상태이거나 yield 받은 상태일 경우, `NSRunningApplication`을 activate
