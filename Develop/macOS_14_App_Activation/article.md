@@ -23,3 +23,15 @@ macOS 14 부터 App Activation의 로직이 바뀌었습니다. 이전 로직은
 - [`-[NSApplication activate]`](https://developer.apple.com/documentation/appkit/nsapplication/4168336-activate) : 현재 App을 Activate - Activate된 앱에서 yield 받았을 때만 유효
 
 - [`-[NSApplication yieldActivationToApplication:]`](https://developer.apple.com/documentation/appkit/nsapplication/4168338-yieldactivationtoapplication), [`-[NSApplication yieldActivationToApplicationWithBundleIdentifier:]`](https://developer.apple.com/documentation/appkit/nsapplication/4168339-yieldactivationtoapplicationwith) : 만약 현재 App이 Activate되었다면, Activate 권한을 다른 App에 양보. 양보한 상태에서도 현재 App은 Activate를 전환할 수 있는 권한을 지닙니다.
+
+## 실험
+
+그러면
+
+```objc
+[NSRunningApplication.currentApplication activateFromApplication:/**/ options:NSApplicationActivateAllWindows];
+```
+
+이렇게 하면, 현재 내 앱이 background/inactive 상태이지만 `NSRunningApplication.currentApplication`은 현재 active된 앱이 나오므로 무조건 active가 가능한건가?
+
+이런 생각이 들었는데 실험해보니 당연히 안 되네요. 애초에 현재 내 앱은 background/inactive 상태일 때는 active를 할 권한이 없으니까요.
