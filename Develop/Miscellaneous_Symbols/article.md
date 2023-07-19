@@ -2,6 +2,16 @@
 
 [Symbols](https://developer.apple.com/documentation/symbols) Framework를 UIKit/AppKit의 Private API로 용도를 확장하는 방법을 소개합니다.
 
+## Symbols 소개
+
+- SF Symbols에 Effect, Transition 적용 가능함
+
+- RenderBox라는 Private Framework로 작동
+
+- Metal 기반
+
+- Objective-C++로 작성
+
 ## UIKit
 
 ### UIButtonConfiguration에 적용하기
@@ -90,7 +100,10 @@ namespace NSMenuItemView {
             object_getInstanceVariable(self, "_imageView", reinterpret_cast<void **>(&imageView));
             
             if (imageView) {
-                [imageView addSymbolEffect:[[NSSymbolBounceEffect bounceUpEffect] effectWithByLayer] options:[NSSymbolEffectOptions optionsWithRepeating] animated:YES];
+                NSSymbolEffect *symbolEffect = /* 적용할 Symbol Effect */;
+                NSSymbolEffectOptions *options = /* Symbol Effect의 Options */;
+                
+                [imageView addSymbolEffect:symbolEffect options:options animated:YES];
             }
         }
     }
