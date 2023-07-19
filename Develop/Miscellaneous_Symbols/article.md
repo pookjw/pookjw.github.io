@@ -45,6 +45,8 @@ reinterpret_cast<void (*)(__kindof NSView *, SEL, NSSymbolEffect *, NSSymbolEffe
 마찬가지로 Symbol Effect만 지원하며 Transition은 지원하지 않습니다.
 
 ```objc
+#import <objc/message.h>
+
 NSToolbarItem *toolbarItem = /* Symbol Effect를 넣을 NSToolbarItem */;
 
 toolbarItem.image = /* Symbol Effect를 지원하는 NSImage */;
@@ -74,6 +76,9 @@ reinterpret_cast<void (*)(__kindof NSView *, SEL, NSSymbolEffect *, NSSymbolEffe
 Symbol Effect와 Transition 모두 지원합니다.
 
 ```objc
+#import <objc/message.h>
+#import <objc/runtime.h>
+
 namespace NSMenuItemView {
     namespace _applyImage_withImageSize {
         static void (*original)(id, SEL, NSImage *, struct CGSize);
