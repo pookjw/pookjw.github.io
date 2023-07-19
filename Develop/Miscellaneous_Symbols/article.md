@@ -70,7 +70,7 @@ auto _view = reinterpret_cast<NSButton * (*)(id, SEL)>(objc_msgSend)(toolbarItem
 // _NSToolbarButtonCell (<- NSButtonCell)
 auto cell = static_cast<__kindof NSButtonCell *>(_view.cell);
 
-// _NSToolbarButtonCell는 NSImageView를 필요할 때만 lazy하게 불러옵니다. effect를 적용하기 위해 당장 불러옵니다.
+// _NSToolbarButtonCell는 NSImageView를 필요할 때만 lazy하게 불러옵니다. effect를 적용하기 위해서는 당장 필요하니 불러옵니다.
 // frame이 zero일 경우 내부적으로 NSIsEmptyRect로 인해 NSImageView가 안 불러오는 로직이기에, zero가 아닌 값을 주입합니다.
 reinterpret_cast<void (*)(id, SEL, struct CGRect, id)>(objc_msgSend)(cell, NSSelectorFromString(@"_updateImageViewWithFrame:inView:"), CGRectMake(0.f, 0.f, 1.f, 1.f), _view);
 
