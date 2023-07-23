@@ -7,6 +7,7 @@
 - [SwiftData에서 ModelActor 사용하기](Develop/SwiftData_ModelActor/article.md)
 - [watchOS 10 - PUICNavigationBarVisualProvider의 새로운 디자인](Develop/watchOS_10_NavigationBarDesign/article.md)
 - [[iOS 17, macOS 14] Symbols + Private API](Develop/Miscellaneous_Symbols/article.md)
+- [[iOS 17] Live Photo 배경화면에 대해](iOS_17_Poster_Live_Photo/Develop/article.md)
 - [iOS 17 - UIWindowSceneDragInteraction](Develop/About_UIWindowSceneDragInteraction/article.md)
 - [[macOS 14] 새로운 App Activation 방식](Develop/macOS_14_App_Activation/article.md)
 - [iOS 16 - PosterBoard에 대해](Develop/iOS_16_PosterBoard/article.md)
