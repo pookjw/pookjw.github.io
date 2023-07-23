@@ -110,7 +110,7 @@ Reverse Engineering하면서 `PhotosPosterProvider`에 대해 알게 된 점을 
 -[PREditorRootViewController actionsMenuButton]
 ```
 
-모든 버튼들은 `UIMenuElement` 또는 `UIAction`을 통해 속성을 정의한다.
+모든 버튼들은 `UIAction`을 통해 속성을 정의한다.
 
 `primaryActionButton`의 Action은 어디서 생성되는건지 모르겠다. `primaryActionButton`은 Live Photo (Settling Effect)을 toggle한다. 이 버튼의 Action은 `-[PUWallpaperPosterEditorController _toggleSettlingEffectAction]`에서 생성되며, 이 Action은 `target = self`,  `action = _toggleSettlingEffectEnabled`다.
 
