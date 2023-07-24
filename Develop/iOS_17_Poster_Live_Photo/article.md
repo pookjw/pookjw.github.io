@@ -122,7 +122,7 @@ Debug HUD를 볼 수 있음
 
 `secondaryActionButton`와 `actionsMenuButton`의 Action은 `-[PUWallpaperPosterEditorController trailingMenuElementsForEditor:]`에서 생성된다. `NSMutableArray`를 반환한다. `secondaryActionButton`은 현재 페이지가 컬러 필터일 경우에만 생성되며, `actionsMenuButton`은 항상 생성된다. `-[PREditorRootViewController scrollView]`를 스크롤 할 때마다 reload 된다.
 
-### `PUWallpaperPosterEditDebugViewController`
+## `PUWallpaperPosterEditDebugViewController`
 
 내부 개발용 View Controller인듯?
 
