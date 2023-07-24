@@ -90,6 +90,12 @@ __attribute__((constructor)) static void init() {
 
 Reverse Engineering하면서 `PhotosPosterProvider`에 대해 알게 된 점을 적자면
 
+## `-[PUParallaxLayerStackViewModel showsDebugHUD]`
+
+Debug HUD를 볼 수 있음
+
+![](2.png)
+
 ## `PhotosPosterProvider`
 
 `PhotosPosterProvider`은 ExtensionKit 기반으로 작동하는 `PhotosUIPrivate` Extension이다. PosterBoard와 XPC로 통신한다.
@@ -123,3 +129,49 @@ Reverse Engineering하면서 `PhotosPosterProvider`에 대해 알게 된 점을 
 띄워봤더니 일반 View랑 똑같이 생김
 
 `-tapToRadarAction`이라는게 있긴 한데 `nil` 반환함
+
+## `-[PUWallpaperPosterEditorController _enableSettlingEffect]`
+
+Settling Effect (Live Photo) 효과를 켜는 method
+
+`-[PUParallaxLayerStackViewModel canEnableSettlingEffect]`가 YES일 때만 가능하며, `-canEnableSettlingEffect`은 위에서 설명한 `-[PIParallaxSegmentationItem isSettlingEffectAvailable]`로 가능하다.
+
+`-isSettlingEffectAvailable`에 상관 없이 강제로 `-[PUParallaxLayerStackViewModel canEnableSettlingEffect]`에서 YES를 반환하도록 하면
+
+```
+(lldb) disassemble -a 0x1ba970634
+PhotosUIPrivate`<redacted>:
+    0x1ba970634 <+0>:   stp    x22, x21, [sp, #-0x30]!
+    0x1ba970638 <+4>:   stp    x20, x19, [sp, #0x10]
+    0x1ba97063c <+8>:   stp    x29, x30, [sp, #0x20]
+    0x1ba970640 <+12>:  add    x29, sp, #0x20
+    0x1ba970644 <+16>:  mov    x19, x0
+    0x1ba970648 <+20>:  bl     0x1bad94420
+    0x1ba97064c <+24>:  bl     0x1bb7dfa20
+    0x1ba970650 <+28>:  mov    x20, x0
+    0x1ba970654 <+32>:  bl     0x1bad7a2a0
+    0x1ba970658 <+36>:  mov    x21, x0
+    0x1ba97065c <+40>:  bl     0x1bb7dfb58
+    0x1ba970660 <+44>:  cbz    w21, 0x1ba97068c          ; <+88>
+    0x1ba970664 <+48>:  mov    x0, x19
+    0x1ba970668 <+52>:  bl     0x1bad94420
+    0x1ba97066c <+56>:  bl     0x1bb7dfa20
+    0x1ba970670 <+60>:  mov    x19, x0
+    0x1ba970674 <+64>:  bl     0x1badb0780
+    0x1ba970678 <+68>:  bl     0x1bb7dde78
+    0x1ba97067c <+72>:  mov    x20, x0
+    0x1ba970680 <+76>:  bl     0x1bb7dfb40
+    0x1ba970684 <+80>:  eor    w0, w20, #0x1
+    0x1ba970688 <+84>:  b      0x1ba970690               ; <+92>
+    0x1ba97068c <+88>:  mov    w0, #0x0
+    0x1ba970690 <+92>:  ldp    x29, x30, [sp, #0x20]
+    0x1ba970694 <+96>:  ldp    x20, x19, [sp, #0x10]
+    0x1ba970698 <+100>: ldp    x22, x21, [sp], #0x30
+    0x1ba97069c <+104>: ret    
+```
+
+`0x1ba97069c`에서 `register write x0 0x1`을 해주면 된다.
+
+![](3.png)
+
+당연히 UI만 바뀌고 Live Photo 효과는 나오지 않는다 ㅎ
