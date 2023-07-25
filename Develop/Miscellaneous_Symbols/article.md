@@ -22,6 +22,146 @@ Objective-C를 사용합니다.
 
 [SymbolButtonConfiguration](https://github.com/pookjw/SymbolButtonConfiguration)
 
+### UIMenu + UIAction에 적용하기
+
+![](2.gif)
+
+Objective-C++를 사용합니다.
+
+```objc
+#import <UIKit/UIKit.h>
+#import <objc/message.h>
+#import <objc/runtime.h>
+#import <vector>
+#import <string>
+#import <algorithm>
+#import <ranges>
+
+#pragma mark - Swizzling _UIContextMenuListView
+
+/*
+UIMenu는 내부적으로 UICollectionView를 사용한다. Cell에 UIAction의 속성에 맞게 업데이트 된 이후에 UIImageView에 Symbol Effect를 추가한다.
+Symbol Effect는 UIAction에 할당된 Association Object에서 가져온다.
+*/
+
+namespace _UIContextMenuListView {
+    namespace _configureCell_forElement_section_size {
+        std::uint8_t *associationKey = nullptr;
+        
+        void (*original)(id, SEL, __kindof UICollectionViewCell *, __kindof UIMenuElement *, id, NSUInteger);
+        void custom(id self, SEL _cmd, __kindof UICollectionViewCell *cell, __kindof UIMenuElement *element, id section, NSUInteger size) {
+            original(self, _cmd, cell, element, section, size);
+            
+            auto symbolEffect = static_cast<__kindof NSSymbolEffect * _Nullable>(objc_getAssociatedObject(element, associationKey));
+            if (!symbolEffect) return;
+            
+            // _UIContextMenuCellContentView
+            __kindof UIView *contentView = cell.contentView;
+            
+            auto imageViews = std::vector<std::string> {
+                "decorationImageView",
+                "iconImageView",
+                "emphasizediconImageView"
+            } |
+            std::views::transform([contentView](const std::string name) {
+                return reinterpret_cast<id (*)(id, SEL)>(objc_msgSend)(contentView, sel_registerName(name.data()));
+            });
+            
+            std::for_each(imageViews.begin(), imageViews.end(), [symbolEffect](UIImageView * _Nullable imageView) {
+                if (!imageView) return;
+                
+                NSAutoreleasePool *pool = [NSAutoreleasePool new];
+                
+                [imageView addSymbolEffect:symbolEffect
+                                   options:[NSSymbolEffectOptions optionsWithRepeating]
+                                  animated:YES];
+                
+                [pool release];
+            });
+        }
+    }
+}
+
+@implementation AppDelegate
+
++ (void)load {
+    Method method_2 = class_getInstanceMethod(UIAction.class, @selector(copyWithZone:));
+    _UIAction::copyWithZone::original = reinterpret_cast<id (*)(id, SEL, struct _NSZone *)>(method_getImplementation(method_2));
+    method_setImplementation(method_2, reinterpret_cast<IMP>(_UIAction::copyWithZone::custom));
+    
+    //
+ 
+    Method method_3 = class_getInstanceMethod(UIAction.class, NSSelectorFromString(@"_immutableCopy"));
+    _UIAction::_immutableCopy::original = reinterpret_cast<id (*)(id, SEL)>(method_getImplementation(method_3));
+    method_setImplementation(method_3, reinterpret_cast<IMP>(_UIAction::_immutableCopy::custom));
+}
+
+@end
+
+
+#pragma mark - Swizzling UIAction
+
+/*
+UIAction이 복사될 때 Association Object도 복사되도록 한다.
+*/
+
+namespace _UIAction {
+    namespace copyWithZone {
+        id (*original)(id, SEL, struct _NSZone *);
+        id custom(id self, SEL _cmd, struct _NSZone *zone) {
+            id copy = original(self, _cmd, zone);
+            
+            id object = objc_getAssociatedObject(self, _UIContextMenuListView::_configureCell_forElement_section_size::associationKey);
+            objc_setAssociatedObject(copy,
+                                     _UIContextMenuListView::_configureCell_forElement_section_size::associationKey,
+                                     object,
+                                     OBJC_ASSOCIATION_COPY);
+            
+            return copy;
+        }
+    }
+    
+    namespace _immutableCopy {
+        id (*original)(id, SEL);
+        id custom(id self, SEL _cmd) {
+            id copy = original(self, _cmd);
+            
+            id object = objc_getAssociatedObject(self, _UIContextMenuListView::_configureCell_forElement_section_size::associationKey);
+            objc_setAssociatedObject(copy,
+                                     _UIContextMenuListView::_configureCell_forElement_section_size::associationKey,
+                                     object,
+                                     OBJC_ASSOCIATION_COPY);
+            
+            return copy;
+        }
+    }
+}
+
+@implementation AppDelegate
+
++ (void)load {
+    _UIContextMenuListView::_configureCell_forElement_section_size::associationKey = new std::uint8_t;
+    
+    Method method_1 = class_getInstanceMethod(NSClassFromString(@"_UIContextMenuListView"), NSSelectorFromString(@"_configureCell:forElement:section:size:"));
+    _UIContextMenuListView::_configureCell_forElement_section_size::original = reinterpret_cast<void (*)(id, SEL, __kindof UICollectionViewCell *, __kindof UIMenuElement *, id, NSUInteger)>(method_getImplementation(method_1));
+    method_setImplementation(method_1, reinterpret_cast<IMP>(_UIContextMenuListView::_configureCell_forElement_section_size::custom));
+}
+
+@end
+
+
+#pragme mark - UIMenu 설정
+
+UIAction *action = /* */;
+
+objc_setAssociatedObject(action,
+                         _UIContextMenuListView::_configureCell_forElement_section_size::associationKey,
+                         [[NSSymbolBounceEffect bounceUpEffect] effectWithByLayer],
+                         OBJC_ASSOCIATION_COPY);
+                         
+UIMenu *menu = [UIMenu menuWithChildren:@[action]];
+```
+
 ## AppKit
 
 ![](1.gif)
@@ -118,4 +258,65 @@ namespace NSMenuItemView {
 }
 
 @end
+```
+
+### NSPaletteMenuItemView에 적용하기
+
+![](3.gif)
+
+Symbol Effect와 Transition 모두 지원합니다.
+
+```objc
+#pragma mark - Swizzling NSPaletteMenuItemView
+
+/*
+NSMenu는 내부적으로 NSTableView를 사용한다. View가 layout 될 때마다 NSImageView에 Symbol Effect를 추가한다.
+Symbol Effect는 NSPaletteMenuItem에 할당된 Association Object에서 가져온다.
+*/
+namespace NSPaletteMenuItemView {
+    namespace layout {
+        static std::uint8_t *associationKey;
+        static void (*original)(id, SEL);
+        static void custom(id self, SEL _cmd) {
+            original(self, _cmd);
+            
+            // NSPaletteMenuItem
+            auto menuItem = reinterpret_cast<__kindof NSMenuItem * _Nullable (*)(id, SEL)>(objc_msgSend)(self, @selector(menuItem));
+            NSSymbolEffect *effect = objc_getAssociatedObject(menuItem, associationKey);
+            
+            if (effect) {
+                [static_cast<__kindof NSView *>(self).subviews enumerateObjectsUsingBlock:^(__kindof NSView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    if ([obj isKindOfClass:NSImageView.class]) {
+                        auto imageView = static_cast<NSImageView *>(obj);
+                        [imageView addSymbolEffect:effect options:[NSSymbolEffectOptions optionsWithRepeating] animated:YES];
+                    }
+                }];
+            }
+        }
+    }
+}
+
+@implementation AppDelegate
+
++ (void)load {
+    Method method_2 = class_getInstanceMethod(NSClassFromString(@"NSPaletteMenuItemView"), @selector(layout));
+    NSPaletteMenuItemView::layout::original = reinterpret_cast<void (*)(id, SEL)>(method_getImplementation(method_2));
+    method_setImplementation(method_2, reinterpret_cast<IMP>(NSPaletteMenuItemView::layout::custom));
+}
+
+@end
+
+#pragma mark - NSMenu 설정
+
+NSMenu *privatePaletteMenu = [NSMenu paletteMenuWithColors:@[]
+                                                    titles:@[]
+                                          selectionHandler:^(NSMenu * _Nonnull) {
+    
+}];
+
+// NSPaletteMenuItem 생성
+auto item = reinterpret_cast<__kindof NSMenuItem * (*)(id, SEL, id, id, id)>(objc_msgSend)([NSClassFromString(@"NSPaletteMenuItem") alloc], NSSelectorFromString(@"initWithColor:image:title:"), NSColor.redColor, [NSImage imageWithSystemSymbolName:@"star.square" accessibilityDescription:nil], nil);
+
+// Effect 설정
+objc_setAssociatedObject(item, NSPaletteMenuItemView::layout::associationKey, [[NSSymbolScaleEffect scaleUpEffect] effectWithWholeSymbol], OBJC_ASSOCIATION_COPY);
 ```
