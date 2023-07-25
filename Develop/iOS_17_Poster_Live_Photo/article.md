@@ -17,6 +17,7 @@ Reverse Engineering을 해보니 `-[PIParallaxSegmentationItem isSettlingEffectA
 한 번 iPad Pro 10.5 (2017)에서 `-[PIParallaxSegmentationItem isSettlingEffectAvailable]`를 hooking해서 `YES`를 반환하도록 강제하니 튕겨버린다... 참고로 `PhotosPosterProvider` (`com.apple.PhotosUIPrivate.PhotosPosterProvider`) target을 hooking해야 한다.
 
 ```objc
+#import <Foundation/Foundation.h>
 #import <substrate.h>
 
 namespace PUParallaxLayerStackViewModel {
@@ -93,6 +94,8 @@ Reverse Engineering하면서 `PhotosPosterProvider`에 대해 알게 된 점을 
 ## `-[PUParallaxLayerStackViewModel showsDebugHUD]`
 
 Debug HUD를 볼 수 있음
+
+[HUDEnablerPU](https://github.com/pookjw/HUDEnablerPU)
 
 ![](2.png)
 

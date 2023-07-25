@@ -60,7 +60,7 @@ Mac Catalyst는 UIKit 이외에도 Photos 같은 iOS 전용 Framework들도 지�
 ```
 (lldb) expression -l objc -O -- [NSApp orderedWindows]
 <__NSArrayM 0x600003737540>(
-<UINSWindow: 0x130f56f20> frame : {{1006, 1139}, {1024, 768}}
+<UINSWindow: 0x130f56f20>
 )
 ```
 
