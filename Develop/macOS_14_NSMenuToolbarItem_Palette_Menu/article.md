@@ -193,7 +193,7 @@ open class NSPaletteMenuItem: NSMenuItem {
 }
 ```
 
-아래처럼 Mirror를 통해 internal property를 가져오는 기능을 구현하고, Objective-C에서 접근할 수 있게 하자
+아래처럼 Mirror를 통해 internal property를 가져오는 기능을 구현하고, Objective-C에서 접근할 수 있게 하자. 이렇게 해야 객체를 복사할 때 color도 가져와서 복사할 수 있기 때문!
 
 ```swift
 import AppKit
