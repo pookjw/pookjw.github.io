@@ -236,7 +236,7 @@ namespace NSPaletteMenuItem {
             id color = reinterpret_cast<id (*)(id, SEL)>(objc_msgSend)(self, @selector(color));
             
             // init 중복 호출하면 안 되긴 하는데... color 값을 설정할 방법이 이거 말곤 없어 보임 ㅠㅠ
-            // Swift Object의 내부 구조를 몰라서... ㅠ NSObject 처럼 base pointer + offset 구조가 아닌 걸로 아는데...
+            // Objective-C Object라면 base pointer + ivar offset로 값 설정할 수 있는데... Swift Object의 내부 구조를 몰라서... ㅠ
             copy = reinterpret_cast<id (*)(id, SEL, id, id, id)>(objc_msgSend)(copy, NSSelectorFromString(@"initWithColor:image:title:"), color, copy.image, copy.title);
             
             return copy;
