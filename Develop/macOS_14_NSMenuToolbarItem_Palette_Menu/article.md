@@ -257,9 +257,7 @@ void registerNSPaletteMenuItemCopyMethod() {
 
 ## 결론
 
-![](0.gif)
-
-위처럼 하니 잘 된다.
+위처럼 하니 처음에 소개한 gif 사진처럼 잘 된다.
 
 이는 `NSPaletteMenuItem`에서 `NSCopying`을 똑바로 지원하지 않아서 생긴 문제다. macOS 내부 버그다.
 
