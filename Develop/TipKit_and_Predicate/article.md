@@ -18,6 +18,8 @@ iOS 17.0 beta 4 SDK 부터 TipKit이 공개되었다.
 
 대충 이정도로 요약할 수 있다.
 
+아마 옛날에는 Objective-C로 구현된 Private Framework가 있었을텐데 (이름 까먹음) 이번에 SwiftUI로 재작성해서 Public으로 공개했다.
+
 ## BPTipKit: TipKit for Objective-C 
 
 아직 작업 중이긴 한데... TipKit을 Objective-C에서 쓸 수 있게 API Wrapper를 만들어봤다.
