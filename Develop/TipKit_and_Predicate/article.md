@@ -85,7 +85,7 @@ BPTipCancellable *shouldDisplayUpdatesObserver = [status observeShouldDisplayUpd
 
 TipKit에는 Rule이라는 기능이 있다. 시간 및 특정 조건에 따라 Tip이 뜰지 말지를 정한다. 이 조건은 [`StandardPredicateExpression`](https://developer.apple.com/documentation/foundation/standardpredicateexpression)과 `#Rule`이라는 macro도 정의한다.
 
-나는 NSPredicate가 유사하다고 생각했기에, 우선 [`Tips.Parameter`](https://developer.apple.com/documentation/tipkit/tips/parameter)는 아래와 같은 API를 구상했다.
+나는 NSPredicate가 유사하다고 생각했기에, [`Tips.Parameter`](https://developer.apple.com/documentation/tipkit/tips/parameter)를 BPTipKit에 적용하기 위해 아래와 같은 API를 구상했다.
 
 ```objc
 @interface Tip : NSObject <BPTip>
