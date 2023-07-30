@@ -64,9 +64,7 @@ BPTipUIView *tipView = [[BPTipUIView alloc] initWithBPTip:tip arrowEdge:NSDirect
 }];
 ```
 
-[`statusUpdates`](https://developer.apple.com/documentation/tipkit/tip/statusupdates) 및 [`shouldDisplayUpdates`](https://developer.apple.com/documentation/tipkit/tip/shoulddisplayupdates)도 지원한다.
-
-Swift의 `AsyncStream`을 `BPTipCancellable`라는 객체로 변환시켜봤다. [`NSKeyValueObservation`](https://github.com/apple/swift-corelibs-foundation/blob/9cf3489411e35a737c2d2de63f50677d5ce8a4a8/Darwin/Foundation-swiftoverlay/NSObject.swift#L163)에서 영감을 얻었다. `BPTipCancellable`가 release되면 `AsyncStream`이 cancel 되는 구조다.
+[`statusUpdates`](https://developer.apple.com/documentation/tipkit/tip/statusupdates) 및 [`shouldDisplayUpdates`](https://developer.apple.com/documentation/tipkit/tip/shoulddisplayupdates)도 지원한다. 이를 구현하기 위해 Swift의 `AsyncStream`을 `BPTipCancellable`라는 객체로 변환시켜봤다. [`NSKeyValueObservation`](https://github.com/apple/swift-corelibs-foundation/blob/9cf3489411e35a737c2d2de63f50677d5ce8a4a8/Darwin/Foundation-swiftoverlay/NSObject.swift#L163)에서 영감을 얻었다. `BPTipCancellable`가 release되면 `AsyncStream`이 cancel 되는 구조다.
 
 ```objc
 Tip *tip = [Tip new];
