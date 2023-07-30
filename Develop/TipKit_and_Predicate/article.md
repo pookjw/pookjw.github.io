@@ -283,7 +283,7 @@ let messagePredicate = #Predicate<Message> { message in
 }
 ```
 
-위 코드의 경우, `Value and Type Parameter Packs` 기능으로 block이 [`PredicateExpressions.Comparison`](https://developer.apple.com/documentation/foundation/predicateexpressions/comparison), [`PredicateExpressions.Equal`](https://developer.apple.com/documentation/foundation/predicateexpressions/equal)로 compile-time에서 변환된다. (`&&`은 뭘로 되징...?)
+위 코드의 경우, `Value and Type Parameter Packs` 기능으로 block이 [`PredicateExpressions.Comparison`](https://developer.apple.com/documentation/foundation/predicateexpressions/comparison), [`PredicateExpressions.Equal`](https://developer.apple.com/documentation/foundation/predicateexpressions/equal)로 compile-time에서 변환된다. (`&&`은 뭘로 되징...? + KeyPath도 아마 변환될듯?)
 
 이렇게 만들어진 Predicate는 `NSPredicate`로 변환할 수 있다! [Apple Documentation](https://developer.apple.com/documentation/foundation/predicateexpressions/equal), [소스코드](https://github.com/apple/swift-foundation/blob/0eeb99ba7bcd36a6e4b3e7daa14ad76d77a42640/Sources/FoundationEssentials/Predicate/NSPredicateConversion.swift#L524)
 
