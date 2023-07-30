@@ -299,7 +299,7 @@ extension PredicateExpressions.Equal : ConvertibleExpression {
 
 요런 식으로 한다.
 
-문제는 `ConvertibleExpression`은 Private API다. 이 말은 **개발자는 Expression을 직접 만들면 안 되며 애플이 기본적으로 제공하는 것만 써야 한다.**
+문제는 `ConvertibleExpression`은 Private API다. 이 말은 NSPredicate로 변환할 목적이 있다면 **개발자는 Expression을 직접 만들면 안 되며 애플이 기본적으로 제공하는 것만 써야 한다.** SwiftData, Tip.Rule에 개발자가 직접 정의한 Expression을 넣으면 안 된다는 소리다.
 
 위에서 내가 Expression을 직접 만들 경우 `ConvertibleExpression`이라는 protocol을 따르지 않기에, `NSPredicate` 변환 과정에서 `nil`이 반환되어 `EXC_BREAKPOINT`이 발생하는 것이다. 아까 크래시가 났던 `0x000000010215690c`을 보면 retain을 실패해서 그런 것이다.
 
