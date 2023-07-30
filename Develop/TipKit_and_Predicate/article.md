@@ -157,7 +157,7 @@ extension PredicateExpressions.NSPredicateExpression : Codable where Value : Cod
 }
 ```
 
-만약 Swift 5.9의 Predicate의 내부 동작 원리에 대해 잘 아는 사람이라면 위 코드는 말이 안 된다고 생각할 것이다. 이는 후술한다.
+만약 Swift의 Predicate의 내부 동작 원리에 대해 잘 아는 사람이라면 위 코드는 말이 안 된다고 생각할 것이다. 이는 후술한다.
 
 이제 위 `NSPredicateExpression`를 통해 `NSPredidate`를 [`Tip.Rule`](https://developer.apple.com/documentation/tipkit/tips/rule/init(_:_:)-7zy3y)로 변환한다.
 
