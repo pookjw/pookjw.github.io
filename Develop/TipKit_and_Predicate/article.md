@@ -1,4 +1,4 @@
-# TipKit, 그리고 Swift 5.9의 Predicate
+# TipKit, 그리고 Swift의 Predicate
 
 ![](0.png)
 
@@ -271,9 +271,9 @@ extension BPTips {
 
 이 에러의 원인은 Predicate의 내부 동작 구조를 알아야 이해할 수 있다.
 
-## Swift 5.9 - Predicate
+## Swift Foundation - Predicate
 
-Swift 5.9에 추가된 Predicate 기능은 정말 강력하다. Swift 코드로 format 기반 NSPredicate를 생성할 수 있다. 또한 compile-time에서 유효성 검증까지 해주니 기존 NSPredicate의 format에 고통받던 사람이라면 감탄만 나온다 ㅎ
+Swift Foundation의 Predicate 기능은 정말 강력하다. Swift 코드로 format 기반 NSPredicate를 생성할 수 있다. 또한 compile-time에서 유효성 검증까지 해주니 기존 NSPredicate의 format에 고통받던 사람이라면 감탄만 나온다 ㅎ
 
 이는 Swift 5.9에서 추가된 Macro 기능과 [Value and Type Parameter Packs](https://github.com/apple/swift-evolution/blob/main/proposals/0393-parameter-packs.md)와 궁합이 정말 좋다.
 
