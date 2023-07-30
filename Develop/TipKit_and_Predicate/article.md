@@ -112,7 +112,7 @@ TipKit에는 Rule이라는 기능이 있다. 시간 및 특정 조건에 따라 
 
 위 predicate의 evaluation 결과는 항상 `YES`이므로 tip이 뜨게 된다. BPTipKit의 해당 로직도 살짝 보여주면
 
-우선 아래 코드는 `NSPredicate`를 `StandardPredicateExpression`도 변환하는 `NSPredicateExpression`를 정의한다.
+우선 아래 코드는 `NSPredicate`를 `StandardPredicateExpression`로 변환하는 `NSPredicateExpression`를 정의한다.
 
 ```swift
 extension PredicateExpressions {
