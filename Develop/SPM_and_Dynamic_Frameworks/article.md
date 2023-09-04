@@ -78,7 +78,7 @@ MyLibrary2_-4872836962210329_PackageProduct`MyLibrary2.init():
 
 ![](4.png)
 
-만약 위 사진과 같이 Xcode Project가 구성되어 있다고 기정하자. SPM와 Dynamic Framework와 App이 있는 구조다. 나만 SPM #2는 App에서만 참조된다.
+만약 위 사진과 같이 Xcode Project가 구성되어 있다고 기정하자. SPM와 Dynamic Framework와 App이 있는 구조다. 하지만 SPM #2는 App에서만 참조된다.
 
 그러면 SPM #2는 App Binary에 통합되며, SPM #1와 Dynamic Framework는 새로운 Framework로 생성된다.
 
