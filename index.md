@@ -15,6 +15,7 @@
 - [iOS 16 - PosterBoard에 대해](Develop/iOS_16_PosterBoard/article.md)
 - [iOS 16 - Screenshot 원리 학습](Develop/iOS_16_Screenshot/article.md)
 - [[C++20] Concepts](Develop/About_Cxx_Concepts/article.md)
+- [SPM과 Dynamic Framework을 쓸 때 Framework 구조에 대해](Develop/SPM_and_Dynamic_Frameworks/article.md)
 - [Mac Catalyst: Behind the scenes (1)](Develop/Mac_Catalyst_Behind_the_scenes_1/article.md)
 - [Swift Concurrency와 Objective-C 혼용 팁](Develop/ObjC_Swift_Concurrency/article.md)
 - [LLVM에서 Bitcode의 deprecation에 대해](Develop/About_Bitcode_Deprecation/article.md)
