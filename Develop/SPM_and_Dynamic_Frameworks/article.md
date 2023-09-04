@@ -41,7 +41,7 @@ MyApp`MyLibrary.init():
 
 ## SPM + Dynamic Library + App (1)
 
-![](0.png)
+![](2.png)
 
 만약 위 사진과 같이 Xcode Project가 구성되어 있다고 기정하자. SPM와 Dynamic Framework와 App이 있는 구조다.
 
