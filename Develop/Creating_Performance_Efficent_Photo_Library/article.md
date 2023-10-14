@@ -35,7 +35,7 @@ snapshot.appendItems(itemModels, toSection: sectionModel)
 
 이제부터 설명드릴 이야기는 Private API를 활용하여 성능을 끌어 올리는 방법이며, 때로는 빠르지만 때로는 느려질 수도 있는 방법이에요. 하지만 `UICollectionView`을 활용하여 Photo Library를 제작한다면 이 방법으로 성능을 끌어 올릴 수 있다고 생각해요. Private API이기에 선택은 개발자의 몫이에요.
 
-우선 `PHFetchResult.object(at:)`의 원리부터 설명드릴게요. `PHFetchResult.object(at:)`를 호출하면 `PHFetchResult`은 모든 `PHAsset`을 Memory에 한 번만 불러와요. 만약에 개발자가 300,000개의 `PHAsset` 중 세번째의 `PHAsset`만 획득하고 싶어도, `PHFetchResult`은 300,000개를 모두 불러오고 거기서 세번째의 PHAsset을 반환해요.
+우선 `PHFetchResult.object(at:)`의 원리부터 설명드릴게요. `PHFetchResult.object(at:)`를 호출하면 `PHFetchResult`은 모든 `PHAsset`을 Memory에 불러와요. 만약에 개발자가 300,000개의 `PHAsset` 중 세번째의 `PHAsset`만 획득하고 싶어도, `PHFetchResult`은 300,000개를 모두 불러오고 거기서 세번째의 PHAsset을 반환해요.
 
 > `-[PHFetchResult objectIDAtIndex:]`의 IMP의 Assembly를 보면 `-[PHFetchResult fetchedObjectIDs]`를 호출해서 `-[NSArray objectAtIndex:]`를 호출하는 것을 보실 수 있어요.
 
