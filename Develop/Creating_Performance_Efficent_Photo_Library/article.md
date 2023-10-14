@@ -94,7 +94,7 @@ for index in 0..<1_000 {
 print(total / 1_000)
 ```
 
-Private API를 활용하면 성능을 크게 끌어 올라간 것을 확인하실 수 있어요. 하지만 모든 `PHAsset`을 fetch 해올 때는 결과가 많이 달라져요.
+Private API를 활용하면 성능을 크게 올라간 것을 확인하실 수 있어요. 하지만 모든 `PHAsset`을 fetch 해올 때는 결과가 많이 달라져요.
 
 ```swift
 let clock = ContinuousClock()
