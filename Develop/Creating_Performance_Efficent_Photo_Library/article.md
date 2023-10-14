@@ -135,11 +135,11 @@ print(result)
 
 > 만약 Multi Display 환경 및 Screen의 Scale 변화에 대응하고 싶으시다면 Private API로 View가 속한 Screen 및 Scale의 변화를 Observing하셔야 해요. [저의 샘플 프로젝트](https://github.com/pookjw/MyPhotoLibrary)는 아직 해당 부분이 구현되어 있지 않으며, 구현하고 싶으시다면 [`-[UIWindowScene _screenDidChangeFromScreen:toScreen:]`](https://gist.github.com/pookjw/44f712226552e59cb5597114558aade3)를 활용하시면 돼요.
 
-## [`PHCachingImageManager`](https://developer.apple.com/documentation/photokit/phcachingimagemanager)
+## [`PHCachingImageManager`](https://developer.apple.com/documentation/photokit/phcachingimagemanager) 사용하기
 
-Image를 Disk에서 불러오고 크기를 조정하는 작업을 반복하는 것은 불필요 할 수 있어요. 이때는 Caching을 하면 좋을 것 같아요.
+Image를 Disk에서 불러오고 크기를 조정하는 작업을 반복하는 것은 불필요 할 수 있어요. 이때는 Memory에 Caching하면 좋을 것 같아요.
 
-하지만 너무 불필요하게 Caching을 많이 하면 Memory 사용 용량이 증가하므로 유의해 주세요. 저는 Memory를 적게 사용하고 싶고 필요할 때 [`stopCachingImages(for:targetSize:contentMode:options:)
+하지만 너무 불필요하게 Caching을 많이 하면 Memory 사용량이 증가하므로 유의해 주세요. 저는 Memory를 적게 사용하고 싶고 필요할 때 [`stopCachingImages(for:targetSize:contentMode:options:)
 `](https://developer.apple.com/documentation/photokit/phcachingimagemanager/1616968-stopcachingimages)을 호출해야 하는 것이 번거로워서 개인적으로 사용하지 않아요.
 
 ## [`UICollectionViewDataSourcePrefetching`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasourceprefetching) 사용하기
