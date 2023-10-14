@@ -154,6 +154,8 @@ Image를 Disk에서 불러오고 크기를 조정하는 작업을 반복하는 �
 
 이렇게 이해하시면 돼요. Prefetching을 지원한다면 Cell에 사진이 더 빨리 뜰 수 있어요. 하지만 화면이 뜨지 않았는데 미리 사진을 Memory에 불러오기 때문에 Memory를 더 소모할 수 있어요.
 
+개인적으로 [샘플 프로젝트](https://github.com/pookjw/MyPhotoLibrary)를 만들 때 가장 어려웠던 부분이었어요. prefetching 도중에 `cellForItemAt:`이 불려버리면 prefetching 중인 내용을 Cell에 넘겨줘야 하고, 그 도중에 Cell의 크기가 바뀌면 prefetching을 취소해서 다시 request를 하고, 이 모든 상태들을 `actor`에 담고 있다보니 온갖 Race Condition이 발생해서 애를 먹었네요.
+
 ## [`UIImage.prepareForDisplay(completionHandler:)`](https://developer.apple.com/documentation/uikit/uiimage/3750844-preparefordisplay)을 활용하면 좋아요.
 
 `UIImage`가 화면에 뜨기 위해서는 몇몇 작업이 필요해요. 이는 무거운 작업이기에 Main Thread에서 진행하면 UI가 멈출 수 있어요. 따라서 이 작업을 `UIImage.prepareForDisplay(completionHandler:)`로 Backgroud Thread에서 진행하면 좋을 것 같아요.
