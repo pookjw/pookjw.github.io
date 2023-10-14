@@ -119,7 +119,7 @@ print(result)
 
 ## Cell의 크기에 맞는 Image를 가져오기
 
-[`PHImageManager.requestImage(for:targetSize:contentMode:options:resultHandler:)`](https://developer.apple.com/documentation/photokit/phimagemanager/1616964-requestimage)에서 `targetSize` parameter를 활용해서 Cell의 사이즈에 맞는 Image를 가져와 주세요. [`PHImageManagerMaximumSize`](https://developer.apple.com/documentation/photokit/phimagemanagermaximumsize) 같은 것으로 불필요하게 큰 크기의 Image를 불러오는 것은 삼가해 주세요.
+[`PHImageManager.requestImage(for:targetSize:contentMode:options:resultHandler:)`](https://developer.apple.com/documentation/photokit/phimagemanager/1616964-requestimage)에서 `targetSize` parameter를 활용해서 Cell의 크기에 맞는 Image를 가져와 주세요. [`PHImageManagerMaximumSize`](https://developer.apple.com/documentation/photokit/phimagemanagermaximumsize) 같은 것으로 불필요하게 큰 크기의 Image를 불러오는 것은 삼가해 주세요.
 
 만약에 Cell의 bounds가 바뀌면 다시 request하는 것도 넣어주시면 좋을 것 같아요.
 
