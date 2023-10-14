@@ -161,3 +161,7 @@ Image를 Disk에서 불러오고 크기를 조정하는 작업을 반복하는 �
 `UIImage`가 화면에 뜨기 위해서는 몇몇 작업이 필요해요. 이는 무거운 작업이기에 Main Thread에서 진행하면 UI가 멈출 수 있어요. 따라서 이 작업을 `UIImage.prepareForDisplay(completionHandler:)`로 Backgroud Thread에서 진행하면 좋을 것 같아요.
 
 실제로 iPhone 15 Pro Max에서 Scroll을 빠르게 할 때 90fps까지 떨어지는데, `UIImage.prepareForDisplay(completionHandler:)`을 사용하면 110fps 이상이 유지돼요.
+
+# `PHImageRequestOptions.isSynchronous`은 웬만하면 꺼주세요.
+
+`PHImageRequest`의 작업들은 무거워요. `isSynchronous`으로 현재 Thread를 lock을 걸 필요는 없을 것 같아요.
