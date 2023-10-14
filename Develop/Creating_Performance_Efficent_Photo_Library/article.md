@@ -29,7 +29,7 @@ snapshot.appendItems(itemModels, toSection: sectionModel)
 
 하지만 [`PHFetchResult`](https://developer.apple.com/documentation/photokit/phfetchresult)은 [`count`](https://developer.apple.com/documentation/photokit/phfetchresult/1620996-count)와 [`object(at:)`](https://developer.apple.com/documentation/photokit/phfetchresult/1621002-object) 기능들을 제공해요.
 
-따라서 `NSDiffableDataSourceSnapshot`를 사용하지 않고, [`UICollectionViewDataSource`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasource)의 [`numberOfItemsInSection)`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasource/1618058-collectionview)와 [`cellForItemAt:`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasource/1618029-collectionview)를 활용하면 loop를 불필요하게 돌 일이 없어질 것 같아요. `cellForItemAt:`에서 `PHFetchResult.object(at:)`를 호출해서 필요한 `PHAsset`을 필요할 때만 가져오면 되니까요.
+따라서 `NSDiffableDataSourceSnapshot`를 사용하지 않고, [`UICollectionViewDataSource`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasource)의 [`numberOfItemsInSection)`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasource/1618058-collectionview)와 [`cellForItemAt:`](https://developer.apple.com/documentation/uikit/uicollectionviewdatasource/1618029-collectionview)를 활용하면 loop를 불필요하게 돌 일이 없어질 것 같아요. `cellForItemAt:`에서 `PHFetchResult.object(at:)`를 호출해서 필요한 `PHAsset`만 가져오면 되니까요.
 
 ## `PHFetchResult.object(at:)` 보다는 Private API?
 
