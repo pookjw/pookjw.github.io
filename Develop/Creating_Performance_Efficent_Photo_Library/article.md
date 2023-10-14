@@ -162,6 +162,6 @@ Image를 Disk에서 불러오고 크기를 조정하는 작업을 반복하는 �
 
 실제로 iPhone 15 Pro Max에서 Scroll을 빠르게 할 때 90fps까지 떨어지는데, `UIImage.prepareForDisplay(completionHandler:)`을 사용하면 110fps 이상이 유지돼요.
 
-# `PHImageRequestOptions.isSynchronous`은 웬만하면 꺼주세요.
+## [`PHImageRequestOptions.isSynchronous`](https://developer.apple.com/documentation/photokit/phimagerequestoptions/1616945-issynchronous)은 웬만하면 꺼주세요.
 
 `PHImageRequest`의 작업들은 무거워요. `isSynchronous`으로 현재 Thread를 lock을 걸 필요는 없을 것 같아요.
