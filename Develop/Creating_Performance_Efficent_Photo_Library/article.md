@@ -115,7 +115,7 @@ print(result)
 
 `object(at:)`은 모든 `PHAsset`을 한 번에 다 가져오지만, 제가 만든 Private API를 호출하는 코드는 하나하나 가져오는 방식이에요. 따라서 위처럼 모든 `PHAsset`을 가져오는 경우는 Private API가 훨씬 느린 것을 확인하실 수 있어요.
 
-하지만 `UICollectionView`에서 Photo Library를 만든다면 Private API를 활용하는 것이 성능에 더 좋을 것 같아요.
+하지만 `UICollectionView`에서 Photo Library를 만든다면 필요한 `PHAsset`만 가져오기 때문에 Private API를 활용하는 것이 성능에 더 좋을 것 같아요.
 
 ## Cell의 크기에 맞는 Image를 가져오기
 
