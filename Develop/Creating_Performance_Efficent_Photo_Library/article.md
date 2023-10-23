@@ -131,9 +131,7 @@ print(result)
 
 🔼 Cell의 크기에 맞는 Image를 가져왔을 때 - 약 49.9MB의 Memory 사용
 
-유의하셔야 할 점은 Cell의 Size에 [`UIScreen.scale`](https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale)을 곱하셔야 해요.
-
-> 만약 Multi Screen 환경 및 Screen의 Scale 변화에 대응하고 싶으시다면 Private API로 View가 속한 Screen 및 Scale의 변화를 Observing하셔야 해요. [저의 샘플 프로젝트](https://github.com/pookjw/MyPhotoLibrary)는 아직 해당 부분이 구현되어 있지 않으며, 구현하고 싶으시다면 [`-[UIWindowScene _screenDidChangeFromScreen:toScreen:]`](https://gist.github.com/pookjw/44f712226552e59cb5597114558aade3)를 활용하시면 돼요.
+유의하셔야 할 점은 Cell의 Size에 [`UIScreen.scale`](https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale) 또는 [`UITrailtCollection.displayScale`](https://developer.apple.com/documentation/uikit/uitraitcollection/1623519-displayscale) 또는 [`EnvironmentValues.displayScale`](https://developer.apple.com/documentation/swiftui/environmentvalues/displayscale)을 곱하셔야 해요.
 
 ## [`PHCachingImageManager`](https://developer.apple.com/documentation/photokit/phcachingimagemanager) 사용하기
 
