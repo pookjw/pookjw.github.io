@@ -199,7 +199,7 @@ private func communicateWithBackend() async {
 
 이유는 Task.sleep은 context를 양보하게 되는데, Thread.sleep은 자기 context를 계속 붙잡아서 양보를 안해준다는 차이점 입니다.
 
-### C++에서 std::mutex로 동시 접근 방지하ㄱ
+### C++에서 std::mutex로 동시 접근 방지하기
 
 ```cpp
 #include <stdio.h>
