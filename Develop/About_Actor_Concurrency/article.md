@@ -2,6 +2,7 @@
 
 > “There ain’t no such thing as a free lunch.” —R. A. Heinlein, The Moon Is a Harsh Mistress
 > - [The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software (2005)](http://www.gotw.ca/publications/concurrency-ddj.htm)
+>
 > 싱글스레드 코드로 공짜 점심을 먹던 시대는 끝났다.
 
 아래와 같은 코드가 있다고 가정합시다.
