@@ -50,7 +50,7 @@ struct MyScript {
 
 actor는 동시 접근을 방지하려는 것으로 알고 있어서 위와 같은 코드를 짰는데, 생각이랑 다르게 동작하고 있습니다.
 
-이유는 actor는 context가 다를 경우 동시 접근을 항상 방지하지 않습니다. 그렇다고 isolated 환경에서 NSLock, OSAllocatedUnfairLock 같은 API를 호출하는 것도 좋은 아이디어는 아닌 것 같고요.
+이유는 actor는 context가 다를 경우 동시 접근을 항상 방지하지 않습니다. 그렇다고 isolated 환경에서 NSLock, OSAllocatedUnfairLock, DispatchSemaphore 같은 API를 호출하는 것도 좋은 아이디어는 아닌 것 같고요.
 
 (**항상**이라고 적은 이유는, context switching이 일어날 때 보장하지 않기 때문. context switching이 일어나지 않는다면 보장됨)
 
