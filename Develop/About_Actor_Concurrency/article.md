@@ -205,26 +205,37 @@ private func communicateWithBackend() async {
 #include <stdio.h>
 #include <thread>
 #include <mutex>
+#include <memory>
 #include <cinttypes>
+#include <chrono>
 
-std::mutex mtx;
-std::uint64_t count { 0 };
-
-void increment() {
-    mtx.lock();
-    std::printf("%llu\n", ++count);
-    mtx.unlock();
-}
-
-void loop() {
-    for (std::uint8_t i { 0 }; i < 100; i++) {
-        increment();
+class Cloth {
+public:
+    void purchase() {
+        mtx.lock();
+        if (count != 0) {
+            return;
+        }
+        communicateWithBackend();
+        std::printf("%llu", ++count);
+        mtx.unlock();
     }
+private:
+    std::mutex mtx;
+    std::uint64_t count;
+    void communicateWithBackend() {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+};
+
+void foo(const std::shared_ptr<Cloth> &cloth) {
+    cloth.get()->purchase();
 }
 
 int main(int argc, const char * argv[]) {
-    std::thread t1(loop);
-    std::thread t2(loop);
+    const std::shared_ptr<Cloth> cloth {new Cloth};
+    std::thread t1(foo, cloth);
+    std::thread t2(foo, cloth);
     
     t1.join();
     t2.join();
@@ -232,4 +243,5 @@ int main(int argc, const char * argv[]) {
     dispatch_main();
     return 0;
 }
+
 ```
