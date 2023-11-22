@@ -1,5 +1,7 @@
 # [Swift Concurrency] Actor는 동시 접근 방지를 항상 보장하지 않는다.
 
+> [The Free Lunch Is Over](http://www.gotw.ca/publications/concurrency-ddj.htm)
+
 아래와 같은 코드가 있다고 가정합시다.
 
 ```swift
