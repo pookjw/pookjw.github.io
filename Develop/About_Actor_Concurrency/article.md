@@ -193,7 +193,7 @@ private func communicateWithBackend() async {
 }
 ```
 
-아래처럼 Task.sleep -> Thread.sleep로 대체하면 작동하긴 해요. 물론 Warning은 뜨지만요.
+아래처럼 Task.sleep -> Thread.sleep로 대체하면 작동하긴 해요. 물론 Warning은 뜨지만요. (아마 `@_unavailableFromAsync` 때문인듯)
 
 ```swift
 private func communicateWithBackend() async {
