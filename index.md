@@ -8,6 +8,7 @@
 - [SwiftData에서 ModelActor 사용하기](Develop/SwiftData_ModelActor/article.md)
 - [[macOS 14] NSMenuToolbarItem와 Palette Menu 사용하기](Develop/macOS_14_NSMenuToolbarItem_Palette_Menu/article.md)
 - [[iOS 17, macOS 14] Symbols + Private API](Develop/Miscellaneous_Symbols/article.md)
+- [[Swift Concurrency] Actor는 동시 접근 방지를 항상 보장하지 않는다.](Develop/About_Actor_Concurrency/article.md)
 - [[iOS 17] Live Photo 배경화면에 대해](Develop/iOS_17_Poster_Live_Photo/article.md)
 - [TipKit, 그리고 Swift의 Predicate](Develop/TipKit_and_Predicate/article.md)
 - [iOS 17 - UIWindowSceneDragInteraction](Develop/About_UIWindowSceneDragInteraction/article.md)
