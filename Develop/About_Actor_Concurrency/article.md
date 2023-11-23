@@ -63,6 +63,10 @@ actor AsyncMutex {
     private var isLocked: Bool = false
     private var continuations: [UUID: AsyncStream<Void>.Continuation] = .init()
     
+    deinit {
+        continuations.forEach { $0.value.finish() }
+    }
+    
     private var stream: AsyncStream<Void> {
         let (stream, continuation): (AsyncStream<Void>, AsyncStream<Void>.Continuation) = AsyncStream<Void>.makeStream()
         let key: UUID = .init()
@@ -78,7 +82,7 @@ actor AsyncMutex {
         return stream
     }
     
-    func lock() async {
+    func lock() async throws {
         mutexLoop: while isLocked {
             for await _ in stream {
                 if !isLocked {
@@ -87,6 +91,7 @@ actor AsyncMutex {
             }
         }
         
+        try Task.checkCancellation()
         isLocked = true
     }
     
@@ -109,7 +114,7 @@ actor Cloth {
     private let mutex: AsyncMutex = .init()
     
     func purchase() async {
-        await mutex.lock()
+        try await mutex.lock()
         
         guard purchasedCount == .zero else {
             await mutex.unlock()
