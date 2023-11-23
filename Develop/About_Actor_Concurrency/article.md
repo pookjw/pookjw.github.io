@@ -113,7 +113,7 @@ actor Cloth {
     private let mutex: AsyncMutex = .init()
     
     func purchase() async {
-        try await mutex.lock()
+        await mutex.lock()
         
         guard purchasedCount == .zero else {
             await mutex.unlock()
