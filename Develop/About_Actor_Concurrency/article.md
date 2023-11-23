@@ -82,11 +82,10 @@ actor AsyncMutex {
         return stream
     }
     
-    func lock() async throws {
+    func lock() async {
         mutexLoop: while isLocked {
             for await _ in stream {
                 if !isLocked {
-                    try Task.checkCancellation()
                     break mutexLoop
                 }
             }
