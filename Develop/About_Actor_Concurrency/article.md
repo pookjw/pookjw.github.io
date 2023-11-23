@@ -86,12 +86,12 @@ actor AsyncMutex {
         mutexLoop: while isLocked {
             for await _ in stream {
                 if !isLocked {
+                    try Task.checkCancellation()
                     break mutexLoop
                 }
             }
         }
         
-        try Task.checkCancellation()
         isLocked = true
     }
     
