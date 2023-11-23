@@ -54,21 +54,17 @@ actor는 동시 접근을 방지하려는 것으로 알고 있어서 위와 같�
 
 (**항상**이라고 적은 이유는, context switching이 일어날 때 보장하지 않기 때문. context switching이 일어나지 않는다면 보장됨)
 
-이를 가능하게 하기 위해서 `CurrentValueAsyncSubject`라는 것을 만들었어요. Combine의 CurrentValueSubject를 Swift Concurrency 용으로 만들었다고 보시면 될 것 같아요.
+이를 가능하게 하기 위해서 `AsyncMutex`라는 것을 만들었어요.
 
 ```swift
 import Foundation
 
-actor CurrentValueAsyncSubject<Element: Sendable>: Equatable {
-    static func == (lhs: CurrentValueAsyncSubject<Element>, rhs: CurrentValueAsyncSubject<Element>) -> Bool {
-        lhs.uuid == rhs.uuid
-    }
+actor AsyncMutex {
+    private var isLocked: Bool = false
+    private var continuations: [UUID: AsyncStream<Void>.Continuation] = .init()
     
-    private(set) var value: Element
-    private let uuid: UUID = .init()
-    
-    var stream: AsyncStream<Element> {
-        let (stream, continuation): (AsyncStream<Element>, AsyncStream<Element>.Continuation) = AsyncStream<Element>.makeStream()
+    private var stream: AsyncStream<Void> {
+        let (stream, continuation): (AsyncStream<Void>, AsyncStream<Void>.Continuation) = AsyncStream<Void>.makeStream()
         let key: UUID = .init()
         
         continuation.onTermination = { [weak self] _ in
@@ -82,38 +78,21 @@ actor CurrentValueAsyncSubject<Element: Sendable>: Equatable {
         return stream
     }
     
-    private var continuations: [UUID: AsyncStream<Element>.Continuation] = .init()
-    
-    init(value: Element) {
-        self.value = value
-    }
-    
-    deinit {
-        continuations.values.forEach { continuation in
-            continuation.finish()
-        }
-    }
-    
-    func callAsFunction() -> AsyncStream<Element> {
-        stream
-    }
-    
-    func yield(with result: Result<Element, Never>) {
-        if case .success(let newValue) = result {
-            value = newValue
+    func lock() async {
+        mutexLoop: while isLocked {
+            for await _ in stream {
+                if !isLocked {
+                    break mutexLoop
+                }
+            }
         }
         
-        continuations.values.forEach { continuation in
-            continuation.yield(with: result)
-        }
+        isLocked = true
     }
     
-    func yield(_ value: Element) {
-        self.value = value
-        
-        continuations.values.forEach { continuation in
-            continuation.yield(value)
-        }
+    func unlock() async {
+        isLocked = false
+        continuations.forEach { $0.value.yield() }
     }
     
     private func remove(key: UUID) {
@@ -127,25 +106,18 @@ actor CurrentValueAsyncSubject<Element: Sendable>: Equatable {
 ```swift
 actor Cloth {
     private(set) var purchasedCount: Int = .zero
-    private let mutexSubject: CurrentValueAsyncSubject<Bool> = .init(value: false)
+    private let mutex: AsyncMutex = .init()
     
     func purchase() async {
-        mutexLoop: while await mutexSubject.value {
-            for await value in await mutexSubject.stream {
-                if !value {
-                    break mutexLoop
-                }
-            }
-        }
+        await mutex.lock()
         
-        await mutexSubject.yield(true)
         guard purchasedCount == .zero else {
-            await mutexSubject.yield(false)
+            await mutex.unlock()
             return
         }
         await communicateWithBackend()
         purchasedCount += 1
-        await mutexSubject.yield(false)
+        await mutex.unlock()
     }
     
     private func communicateWithBackend() async {
