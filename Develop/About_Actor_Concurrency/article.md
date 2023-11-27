@@ -17,7 +17,7 @@ actor Cloth {
         purchasedCount += 1
     }
     
-    private func communicateWithBackend() async {
+    private nonisolated func communicateWithBackend() async {
         try! await Task.sleep(for: .seconds(1))
     }
 }
@@ -27,12 +27,12 @@ struct MyScript {
     static func main() async {
         let cloth: Cloth = .init()
         
-        let t1 = Task.detached {
+        let t1 = Task {
             await cloth.purchase()
         }
         
         
-        let t2 = Task.detached {
+        let t2 = Task {
             await cloth.purchase()
         }
         
@@ -50,9 +50,7 @@ struct MyScript {
 
 actor는 동시 접근을 방지하려는 것으로 알고 있어서 위와 같은 코드를 짰는데, 생각이랑 다르게 동작하고 있습니다.
 
-이유는 actor는 context가 다를 경우 동시 접근을 항상 방지하지 않습니다. 그렇다고 isolated 환경에서 NSLock, OSAllocatedUnfairLock, DispatchSemaphore 같은 API를 호출하는 것도 좋은 아이디어는 아닌 것 같고요.
-
-(**항상**이라고 적은 이유는, context switching이 일어날 때 보장하지 않기 때문. context switching이 일어나지 않는다면 보장됨)
+이유는 `communicateWithBackend`에서 context switching이 일어났기 때문입니다. 그렇다고 isolated 환경에서 NSLock, OSAllocatedUnfairLock, DispatchSemaphore 같은 API를 호출하는 것도 좋은 아이디어는 아닌 것 같고요.
 
 이를 가능하게 하기 위해서 `AsyncMutex`라는 것을 만들었어요.
 
@@ -124,7 +122,7 @@ actor Cloth {
         await mutex.unlock()
     }
     
-    private func communicateWithBackend() async {
+    private nonisolated func communicateWithBackend() async {
         try! await Task.sleep(for: .seconds(1))
     }
 }
@@ -134,17 +132,17 @@ struct MyScript {
     static func main() async {
         let cloth: Cloth = .init()
         
-        let t1 = Task.detached {
+        let t1 = Task {
             await cloth.purchase()
         }
         
         
-        let t2 = Task.detached {
+        let t2 = Task {
             await cloth.purchase()
         }
         
         
-        let t3 = Task.detached {
+        let t3 = Task {
             await cloth.purchase()
         }
         
