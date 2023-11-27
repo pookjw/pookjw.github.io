@@ -157,17 +157,17 @@ struct MyScript {
 
 ## 여담
 
-### Task.sleep -> Thread.sleep으로 대체하면 해결되기도 합니다.
+### `nonisolated`를 지우고, Task.sleep -> Thread.sleep으로 대체하면 해결되기도 합니다.
 
 아래 코드를
 
 ```swift
-private func communicateWithBackend() async {
+private nonisolated func communicateWithBackend() async {
     try! await Task.sleep(for: .seconds(1))
 }
 ```
 
-아래처럼 Task.sleep -> Thread.sleep로 대체하면 작동하긴 해요. 물론 Warning은 뜨지만요. (아마 `@_unavailableFromAsync` 때문인듯)
+아래처럼 `nonisolated`를 지우고, Task.sleep -> Thread.sleep로 대체하면 작동하긴 해요. 물론 Warning은 뜨지만요. (아마 `@_unavailableFromAsync` 때문인듯)
 
 ```swift
 private func communicateWithBackend() async {
