@@ -57,12 +57,14 @@ actor는 동시 접근을 방지하려는 것으로 알고 있어서 위와 같�
 ```swift
 import Foundation
 
-actor AsyncMutex {
+public actor AsyncMutex {
     private var isLocked: Bool = false
-    private var continuations: [UUID: AsyncStream<Void>.Continuation] = .init()
+    private var continuations: [(UUID, AsyncStream<Void>.Continuation)] = []
+    
+    public init() {}
     
     deinit {
-        continuations.forEach { $0.value.finish() }
+        continuations.forEach { $0.1.finish() }
     }
     
     private var stream: AsyncStream<Void> {
@@ -75,16 +77,16 @@ actor AsyncMutex {
             }
         }
         
-        continuations[key] = continuation
+        continuations.append((key, continuation))
         
         return stream
     }
     
-    func lock() async {
-        mutexLoop: while isLocked {
+    public func lock() async {
+        if isLocked {
             for await _ in stream {
                 if !isLocked {
-                    break mutexLoop
+                    break
                 }
             }
         }
@@ -92,13 +94,23 @@ actor AsyncMutex {
         isLocked = true
     }
     
-    func unlock() async {
+    public func unlock() async {
         isLocked = false
-        continuations.forEach { $0.value.yield() }
+        continuations.forEach { $0.1.yield() }
+    }
+    
+    public func check() async {
+        if isLocked {
+            for await _ in stream {
+                if !isLocked {
+                    break
+                }
+            }
+        }
     }
     
     private func remove(key: UUID) {
-        continuations.removeValue(forKey: key)
+        continuations.removeAll { $0.0 == key }
     }
 }
 ```
@@ -151,6 +163,45 @@ struct MyScript {
         await t3.value
         
         await print(cloth.purchasedCount) // 1
+    }
+}
+```
+
+## 테스트 코드
+
+```swift
+final class AsyncMutexTests: XCTestCase {
+    func test() async {
+        let ptr: UnsafeMutablePointer<Bool> = .allocate(capacity: 1_000)
+        
+        await withTaskGroup(of: Void.self) { group in
+            let mutex: AsyncMutex = .init()
+            
+            for _ in 0..<1_000 {
+                group.addTask {
+                    await mutex.lock()
+                    
+                    var falseIndex: Int!
+                    for index in 0..<1_000 {
+                        if ptr.advanced(by: index).pointee == false {
+                            falseIndex = index
+                            break
+                        }
+                    }
+                    
+                    ptr.advanced(by: falseIndex).pointee = true
+                    await mutex.unlock()
+                }
+            }
+            
+            await group.waitForAll()
+        }
+        
+        for index in 0..<1_000 {
+            XCTAssertTrue(ptr.advanced(by: index).pointee)
+        }
+        
+        ptr.deallocate()
     }
 }
 ```
