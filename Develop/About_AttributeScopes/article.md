@@ -101,11 +101,9 @@ var container: AttributeContainer = .init()
 container.foregroundColor = .red
 ```
 
-[AttributeContainer의 소스코드](https://github.com/apple/swift-corelibs-foundation/blob/1b514e4242526690c19fad9f53644065dd50b69d/Sources/Foundation/AttributedString/AttributedString.swift#L17C60-L17C60)를 보면 foregroundColor를 설정하는 코드는 찾아볼 수 없으며, dynamicMember를 봐도 관련된 KeyPath는 찾아볼 수 없습니다.
+해당 subscript dynamicMember로 foregroundColor 같은 값을 설정할 경우 [`AttributeContainer.contents (또는 storage)`](https://github.com/apple/swift-corelibs-foundation/blob/1b514e4242526690c19fad9f53644065dd50b69d/Sources/Foundation/AttributedString/AttributedString.swift#L32)의 값을 변경하게 됩니다. 이 동작은 [`AttributeDynamicLookup`](https://developer.apple.com/documentation/foundation/attributedynamiclookup)에서 이뤄지지만 이 부분의 소스코드는 공개되어 있지 않습니다.
 
-왜냐하면 해당 [`AttributeDynamicLookup`](https://developer.apple.com/documentation/foundation/attributedynamiclookup)의 소스코드는 매우 일부만 공개되어 있기 때문입니다.
-
-해당 subscript dynamicMember로 foregroundColor 같은 값을 설정할 경우 [`AttributeContainer.contents (또는 storage)`](https://github.com/apple/swift-corelibs-foundation/blob/1b514e4242526690c19fad9f53644065dd50b69d/Sources/Foundation/AttributedString/AttributedString.swift#L32)의 값을 변경하게 되며, 이는 아래처럼 Mirror를 통해 확인할 수 있습니다.
+storage의 값이 설정되는 것은 아래처럼 Mirror를 통해 확인할 수 있습니다.
 
 ```swift
 var container: AttributeContainer = try! .init(
