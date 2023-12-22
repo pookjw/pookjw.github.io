@@ -8,7 +8,7 @@ NSAttributedString은 Foundation의 일부이지만, [NSFontAttributeName](https
 
 예를 들어 Font의 경우 UIKit에서는 UIFont이고 AppKit에서는 NSFont이며, ForegroundColor의 경우 UIKit에서는 UIColor, AppKit에서는 NSColor로 되어 있습니다. 이러한 특정 UI Framework에 의존적인 Key는 Foundation에서 구현하고 있지 않습니다.
 
-NSAttributedString에서는 UIKit과 AppKit만 지원했다면, AttributedString은 UIKit, AppKit, SwiftUI를 모두 지원합니다. 여기서 SwiftUI는 iOS과 macOS를 동시에 지원한다는 것을 인지해야 하며 ('동시'가 핵심입니다.), 이때문에 구조가 전반적으로 바뀌어야 합니다.
+NSAttributedString에서는 UIKit과 AppKit만 지원했다면, AttributedString은 UIKit, AppKit, SwiftUI를 모두 지원합니다. 이때문에 구조가 전반적으로 바뀌어야 합니다.
 
 예를 들어 UIKit과 AppKit만을 동시에 지원하는 API를 설계한다고 하면, 아래처럼 간단하게 할 수 있습니다.
 
@@ -65,16 +65,6 @@ nsTextField.textColor = myText.osColor
 let swiftUIText: SwiftUI.Text = SwiftUI.Text("Test")
     .foregroundStyle(myText.swiftUIColor)
 ```
-
-여기서 '왜 osColor와 swiftUIColor을 따로 만드는가? 그냥 osColor 하나만 두고, [`Color(uiColor:)`](https://developer.apple.com/documentation/swiftui/color/init(uicolor:)) 및 [`Color(nsColor:)`](https://developer.apple.com/documentation/swiftui/color/init(nscolor:))를 쓰면 되는게 아닌가?'라고 생각하실 수 있습니다.
-
-그 생각대로 UIColor/NSColor -> SwiftUI.Color로 변환하는 것이 가능하나, 반대로 SwiftUI.Color -> UIColor/NSColor를 제대로 된 방법으로 변환하는 것이 불가능합니다.
-
-SwiftUI.Color -> CGColor -> UIColor/NSColor 이렇게 CGColor로 한 번 변환하면 가능하겠지만 Adaptive Color의 기능을 잃게 됩니다. 예를 들어 Interface Style (Light, Dark)에 따라 색을 분기처리하는 기능을 상실하게 됩니다.
-
-그렇다면 애플은 왜 SwiftUI.Color -> UIColor/NSColor로 변환하는 API를 제공하지 않을까 생각해보면 Adaptive Color가 작동되는 메커니즘이 다르가 때문입니다. SwiftUI.Color는 EnvironmentValues로 분기처리 된다면, UIColor/NSColor는 UITraitCollection으로 분기처리 됩니다. 이를 서로 호환되게 하는 것은 까다로운 작업입니다.
-
-따라서 SwiftUI는 iOS와 macOS를 동시에 호환된다는 특성 때문에, 위에서 보여드린 코드처럼 `MyText.osColor`와 `MyText.swiftUIColor`를 분리해야 하며 서로 상호호환이 어려운 구조입니다. 이러한 로직은 AttributedString에서도 그대로 반영되어 있으며, 이러한 분기처리를 [AttributeScopes](https://developer.apple.com/documentation/foundation/attributescopes)로 합니다.
 
 ## AttributeScopes 때문에 발생하는 문제
 
