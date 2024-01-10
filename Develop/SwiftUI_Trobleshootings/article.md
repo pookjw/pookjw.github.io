@@ -255,7 +255,7 @@ Retain Cycle이 발생하는 이유는 `handler`가 생성될 때의 assembly를
 SwiftUI.StoredLocation<Swift.Optional<() -> ()>>
 ```
 
-handler에는 총 4개의 값이 capture되며, 그 중 마지막이 StoredLocation다.
+handler에는 총 5개의 값이 capture되며, 네번째가 StoredLocation다.
 
 즉, StoredLocation는 handler를 capture하고 handler는 StoredLocation를 capture하므로 retain cycle이 발생한다.
 
