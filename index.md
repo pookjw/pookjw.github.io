@@ -3,6 +3,7 @@
 ## 개발
 
 - [UIDebuggingInformationOverlay를 iOS 15 arm64 환경에서 써보자](Develop/UIDebuggingInformationOverlay_iOS_15_arm64/article.md)
+- [SwiftUI 문제해결 기록](Develop/SwiftUI_Trobleshootings/article.md)
 - [성능 좋은 Photo Library 만들기](Develop/Creating_Performance_Efficent_Photo_Library/article.md)
 - [AttributeString의 AttributeScopes에 대해](Develop/About_AttributeScopes/article.md)
 - [Swift Object로 Associated Object 써보기](Develop/Associated_Objects_with_Swift_Object/article.md)

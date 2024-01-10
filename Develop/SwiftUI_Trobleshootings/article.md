@@ -2,7 +2,7 @@
 
 # Observation - View Model이 여러 번 만들어지는 문제
 
-Xcode 15.2 (15C500b) + iPhone 15 Pro Max 17.2 Simulator 기준
+Xcode 15.2 (15C500b) + iPhone 15 Pro Max 17.2 Simulator + Swift Trunk Development (main, January 8, 2024) 기준
 
 ## 문제
 
@@ -113,4 +113,236 @@ SwiftUI의 내부가 너무 변칙적이라 분석에 굉장히 애를 먹었다
 
 - ObservationRegistrar이 일어난다면 View를 업데이트 한 후, 기존 tracking을 cancel하고 (`$s11Observation0A8TrackingV6cancelyyF`) 다시 옵저빙한다.
 
+### 부록
 
+Swift Toolchain으로 `@_spi(SwiftUI)` API 호출해서 UIKit에서 ObservationRegistrar를 옵저빙하는 예시 코드
+
+```swift
+import UIKit
+@_spi(SwiftUI) import Observation
+
+@Observable
+class ViewModel {
+    var number: Int
+    
+    init(number: Int) {
+        self.number = number
+    }
+}
+
+class ViewController: UIViewController {
+    @ViewLoading @IBOutlet var button: UIButton
+    var viewModel: ViewModel!
+    var viewModelTracking: ObservationTracking!
+    var numberTracking: ObservationTracking!
+    
+    private func configureViewModel() {
+        viewModel = withObservationTracking(
+            { 
+                let viewModel: ViewModel = .init(number: .zero)
+                return viewModel
+            },
+            didSet: { [weak self] tracking in
+                guard let self else { return }
+                self.viewModelTracking?.cancel()
+                self.viewModelTracking = tracking
+                self.configureViewModel()
+                self.observeNumber(viewModel: viewModel)
+            }
+        )
+    }
+    
+    private func observeNumber(viewModel: ViewModel) {
+        withObservationTracking(
+            {
+                _ = viewModel.number
+            },
+            didSet: { [weak self] tracking in
+                guard let self else { return }
+                self.numberTracking?.cancel()
+                self.numberTracking = tracking
+                self.observeNumber(viewModel: viewModel)
+                
+                Task { @MainActor in
+                    var configuration: UIButton.Configuration = .plain()
+                    configuration.title = self.viewModel.number.description
+                    self.button.configuration = configuration
+                }
+            }
+        )
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configureViewModel()
+        observeNumber(viewModel: viewModel)
+    }
+
+    @IBAction func increment(_ sender: Any) {
+        viewModel.number += 1
+    }
+}
+```
+
+# SwiftUI - Retain Cycle
+
+Xcode 15.2 (15C500b) + iPhone 15 Pro Max 17.2 Simulator 기준
+
+아래 코드를 실행하고 Present CounterView → Dismiss 버튼을 누르면 CounterViewModel가 deinit 되지 않는다.
+
+```swift
+import SwiftUI
+
+struct ContentView: View {
+    @State var isPresentingSheet: Bool = false
+    
+    var body: some View {
+        Button("Present") {
+            isPresentingSheet = true
+        }
+        .sheet(isPresented: $isPresentingSheet) {
+            SecondaryView()
+        }
+    }
+}
+
+final class MyObject: NSObject {
+    override init() {
+        super.init()
+        print("MyObject.init")
+    }
+    
+    deinit {
+        print("Never called")
+    }
+}
+
+struct SecondaryView: View {
+    @State var handler: (() -> Void)?
+    let myObject: MyObject = .init()
+    var body: some View {
+        Color.clear
+            .task {
+                handler = { _ = myObject }
+            }
+    }
+}
+```
+
+## 해결
+
+myObject만 capture
+
+```swift
+handler = { [myObject] _ = myObject }
+```
+
+## 과정
+
+`SwiftUI.StoredLocation`에서 Retain Cycle이 발생하여, `CounterViewModel`이 Storage에 계속 붙잡히고 있는 문제다.
+
+Retain Cycle이 발생하는 이유는 `handler`가 생성될 때의 assembly를 보면
+
+```swift
+    0x1042c9e7c <+176>: ldr    x0, [sp, #0x20]
+    0x1042c9e80 <+180>: str    x2, [x1, #0x10]
+    0x1042c9e84 <+184>: str    x3, [x1, #0x18]
+    0x1042c9e88 <+188>: str    x4, [x1, #0x20]
+    0x1042c9e8c <+192>: str    x5, [x1, #0x28]
+->  0x1042c9e90 <+196>: bl     0x1042c9238               ; MyApp.SecondaryView.handler.setter : Swift.Optional<() -> ()> at MyAppApp.swift:44
+
+(lldb) expr -l c -O -- $x4
+SwiftUI.StoredLocation<Swift.Optional<() -> ()>>
+```
+
+handler에는 총 4개의 값이 capture되며, 그 중 마지막이 StoredLocation다.
+
+즉, StoredLocation는 handler를 capture하고 handler는 StoredLocation를 capture하므로 retain cycle이 발생한다.
+
+# iOS 17.0..<17.2의 SwiftUI Presentation에서 Leak
+
+Xcode 15.1 (15C65), iPhone 15 Pro Max 17.0.1 Simulator 기준 (iOS 17.2에서 해결된 SwiftUI 버그)
+
+유명한 버그이기도 하다. 아래 코드에서 Present를 하고 dismiss를 하면 ViewModel의 메모리가 해제되지 않는다.
+
+```swift
+import SwiftUI
+
+@main
+struct MyAppApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+struct ContentView: View {
+  @State private var isPresenting: Bool = false
+
+  var body: some View {
+      Button("Present") {
+        isPresenting = true
+      }
+    .fullScreenCover(isPresented: $isPresenting) {
+        SheetView()
+    }
+  }
+}
+
+struct SheetView: View {
+  @Environment(\.dismiss) var dismiss
+  private let viewModel: ViewModel = .init()
+
+  var body: some View {
+    Button("Dismiss") {
+      dismiss()
+    }
+  }
+}
+
+class ViewModel {
+  init() {
+    print("init")
+  }
+
+  deinit {
+    print("deinit")
+  }
+}
+```
+
+## 해결
+
+- SwiftUI의 Presentation 방식을 안 쓰고 UIKit Presentation 방식을 쓰면 된다. [링크](https://developer.apple.com/forums/thread/737967?answerId=767599022#767599022)
+
+- Leak이 나는 객체의 메모리를 강제로 해제시켜준다. [링크](https://github.com/pookjw/FixSwiftUIMemoryLeak) 미친 짓이니 그냥 참고로만 ㅎ
+
+## 과정
+
+Memory Inspector로 보면 AnyViewStorage라는 객체가 ViewModel를 retain하고 있고, AnyViewStorage는 Retain Count를 2~4 정도로 Leak이 걸린다.
+
+아마 SwiftUI에서 내부적으로 Retain Count를 관리하고 있는 것 같은데, 관리가 잘못 되어서 Leak이 난 것으로 의심된다.
+
+이 AnyViewStorage는 `_TtGC7SwiftUI29PresentationHostingControllerVS_7AnyView_`에서 아래처럼 Mirror를 활용하면 가져올 수 있다.
+
+```swift
+let hostingController: SwiftUI.PresentationHostingController<AnyView> = /* */
+
+if 
+  let delegate = Mirror(reflecting: hostingController).children.first(where: { $0.label == "delegate" })?.value,
+  let some = Mirror(reflecting: delegate).children.first(where: { $0.label == "some" })?.value,
+  let presentationState = Mirror(reflecting: some).children.first(where: { $0.label == "presentationState" })?.value,
+  let base = Mirror(reflecting: presentationState).children.first(where: { $0.label == "base" })?.value,
+  let requestedPresentation = Mirror(reflecting: base).children.first(where: { $0.label == "requestedPresentation" })?.value,
+  let value = Mirror(reflecting: requestedPresentation).children.first(where: { $0.label == ".0" })?.value,
+  let content = Mirror(reflecting: value).children.first(where: { $0.label == "content" })?.value,
+  let storage = Mirror(reflecting: content).children.first(where: { $0.label == "storage" })?.value
+{
+  /* storage */
+}
+```
+
+따라서 `_TtGC7SwiftUI29PresentationHostingControllerVS_7AnyView_`이 안 만들어지게 한다면, 다시 말해 UIKit Presentation으로 대체한다면 문제가 해결된다.
+
+아니면 내가 꼼수로 만든 [`View+fixMemoryLeak.swift`](https://github.com/pookjw/FixSwiftUIMemoryLeak/blob/main/MyApp/View%2BfixMemoryLeak.swift)로 View가 사라질 때 AnyViewStorage의 메모리를 강제로 해제시켜주면 해결되기도 한다. 하지만 코드를 보면 알겠지만 메모리를 강제로 해제시키는 타이밍이 애매하다. (RunLoop에 언제 불릴지 모를 동작을 추가하는 것은 애매하다.) 이는 개선해야 한다.
