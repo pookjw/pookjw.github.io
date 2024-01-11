@@ -127,6 +127,7 @@ class ViewModel {
     
     init(number: Int) {
         self.number = number
+//        print(self.number)
     }
 }
 
@@ -137,39 +138,60 @@ class ViewController: UIViewController {
     var numberTracking: ObservationTracking!
     
     private func configureViewModel() {
-        viewModel = withObservationTracking(
-            { 
-                let viewModel: ViewModel = .init(number: .zero)
-                return viewModel
-            },
+        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList> = .allocate(capacity: 1)
+        pthread_setspecific(.init(0x6a), accessList)
+        
+        let viewModel: ViewModel = .init(number: .zero)
+        self.viewModel = viewModel
+        
+        pthread_setspecific(.init(0x6a), nil)
+        
+        let tracking: ObservationTracking = .init(accessList.pointee)
+        accessList.deallocate()
+        
+        ObservationTracking._installTracking(
+            tracking,
+            willSet: nil,
             didSet: { [weak self] tracking in
-                guard let self else { return }
-                self.viewModelTracking?.cancel()
-                self.viewModelTracking = tracking
-                self.configureViewModel()
-                self.observeNumber(viewModel: viewModel)
-            }
-        )
-    }
-    
-    private func observeNumber(viewModel: ViewModel) {
-        withObservationTracking(
-            {
-                _ = viewModel.number
-            },
-            didSet: { [weak self] tracking in
-                guard let self else { return }
-                self.numberTracking?.cancel()
-                self.numberTracking = tracking
-                self.observeNumber(viewModel: viewModel)
-                
-                Task { @MainActor in
-                    var configuration: UIButton.Configuration = .plain()
-                    configuration.title = self.viewModel.number.description
-                    self.button.configuration = configuration
+                Task { @MainActor [self] in
+                    guard let self = self else { return }
+                    self.viewModelTracking?.cancel()
+                    self.configureViewModel()
                 }
             }
         )
+        
+        self.viewModelTracking = tracking
+    }
+    
+    private func observeNumber(viewModel: ViewModel) {
+        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList> = .allocate(capacity: 1)
+        pthread_setspecific(.init(0x6a), accessList)
+        
+        _ = viewModel.number
+        
+        pthread_setspecific(.init(0x6a), nil)
+        
+        let tracking: ObservationTracking = .init(accessList.pointee)
+        accessList.deallocate()
+        
+        ObservationTracking._installTracking(
+            tracking,
+            willSet: nil,
+            didSet: { [weak self] tracking in
+                Task { @MainActor [self] in
+                    guard let self = self else { return }
+                    self.numberTracking?.cancel()
+                    var configuration: UIButton.Configuration = .plain()
+                    configuration.title = self.viewModel.number.description
+                    self.button.configuration = configuration
+                    
+                    self.observeNumber(viewModel: viewModel)
+                }
+            }
+        )
+        
+        self.numberTracking = tracking
     }
     
     required init?(coder: NSCoder) {
