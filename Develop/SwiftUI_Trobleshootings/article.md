@@ -172,7 +172,9 @@ class ViewController: UIViewController {
         let accessList: UnsafeMutablePointer<ObservationTracking._AccessList?> = .allocate(capacity: 1)
         pthread_setspecific(.init(0x6a), accessList)
         
-        _ = viewModel.number
+        var configuration: UIButton.Configuration = .plain()
+        configuration.title = self.viewModel.number.description
+        self.button.configuration = configuration
         
         pthread_setspecific(.init(0x6a), nil)
         
@@ -202,8 +204,8 @@ class ViewController: UIViewController {
         }
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
+    override func viewDidLoad() {
+        super.viewDidLoad()
         configureViewModel()
         observeNumber(viewModel: viewModel)
     }
@@ -212,7 +214,6 @@ class ViewController: UIViewController {
         viewModel.number += 1
     }
 }
-
 ```
 
 # SwiftUI - Retain Cycle
