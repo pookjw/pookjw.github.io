@@ -138,7 +138,7 @@ class ViewController: UIViewController {
     var numberTracking: ObservationTracking!
     
     private func configureViewModel() {
-        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList> = .allocate(capacity: 1)
+        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList?> = .allocate(capacity: 1)
         pthread_setspecific(.init(0x6a), accessList)
         
         let viewModel: ViewModel = .init(number: .zero)
@@ -146,52 +146,60 @@ class ViewController: UIViewController {
         
         pthread_setspecific(.init(0x6a), nil)
         
-        let tracking: ObservationTracking = .init(accessList.pointee)
-        accessList.deallocate()
-        
-        ObservationTracking._installTracking(
-            tracking,
-            willSet: nil,
-            didSet: { [weak self] tracking in
-                Task { @MainActor [self] in
-                    guard let self = self else { return }
-                    self.viewModelTracking?.cancel()
-                    self.configureViewModel()
+        if let scope = accessList.pointee {
+            accessList.deallocate()
+            let tracking: ObservationTracking = .init(scope)
+            
+            ObservationTracking._installTracking(
+                tracking,
+                willSet: nil,
+                didSet: { [weak self] tracking in
+                    Task { @MainActor [self] in
+                        guard let self = self else { return }
+                        self.viewModelTracking?.cancel()
+                        self.configureViewModel()
+                    }
                 }
-            }
-        )
-        
-        self.viewModelTracking = tracking
+            )
+            
+            self.viewModelTracking = tracking
+        } else {
+            accessList.deallocate()
+        }
     }
     
     private func observeNumber(viewModel: ViewModel) {
-        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList> = .allocate(capacity: 1)
+        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList?> = .allocate(capacity: 1)
         pthread_setspecific(.init(0x6a), accessList)
         
         _ = viewModel.number
         
         pthread_setspecific(.init(0x6a), nil)
         
-        let tracking: ObservationTracking = .init(accessList.pointee)
-        accessList.deallocate()
-        
-        ObservationTracking._installTracking(
-            tracking,
-            willSet: nil,
-            didSet: { [weak self] tracking in
-                Task { @MainActor [self] in
-                    guard let self = self else { return }
-                    self.numberTracking?.cancel()
-                    var configuration: UIButton.Configuration = .plain()
-                    configuration.title = self.viewModel.number.description
-                    self.button.configuration = configuration
-                    
-                    self.observeNumber(viewModel: viewModel)
+        if let scope = accessList.pointee {
+            accessList.deallocate()
+            let tracking: ObservationTracking = .init(scope)
+            
+            ObservationTracking._installTracking(
+                tracking,
+                willSet: nil,
+                didSet: { [weak self] tracking in
+                    Task { @MainActor [self] in
+                        guard let self = self else { return }
+                        self.numberTracking?.cancel()
+                        var configuration: UIButton.Configuration = .plain()
+                        configuration.title = self.viewModel.number.description
+                        self.button.configuration = configuration
+                        
+                        self.observeNumber(viewModel: viewModel)
+                    }
                 }
-            }
-        )
-        
-        self.numberTracking = tracking
+            )
+            
+            self.numberTracking = tracking
+        } else {
+            accessList.deallocate()
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -204,6 +212,7 @@ class ViewController: UIViewController {
         viewModel.number += 1
     }
 }
+
 ```
 
 # SwiftUI - Retain Cycle
