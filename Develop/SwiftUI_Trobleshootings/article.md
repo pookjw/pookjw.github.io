@@ -102,8 +102,8 @@ func render() {
 
 SwiftUI의 내부가 너무 변칙적이라 분석에 굉장히 애를 먹었다.
 
-- SwiftUI의 Update Cycle이 시작될 때 (아마도 `AG::Graph::UpdateStack::update`), `pthread_getspecific(0x6a)`에 새로운 ObservationTracking._AccessList을 할당한다.
-    - [ObservationTracking._AccessList.init](https://github.com/apple/swift/blob/81d77a68ee067a5fbc46a82639db060aa17c232d/stdlib/public/Observation/Sources/Observation/ObservationTracking.swift#L56)이 internal이어서 직접 struct를 alloc한 것으로 보인다. symbol (`$s11Observation0A8TrackingVyA2C11_AccessListVSgcfC`)로 breakpoint를 걸면 안 잡히지만 `expr -l c -- (void *)pthread_getspecific(0x6a)` 찍으면 값이 잘 나오는 것을 확인할 수 있으며 `breakpoint set -n pthread_getspecific -C '$x0 == 0x6a'`로 breakpoint를 걸 수 있다.
+- SwiftUI의 Update Cycle이 시작될 때 (아마도 `AG::Graph::UpdateStack::update`), `pthread_getspecific(0x6a)`에 새로운 Optional<ObservationTracking._AccessList>의 포인터를 할당한다.
+    - `breakpoint set -n pthread_getspecific -C '$x0 == 0x6a'`로 breakpoint를 걸 수 있으며, Update 도중 `expr -l c -- (void *)pthread_getspecific(0x6a)` 찍으면 값이 잘 나오는 것을 확인할 수 있다.
 
 - View의 데이터 (struct)를 생성하고, 만약 `ObservationTracking._AccessList`이 비어 있지 않다면 _installTracking을 호출해서 TLS에 있는 `ObservationTracking._AccessList`로 View의 갱신 조건으로 설정한다.
 
