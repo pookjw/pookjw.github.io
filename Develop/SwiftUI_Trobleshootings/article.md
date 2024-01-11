@@ -127,45 +127,19 @@ class ViewModel {
     
     init(number: Int) {
         self.number = number
-//        print(self.number)
+        print(self.number)
     }
 }
 
 class ViewController: UIViewController {
     @ViewLoading @IBOutlet var button: UIButton
     var viewModel: ViewModel!
-    var viewModelTracking: ObservationTracking!
+    var viewTracking: ObservationTracking!
     var numberTracking: ObservationTracking!
     
     private func configureViewModel() {
-        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList?> = .allocate(capacity: 1)
-        pthread_setspecific(.init(0x6a), accessList)
-        
         let viewModel: ViewModel = .init(number: .zero)
         self.viewModel = viewModel
-        
-        pthread_setspecific(.init(0x6a), nil)
-        
-        if let scope = accessList.pointee {
-            accessList.deallocate()
-            let tracking: ObservationTracking = .init(scope)
-            
-            ObservationTracking._installTracking(
-                tracking,
-                willSet: nil,
-                didSet: { [weak self] tracking in
-                    Task { @MainActor [self] in
-                        guard let self = self else { return }
-                        self.viewModelTracking?.cancel()
-                        self.configureViewModel()
-                    }
-                }
-            )
-            
-            self.viewModelTracking = tracking
-        } else {
-            accessList.deallocate()
-        }
     }
     
     private func observeNumber(viewModel: ViewModel) {
@@ -206,7 +180,36 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let accessList: UnsafeMutablePointer<ObservationTracking._AccessList?> = .allocate(capacity: 1)
+        pthread_setspecific(.init(0x6a), accessList)
         configureViewModel()
+        pthread_setspecific(.init(0x6a), nil)
+        
+        if let scope = accessList.pointee {
+            accessList.deallocate()
+            let tracking: ObservationTracking = .init(scope)
+            
+            ObservationTracking._installTracking(
+                tracking,
+                willSet: nil,
+                didSet: { [weak self] tracking in
+                    Task { @MainActor [self] in
+                        guard let self = self else { return }
+                        self.viewTracking?.cancel()
+                        self.configureViewModel()
+                        self.observeNumber(viewModel: self.viewModel)
+                    }
+                }
+            )
+            
+            self.viewTracking = tracking
+        } else {
+            accessList.deallocate()
+        }
+        
+        //
+        
         observeNumber(viewModel: viewModel)
     }
 
